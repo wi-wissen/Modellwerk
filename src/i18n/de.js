@@ -301,6 +301,7 @@ export default {
     action: 'Aktion',
     identical: 'identisch',
     open: 'Öffnen',
+    noResults: 'Datei enthält keine gespeicherten Werte – nichts zu vergleichen',
     variant: 'Formatvariante noch nicht unterstützt',
     mismatch: 'Abweichung bei {variable}, Schritt {step}',
   },

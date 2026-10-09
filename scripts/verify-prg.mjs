@@ -1,5 +1,6 @@
 // Proof run: recalculates every simulation stored in reference PRG files.
 // Usage: PRG_REFERENCE_DIR=/path/to/files npm run verify
+// Files that use random() need the seed the original run used: PRG_SEED=<number>
 // The reference files are copyrighted and not part of the repository.
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
@@ -17,8 +18,9 @@ for (const file of readdirSync(dir).filter((f) => /\.prg$/i.test(f)).sort()) {
   const sims = readPrg(new Uint8Array(readFileSync(join(dir, file))))
   if (!sims.length) rows.push({ file, status: 'no stored results found (unsupported variant)' })
   for (const sim of sims) {
+    if (!sim.hasResults) { rows.push({ file, name: sim.name, status: 'no stored results (saved before a run)' }); continue }
     try {
-      const r = verifySimulation(sim)
+      const r = verifySimulation(sim, { seed: process.env.PRG_SEED ? Number(process.env.PRG_SEED) : undefined })
       rows.push({ file, ...r, status: r.identical === r.compared ? 'bit-identical' : 'MISMATCH' })
     } catch (e) {
       rows.push({ file, name: sim.name, status: `error: ${e.message}` })

@@ -301,6 +301,7 @@ export default {
     action: 'Action',
     identical: 'identical',
     open: 'Open',
+    noResults: 'The file stores no computed values – nothing to compare',
     variant: 'File variant not supported yet',
     mismatch: 'Differs at {variable}, step {step}',
   },

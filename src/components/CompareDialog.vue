@@ -42,7 +42,7 @@
                 <td class="px-3 py-2 text-right tabular">{{ r.compared != null ? `${fmtInt(r.identical)}/${fmtInt(r.compared)}` : '' }}</td>
                 <td class="px-3 py-2">
                   <span v-if="r.ok" class="inline-flex items-center gap-1 font-semibold text-ok"><CircleCheck :size="16" aria-hidden="true" /> {{ $t('compare.identical') }}</span>
-                  <span v-else :class="r.unsupported ? 'text-muted' : 'text-bad'">{{ message(r) }}</span>
+                  <span v-else :class="r.unsupported || r.noResults ? 'text-muted' : 'text-bad'">{{ message(r) }}</span>
                 </td>
                 <td class="px-3 py-2">
                   <button v-if="r.sim" type="button" class="btn !min-h-8 !py-1 text-sm" @click="open(r)">{{ $t('compare.open') }}</button>
@@ -74,7 +74,7 @@ export default {
       return this.rows.reduce((a, r) => ({ all: a.all + (r.compared ?? 0), same: a.same + (r.identical ?? 0) }), { all: 0, same: 0 })
     },
     allOk() {
-      return this.totals.all > 0 && this.totals.all === this.totals.same && this.rows.every((r) => r.ok || r.unsupported)
+      return this.totals.all > 0 && this.totals.all === this.totals.same && this.rows.every((r) => r.ok || r.unsupported || r.noResults)
     },
   },
   methods: {
@@ -83,6 +83,7 @@ export default {
     fmtInt(n) { return n.toLocaleString(numberLocale()) },
     message(r) {
       if (r.unsupported) return this.$t('compare.variant')
+      if (r.noResults) return this.$t('compare.noResults')
       if (r.mismatch) return this.$t('compare.mismatch', r.mismatch)
       return this.$errorText(r.error)
     },
@@ -97,6 +98,8 @@ export default {
           const sims = readPrg(new Uint8Array(await f.arrayBuffer()))
           if (!sims.length) rows.push({ file: f.name, unsupported: true })
           for (const sim of sims) {
+            // a file saved without results has nothing to compare, which is not a match
+            if (!sim.hasResults) { rows.push({ file: f.name, name: sim.name, noResults: true, sim }); continue }
             const r = verifySimulation(sim)
             const ok = r.identical === r.compared
             rows.push({ file: f.name, ...r, ok, sim, mismatch: ok ? null : r.firstMismatch })
