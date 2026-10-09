@@ -78,7 +78,7 @@
                 <label class="flex flex-col gap-1 text-sm">
                   <span class="font-semibold">{{ $t('app.color') }}</span>
                   <input :id="`style-color-${name}`" type="color" class="h-10 w-14 cursor-pointer rounded-lg border border-line bg-sheet p-1"
-                         :value="styleOf(name).color ?? '#000000'" @input="setStyle(name, { color: $event.target.value })" />
+                         :value="shownHex(styleOf(name).color) ?? '#000000'" @input="setStyle(name, { color: $event.target.value })" />
                 </label>
                 <label class="flex flex-col gap-1 text-sm">
                   <span class="font-semibold">{{ $t('app.curveLook') }}</span>
@@ -175,7 +175,7 @@ import ResultChart3D from './ResultChart3D.vue'
 import ResultTable from './ResultTable.vue'
 import { parseNumber } from '../engine/model.js'
 import { tableRows, toCsv, toTsv } from '../engine/export.js'
-import { CURVE_MODES, MARKERS, curveStyle, seriesColor, seriesDash, sparkPoints } from '../chartStyle.js'
+import { CURVE_MODES, MARKERS, curveStyle, seriesColor, seriesDash, shownHex, sparkPoints } from '../chartStyle.js'
 
 // light-theme values of the automatic curve colours, as start values of the colour picker
 const AUTO_HEX = ['#1d4fd8', '#d55e00', '#009e73', '#cc79a7', '#8a6d00', '#555f69']
@@ -248,6 +248,7 @@ export default {
     },
   },
   methods: {
+    shownHex,
     labelOf(name) { return this.variables.find((v) => v.name === name)?.label ?? name },
     // the curves in the graph, in the order that decides their automatic colour
     // same numbering as the graph, which colours the curves in the order of plotY

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { LINE_DASHES, curveStyle, tickLabel } from '../src/chartStyle.js'
+import { LINE_DASHES, curveStyle, fixedColor, shownHex, tickLabel } from '../src/chartStyle.js'
 
 describe('tickLabel', () => {
   it('keeps the decimals the step needs', () => {
@@ -21,11 +21,23 @@ describe('curveStyle', () => {
   })
   it('maps stored legacy styles', () => {
     const look = curveStyle(0, { mode: 'both', dash: 2, width: 3, color: '#ff0000', marker: 'cross', markerSize: 5, markerColor: null })
-    expect(look.color).toContain('#ff0000')
+    expect(look.color).toBe('var(--legacy-red)')
     expect(look.markerColor).toBe(look.color)
     expect(look.dash).toBe(LINE_DASHES[2])
     expect(look.width).toBe(4.5)
     expect(curveStyle(0, { dash: 0, color: null }).color).toBe('var(--ink)')
     expect(curveStyle(0, { dash: 5 }).dash).toBeNull()
+  })
+})
+
+describe('legacy colours', () => {
+  it('shows the Windows colours as Tailwind tokens', () => {
+    expect(fixedColor('#000080')).toBe('var(--legacy-navy)')
+    expect(fixedColor('#FF0000')).toBe('var(--legacy-red)')
+    expect(shownHex('#000080')).toBe('#1e40af')
+  })
+  it('keeps colours chosen in the app', () => {
+    expect(fixedColor('#123456')).toContain('#123456')
+    expect(shownHex('#123456')).toBe('#123456')
   })
 })

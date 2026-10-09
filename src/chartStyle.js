@@ -10,8 +10,40 @@ export const LINE_DASHES = ['', '8 5', '2 4', '10 4 2 4', '10 4 2 4 2 4', null]
 export const CURVE_MODES = ['line', 'points', 'both', 'bars']
 export const MARKERS = ['cross', 'circle', 'disc']
 
-/** A fixed colour, lightened in the dark theme (--fixed-lift) so dark blues stay readable. */
-export const fixedColor = (hex) => (hex ? `color-mix(in oklab, ${hex}, #fff var(--fixed-lift))` : 'var(--ink)')
+// The Windows colours that PRG files use, shown as Tailwind tones with their own
+// light and dark value (tokens --legacy-* in style.css): still blue, but a modern
+// blue. `light` is the light-theme value, e.g. for the colour picker.
+export const LEGACY_COLORS = {
+  '#800000': { name: 'maroon', light: '#991b1b' },
+  '#008000': { name: 'green', light: '#15803d' },
+  '#808000': { name: 'olive', light: '#b45309' },
+  '#000080': { name: 'navy', light: '#1e40af' },
+  '#800080': { name: 'purple', light: '#7e22ce' },
+  '#008080': { name: 'teal', light: '#0f766e' },
+  '#808080': { name: 'gray', light: '#6b7280' },
+  '#c0c0c0': { name: 'silver', light: '#9ca3af' },
+  '#ff0000': { name: 'red', light: '#dc2626' },
+  '#00ff00': { name: 'lime', light: '#65a30d' },
+  '#ffff00': { name: 'yellow', light: '#ca8a04' },
+  '#0000ff': { name: 'blue', light: '#2563eb' },
+  '#ff00ff': { name: 'fuchsia', light: '#c026d3' },
+  '#00ffff': { name: 'aqua', light: '#0891b2' },
+  '#ffffff': { name: 'white', light: '#d1d5db' },
+}
+
+/**
+ * Colour of a stored style: a Windows colour becomes its Tailwind token, any
+ * other colour is used as chosen and lightened in the dark theme (--fixed-lift);
+ * null is the legacy black, shown in the text colour.
+ */
+export function fixedColor(hex) {
+  if (!hex) return 'var(--ink)'
+  const legacy = LEGACY_COLORS[hex.toLowerCase()]
+  return legacy ? `var(--legacy-${legacy.name})` : `color-mix(in oklab, ${hex}, #fff var(--fixed-lift))`
+}
+
+/** The colour as shown in the light theme (hex), for colour pickers. */
+export const shownHex = (hex) => (hex ? LEGACY_COLORS[hex.toLowerCase()]?.light ?? hex : null)
 
 /**
  * Effective look of curve number `i`: the automatic palette, or a stored style
