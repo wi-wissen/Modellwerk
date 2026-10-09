@@ -39,19 +39,32 @@ PRG_REFERENCE_DIR=/path/to/prg-files npm run verify   # report
 PRG_REFERENCE_DIR=/path/to/prg-files npm test         # also as test cases
 ```
 
-Result for the 27 reference files shipped with the legacy program: **29,380 of 29,380
-values identical** (21 files contain stored results; 5 use a file variant that is not
-read yet). The reference files are copyrighted and are not part of this repository. In
-the app, *Compare PRG file* in the footer runs the same check locally.
+Results:
+
+- **26 example files shipped with the legacy program** (all file variants, including
+  several simulations per file): **52,720 of 52,720 values identical**.
+- **Own test programs run in the legacy program** (under Wine, saved with results):
+  all functions 2,400/2,400, powers and unary minus 720/720, IF/WHILE 240/240,
+  `random` 200/200 (with the recovered seed, `PRG_SEED=2232077016`). These runs are
+  also a fixture in `tests/legacy-runs.test.js`, so they are checked on every `npm test`.
+
+The reference files are copyrighted and are not part of this repository. In the app,
+*Compare PRG file* in the footer runs the same check locally; files saved without a
+run are reported as having nothing to compare.
 
 What we learned about the legacy program:
 
 - Every operation is rounded to an IEEE-754 double (an 80-bit extended re-run differs
   in up to 70 % of the values).
-- `exp`, `ln` and `^` are effectively correctly rounded (x87 with 80 bits, then
-  stored as double). JavaScript's `Math.exp`, `Math.log` and `Math.pow` are off by one
-  ULP in 3–9 % of cases, so `src/engine/exactmath.js` computes them in double-double
-  arithmetic and rounds once (tested against 60-digit references).
+- `exp`, `ln` and `^` are correctly rounded. JavaScript's `Math.exp`, `Math.log` and
+  `Math.pow` are off by one ULP in 3–9 % of cases, so `src/engine/exactmath.js`
+  computes them in double-double arithmetic and rounds once (tested against
+  60-digit references).
+- `sin` and `cos` behave like the x87 `FSIN`/`FCOS`: the argument is reduced with a
+  66-bit π/2, the result is rounded to 64-bit extended and then to double (double
+  rounding). `arctan` is the true value rounded the same way.
+- `random` is Delphi's linear congruential generator (multiplier `0x08088405`) seeded
+  from the clock; Modellwerk stores the seed so runs can be repeated.
 - Values are recorded after each pass; the initial value is stored separately.
 
 ## Modelling language
@@ -68,9 +81,10 @@ functions `sqr sqrt exp ln sin cos arctan abs int frac random`. `random(0)` give
 fraction in [0, 1), `random(x)` a whole number from 0 to x−1. Letter case is ignored
 unless switched on. At most 8191 steps.
 
-Semantics marked as *documented but not yet verified bit for bit* in
-`src/engine/language.js`: `^` precedence (assumed: binds tighter than unary minus,
-right-associative), `IF`/`WHILE`, trigonometric functions and `random`.
+Verified against the legacy program: unary minus binds tighter than `^`
+(`-2^2 = 4`), `^` is left-associative (`2^3^2 = 64`), a negative base with a
+fractional exponent stops the run with an error. Program blocks (macros) are called by
+writing their name as a statement.
 
 ## Code layout
 

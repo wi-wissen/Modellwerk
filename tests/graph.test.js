@@ -276,7 +276,7 @@ describe('programToGraph', () => {
     ].join('\n')
     const r = programToGraph(src)
     expect(r.ok).toBe(true)
-    expect(graphToProgram(r.graph, r).source).toBe(src.replace('A := 1', 'A := 1'))
+    expect(graphToProgram(r.graph, r).source).toBe(src)
   })
 })
 

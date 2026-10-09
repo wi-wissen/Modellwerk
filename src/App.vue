@@ -66,8 +66,8 @@
       <SimulationBar :names="simNames" :active="project.active" :raw-name="sim.name"
                      @select="selectSim" @copy="copySim" @remove="removeSim" @rename="patchSim({ name: $event })" />
 
-      <div class="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
-        <ModelPanel ref="modelPanel" :sim="sim" :source="source" :analysis="analysis" :conversion="conversion" :tab="modelTab"
+      <div class="grid items-start gap-5" :class="{ 'xl:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]': !wideModel }">
+        <ModelPanel ref="modelPanel" :sim="sim" :source="source" :analysis="analysis" :conversion="conversion" :graph-conversion="graphConversion" :tab="modelTab" :wide="wideModel" @update:wide="wideModel = $event"
                     :reset-key="`${loadCount}-${project.active}`"
                     @patch="patchSim" @update:tab="modelTab = $event" @new-model="newModel" @announce="announce">
           <template #diagram>
@@ -78,7 +78,13 @@
         <ResultPanel :runs="runs" :active="project.active" :sim-names="simNames" :variables="variableList" :time-var="timeVar"
                      :view="view" :steps="sim.steps" :max-steps="maxSteps" :continue-by="continueBy" :file-name="fileName"
                      @update:view="Object.assign(view, $event)" @continue="continueRun" @goto-program="gotoProgram"
-                     @report="printReport" @announce="announce" />
+                     :has-animation="!!runs[project.active].result" :animation-svg="() => $refs.animation?.toSvgString()"
+                     @report="printReport" @announce="announce">
+          <template #animation="{ result }">
+            <ResultAnimation ref="animation" :result="result" :roles="analysis.roles" :context="project.example || texts.title"
+                             :model-value="view.animation" @update:model-value="view.animation = $event" />
+          </template>
+        </ResultPanel>
       </div>
     </main>
 
@@ -114,6 +120,7 @@ import { AArrowDown, AArrowUp, BookOpen, FilePlus, FolderOpen, History, Language
 import ModelPanel from './components/ModelPanel.vue'
 import ModelDiagram from './components/ModelDiagram.vue'
 import ResultPanel from './components/ResultPanel.vue'
+import ResultAnimation from './components/ResultAnimation.vue'
 import SimulationBar from './components/SimulationBar.vue'
 import CompareDialog from './components/CompareDialog.vue'
 import ExamplesDialog from './components/ExamplesDialog.vue'
@@ -123,6 +130,7 @@ import { analyse, formatNumber, programToSentences, sentencesToProgram } from '.
 import { MAX_STEPS, simulate } from './engine/simulate.js'
 import { readPrg } from './engine/prg.js'
 import { tableRows } from './engine/export.js'
+import { graphToProgram, programToGraph } from './engine/graph.js'
 import { seriesColor, seriesDash } from './chartStyle.js'
 import { PROJECT_EXTENSION, cleanSimulation, parseProject, projectToText, toProject } from './engine/project.js'
 import { EXAMPLES } from './examples.js'
@@ -156,9 +164,10 @@ function viewFor(plot, saved = {}) {
 }
 
 function sourceOf(sim) {
-  return sim.origin === 'sentences'
-    ? sentencesToProgram(sim.sentences, { simplified: sim.simplified, timeName: sim.timeName, dtName: sim.dtName })
-    : sim.source
+  const options = { simplified: sim.simplified, timeName: sim.timeName, dtName: sim.dtName }
+  if (sim.origin === 'sentences') return sentencesToProgram(sim.sentences, options)
+  if (sim.origin === 'graph' && sim.graph) return graphToProgram(sim.graph, { ...options, extended: sim.extended }).source
+  return sim.source
 }
 
 /** Sensible axes for a model: time on x, stocks as curves. */
@@ -174,7 +183,7 @@ export default {
   name: 'App',
   components: {
     AArrowDown, AArrowUp, BookOpen, FilePlus, FolderOpen, History, Languages, Monitor, Moon, Save, Sun, TriangleAlert, X,
-    ModelPanel, ModelDiagram, ResultPanel, SimulationBar, CompareDialog, ExamplesDialog, AppFooter, ReportView,
+    ModelPanel, ModelDiagram, ResultPanel, SimulationBar, CompareDialog, ExamplesDialog, AppFooter, ReportView, ResultAnimation,
   },
   data() {
     // deep link from the guide pages: app/#<example-id>; otherwise restore the last session
@@ -205,6 +214,7 @@ export default {
       textScale: store('textScale') ?? 1,
       announcement: '',
       report: null,
+      wideModel: false,
     }
   },
   computed: {
@@ -229,6 +239,14 @@ export default {
     analysis() { return this.analyses[this.project.active] },
     conversion() {
       return this.sim.origin === 'sentences' ? { ok: false, line: null } : programToSentences(this.source, { macros: this.sim.macros })
+    },
+    graphConversion() {
+      if (this.sim.origin === 'graph') return { ok: false, line: null }
+      if (this.sim.macros.length && this.sim.macros.some((m) => new RegExp(`^\\s*${m.name}\\s*(//.*)?$`, 'im').test(this.source))) {
+        const line = this.source.split('\n').findIndex((l) => this.sim.macros.some((m) => l.trim().toUpperCase() === m.name.toUpperCase())) + 1
+        return { ok: false, line: line || null, reason: 'macro' }
+      }
+      return programToGraph(this.source)
     },
     variableList() {
       return [...this.analysis.program.variables].map(([name, label]) => ({ name, label, role: this.analysis.roles.get(name) }))
@@ -319,9 +337,11 @@ export default {
         viewFor(defaultPlot(first.source, { caseSensitive: first.caseSensitive })), 'program')
       this.announce(this.$t('app.modelOpened', { title: this.texts.title }))
     },
-    newModel() {
-      const sim = cleanSimulation({ origin: 'sentences', sentences: [{ subject: '', predicate: 'increase', object: '' }], steps: 50 })
-      this.startProject({ title: '', file: '', example: null, simulations: [sim], active: 0 }, viewFor({ x: 'ZEIT', y: [] }), 'sentences')
+    newModel(kind = 'sentences') {
+      const sim = kind === 'graph'
+        ? cleanSimulation({ origin: 'graph', graph: { nodes: [], links: [] }, steps: 50 })
+        : cleanSimulation({ origin: 'sentences', sentences: [{ subject: '', predicate: 'increase', object: '' }], steps: 50 })
+      this.startProject({ title: '', file: '', example: null, simulations: [sim], active: 0 }, viewFor({ x: 'ZEIT', y: [] }), kind === 'graph' ? 'diagram' : 'sentences')
       this.announce(this.$t('app.newModel'))
     },
     currentProject() {
@@ -352,7 +372,7 @@ export default {
         const s = p.simulations[p.active]
         this.startProject({ title: p.title, file: file.name, example: example ?? null, simulations: p.simulations, active: p.active },
           viewFor(defaultPlot(sourceOf(s), { caseSensitive: s.caseSensitive, macros: s.macros }), savedView),
-          s.origin === 'sentences' ? 'sentences' : 'program')
+          s.origin === 'sentences' ? 'sentences' : s.origin === 'graph' ? 'diagram' : 'program')
         this.announce(this.$t('app.modelOpened', { title: this.texts.title }))
       } catch (e) {
         this.openError = e.code ? this.$t(`app.${e.code}`) : e.message

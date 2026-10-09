@@ -11,23 +11,30 @@
         <!-- grid with axis values -->
         <g v-if="config.background === 'grid'">
           <g stroke="var(--grid)" stroke-width="1">
-            <line v-for="t in frame.ticks.x" :key="'gx' + t.v" :x1="t.px" :x2="t.px" :y1="plot.t" :y2="plot.t + plot.h" />
-            <line v-for="t in frame.ticks.y" :key="'gy' + t.v" :x1="plot.l" :x2="plot.l + plot.w" :y1="t.px" :y2="t.px" />
+            <line v-for="t in frame.ticks.x" :key="'gx' + t.v" :x1="t.px" :x2="t.px" :y1="area.t" :y2="area.b" />
+            <line v-for="t in frame.ticks.y" :key="'gy' + t.v" :x1="area.l" :x2="area.r" :y1="t.px" :y2="t.px" />
           </g>
           <g stroke="var(--muted)" stroke-width="1">
-            <line v-for="t in frame.ticks.x.filter((t) => t.v === 0)" :key="'zx'" :x1="t.px" :x2="t.px" :y1="plot.t" :y2="plot.t + plot.h" />
-            <line v-for="t in frame.ticks.y.filter((t) => t.v === 0)" :key="'zy'" :x1="plot.l" :x2="plot.l + plot.w" :y1="t.px" :y2="t.px" />
+            <line v-for="t in frame.ticks.x.filter((t) => t.v === 0)" :key="'zx'" :x1="t.px" :x2="t.px" :y1="area.t" :y2="area.b" />
+            <line v-for="t in frame.ticks.y.filter((t) => t.v === 0)" :key="'zy'" :x1="area.l" :x2="area.r" :y1="t.px" :y2="t.px" />
           </g>
           <g font-size="11" fill="var(--muted)" class="tabular">
-            <text v-for="t in frame.ticks.y" :key="'ty' + t.v" :x="plot.l - 6" :y="t.px + 4" text-anchor="end">{{ fmt(t.v) }}</text>
-            <text v-for="t in frame.ticks.x" :key="'tx' + t.v" :x="t.px" :y="plot.t + plot.h + 15" text-anchor="middle">{{ fmt(t.v) }}</text>
+            <text v-for="t in frame.ticks.y" :key="'ty' + t.v" :x="area.l - 6" :y="t.px + 4" text-anchor="end">{{ tickLabels.y(t.v) }}</text>
+            <text v-for="t in frame.ticks.x" :key="'tx' + t.v" :x="t.px" :y="area.b + 15" text-anchor="middle">{{ tickLabels.x(t.v) }}</text>
           </g>
         </g>
 
-        <!-- ground -->
+        <!-- ground, with a height scale at the left -->
         <g v-if="config.background === 'ground'">
           <rect x="0" :y="frame.groundY" :width="w" :height="Math.max(0, h - frame.groundY)" fill="var(--sunken)" />
           <line x1="0" :x2="w" :y1="frame.groundY" :y2="frame.groundY" stroke="var(--muted)" stroke-width="2" />
+          <g v-if="frame.ticks.y.length" font-size="11" fill="var(--muted)" class="tabular">
+            <line :x1="plot.l - 2" :x2="plot.l - 2" :y1="frame.ticks.y[0].px" :y2="frame.ticks.y[frame.ticks.y.length - 1].px" stroke="var(--line)" />
+            <g v-for="t in frame.ticks.y" :key="'gt' + t.v">
+              <line :x1="plot.l - 6" :x2="plot.l - 2" :y1="t.px" :y2="t.px" stroke="var(--muted)" />
+              <text :x="plot.l - 9" :y="t.px + 4" text-anchor="end">{{ tickLabels.y(t.v) }}</text>
+            </g>
+          </g>
         </g>
 
         <!-- traces -->
@@ -96,7 +103,7 @@
             <option v-for="s in speeds" :key="s" :value="s">{{ fmt(s) }}×</option>
           </select>
         </label>
-        <div class="flex items-center gap-2 text-sm" role="group" :aria-labelledby="uid + '-loop'">
+        <div class="flex flex-wrap items-center gap-2 text-sm" role="group" :aria-labelledby="uid + '-loop'">
           <span :id="uid + '-loop'" class="font-semibold">{{ $t('animation.loop') }}</span>
           <div class="seg">
             <button v-for="m in loopModes" :key="m" type="button" :class="{ 'is-selected': config.loop === m }"
@@ -124,8 +131,8 @@
             <span :id="`${uid}-sprite-${o.id}`" class="text-sm font-semibold">{{ $t('animation.sprite') }}</span>
             <div class="grid gap-1 [grid-template-columns:repeat(auto-fill,minmax(2.75rem,1fr))]" role="group" :aria-labelledby="`${uid}-sprite-${o.id}`">
               <button v-for="s in sprites" :key="s.id" type="button"
-                      class="grid h-11 place-items-center rounded-lg border border-line bg-sheet hover:border-accent"
-                      :class="{ 'is-selected': o.sprite === s.id }" :aria-pressed="String(o.sprite === s.id)"
+                      class="grid h-11 place-items-center rounded-lg border hover:border-accent"
+                      :class="o.sprite === s.id ? 'is-selected' : 'border-line bg-sheet'" :aria-pressed="String(o.sprite === s.id)"
                       :aria-label="spriteName(s.id)" :title="spriteName(s.id)" @click="setSprite(oi, s)">
                 <img :src="s.src" alt="" width="28" height="28" draggable="false" />
               </button>
@@ -267,11 +274,26 @@ export default {
     },
     layout() { return computeLayout(this.result, this.config, { width: this.w, height: this.h }) },
     plot() { return this.layout.plot },
+    area() { return this.layout.area },
     frame() { return frameAt(this.result, this.config, this.index, this.layout) },
     traces() {
-      return this.config.objects.map((o, i) => ({ o, i })).filter(({ o }) => o.trace).map(({ o, i }) => ({
-        id: o.id, points: tracePoints(this.result, this.layout, i, this.frame.index), color: seriesColor(i), dash: seriesDash(i),
+      return this.config.objects.map((o, i) => ({ o, i })).filter(({ o }) => o.trace).map(({ o, i }, k) => ({
+        id: o.id, points: tracePoints(this.result, this.layout, i, this.frame.index), color: seriesColor(k), dash: seriesDash(k),
       }))
+    },
+    // one format per axis: plain integers (years!), or a shared power of ten for large/small values
+    tickLabels() {
+      const make = (ticks) => {
+        const max = Math.max(0, ...ticks.map((t) => Math.abs(t.v)))
+        if (max >= 1e5 || (max > 0 && max < 1e-3)) {
+          const e = Math.floor(Math.log10(max))
+          const sup = String(e).replace(/-/g, '⁻').replace(/\d/g, (d) => '⁰¹²³⁴⁵⁶⁷⁸⁹'[d])
+          return (v) => (v === 0 ? '0' : `${this.fmt(v / 10 ** e, 3).replace('-', '−')}·10${sup}`)
+        }
+        if (ticks.every((t) => Number.isInteger(t.v)) && max < 1e5) return (v) => String(v).replace('-', '−')
+        return (v) => this.fmt(v).replace('-', '−')
+      }
+      return { x: make(this.frame.ticks.x), y: make(this.frame.ticks.y) }
     },
     timeName() { return findTimeName(this.result, this.roles) },
     readout() {

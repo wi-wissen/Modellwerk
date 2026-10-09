@@ -28,6 +28,8 @@ const MAX_TRACE_POINTS = 1500
 
 /** Direction the artwork points to (degrees, counter-clockwise from "right") for sprites that turn with the motion. */
 export const SPRITE_HEADINGS = { rocket: 90, 'water-rocket': 90, car: 0, arrow: 0 }
+/** Radius of the round body inside the 64×64 artwork, for true-to-scale objects (default: half the box). */
+export const SPRITE_BODY_RADIUS = { earth: 24, moon: 22, sun: 16, planet: 17, ball: 22, 'ball-small': 22 }
 
 const TIME_NAME = /^(ZEIT|T|TIME|TAG|TAGE|JAHR|JAHRE|STUNDE|STUNDEN|MINUTE|MINUTEN|SEKUNDE|SEKUNDEN)$/
 const STEP_NAME = /^(DELTAT|DT|ZEITSCHRITT|TIMESTEP|SCHRITT)$/
@@ -132,8 +134,17 @@ export function makeObject(fields = {}, objects = []) {
 /** Fills missing fields; never mutates the input. */
 export function normalizeAnimation(animation = {}) {
   const a = animation ?? {}
+  // keep given ids; missing or duplicate ones get the first free "obj<n>"
+  const input = a.objects ?? []
+  const taken = input.filter((o) => o?.id != null).map((o) => ({ id: o.id }))
+  const seen = new Set()
   const objects = []
-  for (const o of a.objects ?? []) objects.push(makeObject(o, objects))
+  for (const o of input) {
+    const keep = o?.id != null && !seen.has(o.id)
+    const id = keep ? o.id : newObjectId([...taken, ...objects])
+    seen.add(id)
+    objects.push(makeObject({ ...o, id }, objects))
+  }
   return {
     objects,
     range: { auto: true, ...(a.range ?? {}) },
@@ -379,7 +390,7 @@ export function computeLayout(result, animation, viewport = {}) {
   const grid = a.background === 'grid'
   const ground = a.background === 'ground'
   const m = {
-    l: half + (grid && usesY ? 46 : 0),
+    l: half + ((grid || ground) && usesY ? 46 : 0),
     r: half,
     t: Math.max(top, 8),
     b: half + (grid && usesX ? 18 : 0) + (ground ? 14 : 0),
@@ -407,12 +418,18 @@ export function computeLayout(result, animation, viewport = {}) {
   if (usesY && !a.flipY && yRange[0] <= 0 && yRange[1] >= 0) groundY = toPxY(0)
 
   const ticks = {
-    x: usesX ? niceTicks(xRange[0], xRange[1], Math.max(2, Math.floor(pw / 90))).map((v) => ({ v, px: toPxX(v) })) : [],
-    y: usesY ? niceTicks(yRange[0], yRange[1], Math.max(2, Math.floor(ph / 60))).map((v) => ({ v, px: toPxY(v) })) : [],
+    x: usesX ? niceTicks(xRange[0], xRange[1], Math.max(3, Math.floor(pw / 80))).map((v) => ({ v, px: toPxX(v) })) : [],
+    y: usesY ? niceTicks(yRange[0], yRange[1], Math.max(3, Math.floor(ph / 60))).map((v) => ({ v, px: toPxY(v) })) : [],
+  }
+  // the part of the plot the data range covers (smaller than plot with equal scale)
+  const ys = [toPxY(yRange[0]), toPxY(yRange[1])]
+  const area = {
+    l: usesX ? toPxX(xRange[0]) : m.l, r: usesX ? toPxX(xRange[1]) : m.l + pw,
+    t: usesY ? Math.min(...ys) : m.t, b: usesY ? Math.max(...ys) : m.t + ph,
   }
   return {
     animation: a, width, height, margin: m,
-    plot: { l: m.l, t: m.t, w: pw, h: ph },
+    plot: { l: m.l, t: m.t, w: pw, h: ph }, area,
     xRange, yRange, scale: { x: kx, y: ky }, usesX, usesY, groundY, ticks, toPxX, toPxY,
     centerX: m.l + pw / 2, pivot: { x: m.l + pw / 2, y: m.t }, armLength: Math.min(ph, pw / 2),
   }
@@ -439,7 +456,7 @@ function positionAt(result, layout, o, i) {
 }
 
 function displaySize(layout, o) {
-  if (o.radius > 0) return Math.max(2, 2 * o.radius * Math.min(layout.scale.x, layout.scale.y))
+  if (o.radius > 0) return Math.max(2, 2 * o.radius * Math.min(layout.scale.x, layout.scale.y) * (32 / (SPRITE_BODY_RADIUS[o.sprite] ?? 32)))
   return objectSize(o)
 }
 
@@ -498,7 +515,7 @@ export function frameAt(result, animation, index, viewport = {}) {
       rod: isArm(o) && pos ? { x1: layout.pivot.x, y1: layout.pivot.y, x2: round1(pos.x), y2: round1(pos.y) } : null,
     }
   })
-  return { index: i, steps, width: layout.width, height: layout.height, plot: layout.plot, groundY: layout.groundY, ticks: layout.ticks, objects }
+  return { index: i, steps, width: layout.width, height: layout.height, plot: layout.plot, area: layout.area, groundY: layout.groundY, ticks: layout.ticks, objects }
 }
 
 const round1 = (v) => Math.round(v * 10) / 10

@@ -7,7 +7,7 @@ export const PROJECT_EXTENSION = '.modellwerk.json'
 
 const SIMULATION_KEYS = [
   'name', 'example', 'simplified', 'sentences', 'origin', 'source', 'start', 'steps',
-  'caseSensitive', 'timeName', 'dtName', 'macros', 'seed', 'graph',
+  'caseSensitive', 'timeName', 'dtName', 'macros', 'seed', 'graph', 'extended',
 ]
 
 const projectError = (code, message) => Object.assign(new Error(message), { code })
@@ -52,7 +52,9 @@ export function cleanSimulation(m = {}) {
       ? m.macros.filter((x) => x && typeof x.name === 'string' && typeof x.body === 'string').map((x) => ({ name: x.name, body: x.body }))
       : [],
     seed: Number.isInteger(m.seed) && m.seed >= 0 ? m.seed : 0,
-    graph: m.graph && typeof m.graph === 'object' ? m.graph : null,
+    graph: m.graph && Array.isArray(m.graph.nodes) && Array.isArray(m.graph.links) ? { nodes: m.graph.nodes, links: m.graph.links } : null,
+    // extended syntax for graphical models: helper quantities and functions of stocks
+    extended: m.extended === true,
   }
 }
 

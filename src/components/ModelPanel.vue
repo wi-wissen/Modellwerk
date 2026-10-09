@@ -41,7 +41,44 @@
         </div>
       </template>
 
-      <slot v-else-if="tab === 'diagram'" name="diagram" />
+      <template v-else-if="tab === 'diagram'">
+        <template v-if="sim.origin === 'graph' && sim.graph">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+          <label class="flex items-start gap-2">
+            <input id="graph-extended" type="checkbox" class="mt-0.5 size-5 flex-none" :checked="sim.extended" @change="patch({ extended: $event.target.checked })" />
+            <span><span class="font-semibold">{{ $t('graph.extended') }}</span><br /><span class="text-sm text-muted">{{ $t('graph.extendedHint') }}</span></span>
+          </label>
+          <button type="button" class="btn btn-quiet" :aria-pressed="wide ? 'true' : 'false'" @click="$emit('update:wide', !wide)">
+            <component :is="wide ? 'Minimize2' : 'Maximize2'" :size="18" aria-hidden="true" /> {{ $t(wide ? 'graph.narrow' : 'graph.wide') }}
+          </button>
+          </div>
+          <GraphEditor :model-value="sim.graph" :extended="sim.extended" :simplified="sim.simplified" :time-name="sim.timeName" :dt-name="sim.dtName"
+                       @update:model-value="patch({ graph: $event })" />
+          <div v-if="source.trim()" class="rounded-xl bg-sunken p-3">
+            <p class="eyebrow mb-1 flex items-center gap-1"><ArrowRight :size="14" aria-hidden="true" /> {{ $t('app.becomesProgram') }}</p>
+            <pre class="overflow-x-auto font-mono text-sm leading-6">{{ source }}</pre>
+          </div>
+        </template>
+        <template v-else>
+          <div v-if="graphConversion.ok" class="flex flex-col gap-3 rounded-xl border border-accent bg-accent-soft p-4">
+            <p>{{ $t('graph.convertible') }}</p>
+            <div>
+              <button type="button" class="btn btn-primary" @click="convertToGraph"><PencilRuler :size="18" aria-hidden="true" /> {{ $t('graph.convert') }}</button>
+            </div>
+          </div>
+          <div v-else class="flex flex-col gap-2 rounded-xl border border-line bg-sunken p-4" role="note">
+            <p class="flex items-center gap-2 font-bold"><Info :size="18" aria-hidden="true" class="text-accent" /> {{ $t('graph.readOnly') }}</p>
+            <p v-if="graphConversion.reason">
+              <template v-if="graphConversion.line">{{ $t('app.lineN', { n: graphConversion.line }) }}: </template>{{ $t(`graph.reasons.${graphConversion.reason}`) }}
+            </p>
+            <div class="flex flex-wrap gap-2">
+              <button v-if="graphConversion.line" type="button" class="btn" @click="gotoLine(graphConversion.line)"><Code :size="18" aria-hidden="true" /> {{ $t('sentences.showLine') }}</button>
+              <button type="button" class="btn" @click="$emit('new-model', 'graph')"><FilePlus :size="18" aria-hidden="true" /> {{ $t('graph.startNew') }}</button>
+            </div>
+          </div>
+          <slot name="diagram" />
+        </template>
+      </template>
 
       <template v-else>
         <ProgramEditor ref="program" :model-value="source" :errors="analysis.program.errors" @update:model-value="patch({ source: $event, origin: 'program' })" />
@@ -67,7 +104,8 @@
 </template>
 
 <script>
-import { ArrowRight, Code, Dices, FilePlus, Info, MessageSquareText, Workflow } from 'lucide-vue-next'
+import { ArrowRight, Code, Dices, FilePlus, Info, Maximize2, MessageSquareText, Minimize2, PencilRuler, Workflow } from 'lucide-vue-next'
+import GraphEditor from './GraphEditor.vue'
 import SentenceEditor from './SentenceEditor.vue'
 import ProgramEditor from './ProgramEditor.vue'
 import StartValues from './StartValues.vue'
@@ -75,16 +113,19 @@ import MacroEditor from './MacroEditor.vue'
 
 export default {
   name: 'ModelPanel',
-  components: { ArrowRight, Code, Dices, FilePlus, Info, MessageSquareText, Workflow, SentenceEditor, ProgramEditor, StartValues, MacroEditor },
+  components: { ArrowRight, Code, Dices, FilePlus, Info, Maximize2, MessageSquareText, Minimize2, PencilRuler, Workflow, GraphEditor, SentenceEditor, ProgramEditor, StartValues, MacroEditor },
   props: {
     sim: { type: Object, required: true },
     source: { type: String, required: true },
     analysis: { type: Object, required: true },
     conversion: { type: Object, required: true },
+    graphConversion: { type: Object, default: () => ({ ok: false, line: null }) },
     tab: { type: String, required: true },
     resetKey: { type: [String, Number], default: 0 },
+    // model and result stacked instead of side by side (more room for the graph editor)
+    wide: { type: Boolean, default: false },
   },
-  emits: ['patch', 'update:tab', 'new-model', 'announce'],
+  emits: ['patch', 'update:tab', 'update:wide', 'new-model', 'announce'],
   data() {
     return {
       tabs: [
@@ -127,6 +168,12 @@ export default {
       if (!c.ok) return
       this.patch({ sentences: c.sentences, simplified: c.simplified, timeName: c.timeName, dtName: c.dtName, origin: 'sentences' })
       this.$emit('announce', this.$t('sentences.converted'))
+    },
+    convertToGraph() {
+      const c = this.graphConversion
+      if (!c.ok) return
+      this.patch({ graph: c.graph, simplified: c.simplified, timeName: c.timeName, dtName: c.dtName, extended: c.requiresExtended, origin: 'graph' })
+      this.$emit('announce', this.$t('graph.converted'))
     },
     newSeed() {
       return Math.floor(Math.random() * 2 ** 31)
