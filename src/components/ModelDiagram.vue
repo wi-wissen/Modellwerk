@@ -11,23 +11,23 @@
     <div class="panel overflow-x-auto p-2">
       <svg :viewBox="`0 0 ${width} ${height}`" class="mx-auto block h-auto w-full"
            :style="{ minWidth: `${Math.round(width * (large ? 1 : 0.7))}px`, maxHeight: large ? '68vh' : null }"
-           role="img" aria-labelledby="diagram-svg-title diagram-svg-desc">
-        <title id="diagram-svg-title">{{ $t('diagram.svgTitle') }}</title>
-        <desc id="diagram-svg-desc">{{ textDescription.join(' ') }}</desc>
+           role="img" :aria-labelledby="`${uid}-title ${uid}-desc`">
+        <title :id="`${uid}-title`">{{ $t('diagram.svgTitle') }}</title>
+        <desc :id="`${uid}-desc`">{{ textDescription.join(' ') }}</desc>
         <defs>
-          <marker id="arrow-flow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+          <marker :id="`${uid}-flow`" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
             <path d="M0,0 L10,5 L0,10 z" fill="var(--rate)" />
           </marker>
-          <marker id="arrow-info" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <marker :id="`${uid}-info`" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
             <path d="M0,0 L10,5 L0,10 z" fill="var(--muted)" />
           </marker>
         </defs>
 
         <g fill="none">
           <line v-for="(e, i) in infoEdges" :key="'i' + i" :x1="e.x1" :y1="e.y1" :x2="e.x2" :y2="e.y2"
-                stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#arrow-info)" />
+                stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="5 4" :marker-end="`url(#${uid}-info)`" />
           <g v-for="(e, i) in flowEdges" :key="'f' + i">
-            <line :x1="e.x1" :y1="e.y1" :x2="e.x2" :y2="e.y2" stroke="var(--rate)" stroke-width="5" marker-end="url(#arrow-flow)" />
+            <line :x1="e.x1" :y1="e.y1" :x2="e.x2" :y2="e.y2" stroke="var(--rate)" stroke-width="5" :marker-end="`url(#${uid}-flow)`" />
             <circle :cx="e.mx" :cy="e.my" r="11" fill="var(--sheet)" stroke="var(--rate)" stroke-width="2" />
             <text :x="e.mx" :y="e.my + 5" text-anchor="middle" font-size="15" font-weight="800" fill="var(--rate)">{{ e.sign === '+' ? '+' : '−' }}</text>
           </g>
@@ -51,7 +51,7 @@
       <li class="chip role-time">⬭ {{ $t('roles.timeLong') }}</li>
     </ul>
 
-    <details class="text-sm">
+    <details class="diagram-text text-sm">
       <summary class="cursor-pointer font-semibold text-muted">{{ $t('diagram.asText') }}</summary>
       <ul class="mt-2 list-disc pl-5">
         <li v-for="(t, i) in textDescription" :key="i">{{ t }}</li>
@@ -75,6 +75,7 @@ export default {
   },
   emits: ['enlarge'],
   computed: {
+    uid() { return `diagram-${this.$.uid}` },
     label() {
       return (name) => this.analysis.program.variables.get(name) ?? name
     },

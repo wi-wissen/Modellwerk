@@ -502,6 +502,7 @@ export default {
           source: this.sources[i],
           macros: s.macros,
           steps: s.steps,
+          analysis: a.program.errors.length ? null : a,
           start: [...a.program.variables].filter(([n]) => a.roles.get(n) !== 'rate')
             .map(([name, label]) => ({ name, label, value: fmt(s.start[name] ?? 0), role: a.roles.get(name) })),
         }

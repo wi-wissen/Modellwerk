@@ -9,6 +9,10 @@
 
     <section v-for="(s, i) in sims" :key="i" class="report-sim">
       <h2 v-if="sims.length > 1">{{ s.name }}</h2>
+      <div v-if="s.analysis" class="keep">
+        <h3>{{ $t('diagram.title') }}</h3>
+        <ModelDiagram :analysis="s.analysis" large />
+      </div>
       <h3>{{ $t('report.program') }}</h3>
       <pre>{{ s.source }}</pre>
       <template v-if="s.macros.length">
@@ -49,13 +53,16 @@
 </template>
 
 <script>
+import ModelDiagram from './ModelDiagram.vue'
+
 export default {
   name: 'ReportView',
+  components: { ModelDiagram },
   props: {
     title: { type: String, required: true },
     topic: { type: String, default: '' },
     description: { type: String, default: '' },
-    sims: { type: Array, required: true }, // [{ name, source, macros, start: [{ name, label, value, role }], steps }]
+    sims: { type: Array, required: true }, // [{ name, source, macros, start: [{ name, label, value, role }], steps, analysis }]
     chartSvg: { type: String, default: '' },
     legend: { type: Array, default: () => [] }, // [{ label, color, dash }]
     table: { type: Object, default: () => ({ header: [], rows: [], every: 1 }) },
@@ -82,6 +89,10 @@ export default {
   .report-chart svg { width: 100%; height: auto; }
   .report-legend { display: flex; flex-wrap: wrap; gap: 4pt 14pt; list-style: none; padding: 0; margin: 4pt 0 0; font-size: 9.5pt; }
   .report-legend li { display: inline-flex; align-items: center; gap: 5pt; }
-  .report section { break-inside: avoid; }
+  .report .diagram-text { display: none; }
+  .report .panel { border: 0; padding: 0; }
+  .report svg[role="img"] { max-height: 9cm !important; min-width: 0 !important; }
+  .report section:not(.report-sim), .report .keep, .report pre, .report-table { break-inside: avoid; }
+  .report h2, .report h3 { break-after: avoid; }
 }
 </style>
