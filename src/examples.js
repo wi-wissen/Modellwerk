@@ -29,7 +29,7 @@ Q := Q - DeltaQ
 t := t + DeltaT
 // exakte Lösung zum Vergleich
 Qexakt := Q0*exp(-t/(R*C))`,
-    start: { Q: 0.00423, Q0: 0.00423, C: 0.00047, R: 2200, DELTAT: 0.05, T: 0 },
+    start: { Q: 0.00423, QEXAKT: 0.00423, Q0: 0.00423, C: 0.00047, R: 2200, DELTAT: 0.05, T: 0 },
     steps: 100,
     plot: { x: 'T', y: ['Q', 'QEXAKT'] },
   },

@@ -1,1 +1,2818 @@
-[]
+[
+  {
+    "id": "sunflower",
+    "teaser": {
+      "de": "Eine Sonnenblume schießt in wenigen Wochen in die Höhe – und hört dann plötzlich auf zu wachsen. Warum?",
+      "en": "A sunflower shoots up in just a few weeks – and then suddenly stops growing. Why?"
+    },
+    "phenomenon": {
+      "de": "Ein junger Sonnenblumenkeimling ist nur ein paar Zentimeter groß und wächst anfangs eher gemächlich. Dann legt er richtig los und wird jeden Tag ein gutes Stück größer. Kurz vor der Blüte wird das Wachstum langsamer, bis die Pflanze ihre endgültige Höhe von etwa 2,5 m erreicht. Ähnliche Verläufe findest du bei vielen Lebewesen und auch bei Tierbeständen in einem begrenzten Lebensraum.",
+      "en": "A young sunflower seedling is only a few centimetres tall and grows rather slowly at first. Then it really takes off and gets noticeably taller every day. Shortly before flowering, growth slows down until the plant reaches its final height of about 2.5 m. You see similar patterns in many living things and in animal populations living in a limited habitat."
+    },
+    "idea": {
+      "de": "In jedem Zeitschritt (ein Tag) wächst die Pflanze um ein Stück. Dieses Stück hängt von zwei Dingen ab: von der jetzigen Höhe (eine größere Pflanze hat mehr Blätter und kann mehr bauen) und vom Abstand zur Endhöhe (je näher sie dem Ziel kommt, desto stärker wird sie gebremst). Das Produkt aus beidem ist am Anfang und am Ende klein und in der Mitte am größten.",
+      "en": "In every time step (one day) the plant grows by a certain amount. That amount depends on two things: the current height (a taller plant has more leaves and can build more) and the distance still left to the final height (the closer it gets, the more it is held back). The product of the two is small at the beginning and at the end and largest in the middle."
+    },
+    "quantities": [
+      {
+        "name": "Wachstum",
+        "meaning": {
+          "de": "Höhenzuwachs an diesem Tag",
+          "en": "increase in height on this day"
+        },
+        "unit": {
+          "de": "cm pro Tag",
+          "en": "cm per day"
+        }
+      },
+      {
+        "name": "FWachstum",
+        "meaning": {
+          "de": "Wachstumsfaktor: legt fest, wie schnell die Pflanze insgesamt wächst",
+          "en": "growth factor: sets how fast the plant grows overall"
+        },
+        "unit": {
+          "de": "1/(cm · Tag)",
+          "en": "1/(cm · day)"
+        }
+      },
+      {
+        "name": "Hoehe",
+        "meaning": {
+          "de": "Höhe der Sonnenblume",
+          "en": "height of the sunflower"
+        },
+        "unit": {
+          "de": "cm",
+          "en": "cm"
+        }
+      },
+      {
+        "name": "Endhoehe",
+        "meaning": {
+          "de": "Höhe, die die Pflanze höchstens erreicht",
+          "en": "maximum height the plant can reach"
+        },
+        "unit": {
+          "de": "cm",
+          "en": "cm"
+        }
+      },
+      {
+        "name": "Zeit",
+        "meaning": {
+          "de": "Tage seit Beginn der Beobachtung",
+          "en": "days since observation began"
+        },
+        "unit": {
+          "de": "Tage",
+          "en": "days"
+        }
+      }
+    ],
+    "lines": [
+      {
+        "code": "Wachstum := FWachstum*Hoehe*(Endhoehe-Hoehe)",
+        "explanation": {
+          "de": "Der Tageszuwachs ist proportional zur Höhe und zum noch fehlenden Stück bis zur Endhöhe. Am ersten Tag: 0,0009 · 8 · 242 ≈ 1,7 cm.",
+          "en": "The daily growth is proportional to the height and to the distance still left to the final height. On the first day: 0.0009 · 8 · 242 ≈ 1.7 cm."
+        }
+      },
+      {
+        "code": "Hoehe := Hoehe + Wachstum",
+        "explanation": {
+          "de": "Die Pflanze wird um den Tageszuwachs größer.",
+          "en": "The plant gets taller by the day's growth."
+        }
+      },
+      {
+        "code": "Zeit := Zeit + 1",
+        "explanation": {
+          "de": "Die Uhr läuft einen Tag weiter.",
+          "en": "The clock moves on by one day."
+        }
+      }
+    ],
+    "observe": {
+      "de": "Die Höhenkurve ist S-förmig: erst flach, dann steil, dann wieder flach. Am schnellsten wächst die Sonnenblume um Tag 16 bis 17, wenn sie etwa halb so hoch ist wie die Endhöhe (125 cm) – dort legt sie rund 14 cm pro Tag zu. Nach 20 Tagen ist sie etwa 177 cm hoch (Zuwachs knapp 13 cm/Tag), nach 30 Tagen schon 241 cm, und danach ändert sich kaum noch etwas.",
+      "en": "The height curve is S-shaped: flat at first, then steep, then flat again. The sunflower grows fastest around days 16 to 17, when it is about half its final height (125 cm) – at that point it gains about 14 cm a day. After 20 days it is about 177 cm tall (growing almost 13 cm a day), after 30 days it has already reached 241 cm, and after that hardly anything changes."
+    },
+    "tasks": [
+      {
+        "text": {
+          "de": "Starte mit einem kleineren Keimling (Hoehe = 4 cm). Sag vorher: Erreicht die Pflanze am Ende eine andere Höhe? Wann ist sie halb so hoch wie die Endhöhe?",
+          "en": "Start with a smaller seedling (Hoehe = 4 cm). Predict: will the plant end up at a different height? When will it be half its final height?"
+        },
+        "hint": {
+          "de": "Die Endhöhe bleibt 250 cm, denn dort wird das Wachstum null. Die Kurve verschiebt sich nur nach rechts (125 cm erst um Tag 20 statt Tag 17).",
+          "en": "The final height stays at 250 cm, because growth becomes zero there. The curve just shifts to the right (125 cm only at day 20 instead of day 17)."
+        }
+      },
+      {
+        "text": {
+          "de": "Vergleiche mit echten Messwerten: Miss eine Sonnenblume (oder Bohnenpflanze) mehrere Wochen lang zweimal pro Woche und passe FWachstum und Endhoehe an deine Daten an.",
+          "en": "Compare with real data: measure a sunflower (or bean plant) twice a week for several weeks and adjust FWachstum and Endhoehe to fit your data."
+        },
+        "hint": {
+          "de": "Lies zuerst die Endhöhe aus deinen letzten Messwerten ab. Ist dein Wachstum langsamer als simuliert, musst du FWachstum verkleinern.",
+          "en": "First read off the final height from your last measurements. If your plant grows more slowly than the simulation, make FWachstum smaller."
+        }
+      },
+      {
+        "text": {
+          "de": "Vergrößere FWachstum auf 0,0075 und dann auf 0,009. Was passiert mit der Kurve? Ist das biologisch sinnvoll?",
+          "en": "Increase FWachstum to 0.0075 and then to 0.009. What happens to the curve? Does it make biological sense?"
+        },
+        "hint": {
+          "de": "Mit so großen Faktoren „springt“ die Höhe über die Endhöhe hinaus und pendelt (bei 0,009 sogar dauerhaft zwischen etwa 179 und 293 cm). Das liegt am großen Zeitschritt von einem Tag – eine Pflanze schrumpft nicht. Probiere einen kleineren Zeitschritt.",
+          "en": "With such large factors the height overshoots the final height and swings back and forth (at 0.009 it even keeps jumping between about 179 and 293 cm). This is caused by the large time step of one day – a plant does not shrink. Try a smaller time step."
+        }
+      }
+    ],
+    "limits": {
+      "de": "Das Modell kennt weder Wetter noch Licht, Wasser oder Nährstoffe; es geht davon aus, dass die Endhöhe von Anfang an feststeht. Echte Sonnenblumen wachsen meist langsamer, als das Modell es mit bis zu 14 cm pro Tag annimmt, und brauchen eher zwei bis drei Monate bis zur vollen Höhe. Außerdem verändert sich die Höhe in Wirklichkeit stetig und nicht in Tagessprüngen.",
+      "en": "The model knows nothing about weather, light, water or nutrients; it assumes that the final height is fixed from the start. Real sunflowers usually grow more slowly than the model's peak of 14 cm a day and tend to need two to three months to reach full height. Also, in reality the height changes continuously rather than in daily jumps."
+    },
+    "glossary": [
+      {
+        "term": {
+          "de": "logistisches Wachstum",
+          "en": "logistic growth"
+        },
+        "definition": {
+          "de": "Wachstum, das erst fast exponentiell verläuft und dann gebremst wird, weil es eine obere Grenze gibt. Die Kurve hat eine S-Form.",
+          "en": "Growth that starts almost exponentially and then slows down because there is an upper limit. The curve is S-shaped."
+        }
+      },
+      {
+        "term": {
+          "de": "Sättigungsgrenze",
+          "en": "saturation limit"
+        },
+        "definition": {
+          "de": "Der Wert, den eine wachsende Größe höchstens erreichen kann – hier die Endhöhe.",
+          "en": "The highest value a growing quantity can reach – here the final height."
+        }
+      }
+    ]
+  },
+  {
+    "id": "capacitor-discharge",
+    "teaser": {
+      "de": "Wie schnell verschwindet die Ladung aus einem Kondensator – und wie gut trifft ein einfaches Rechenverfahren die exakte Formel?",
+      "en": "How quickly does the charge drain out of a capacitor – and how close does a simple step-by-step method get to the exact formula?"
+    },
+    "phenomenon": {
+      "de": "Ein Kondensator speichert elektrische Ladung, ähnlich wie ein kleiner Akku, aber nur für kurze Zeit. Verbindet man ihn mit einem Widerstand, fließt ein Strom und der Kondensator entlädt sich. Das passiert zum Beispiel beim Blitzlicht einer Kamera oder wenn eine LED nach dem Ausschalten noch kurz nachglimmt.",
+      "en": "A capacitor stores electric charge, a bit like a small battery, but only for a short time. If you connect it to a resistor, a current flows and the capacitor discharges. This happens, for example, in a camera flash or when an LED keeps glowing faintly for a moment after being switched off."
+    },
+    "idea": {
+      "de": "Die Spannung am Kondensator hängt davon ab, wie viel Ladung noch drauf ist (U = Q/C). Diese Spannung treibt einen Strom durch den Widerstand (I = U/R). In jedem kleinen Zeitschritt fließt die Ladung I · Δt ab. Weil mit weniger Ladung auch der Strom kleiner wird, geht die Entladung immer langsamer.",
+      "en": "The voltage across the capacitor depends on how much charge is left (U = Q/C). This voltage drives a current through the resistor (I = U/R). In every small time step the charge I · Δt flows away. Because less charge also means a smaller current, the discharge gets slower and slower."
+    },
+    "quantities": [
+      {
+        "name": "U",
+        "meaning": {
+          "de": "Spannung am Kondensator",
+          "en": "voltage across the capacitor"
+        },
+        "unit": {
+          "de": "V",
+          "en": "V"
+        }
+      },
+      {
+        "name": "Q",
+        "meaning": {
+          "de": "Ladung auf dem Kondensator (Simulation)",
+          "en": "charge on the capacitor (simulation)"
+        },
+        "unit": {
+          "de": "C (Coulomb)",
+          "en": "C (coulombs)"
+        }
+      },
+      {
+        "name": "C",
+        "meaning": {
+          "de": "Kapazität des Kondensators (470 µF)",
+          "en": "capacitance of the capacitor (470 µF)"
+        },
+        "unit": {
+          "de": "F (Farad)",
+          "en": "F (farads)"
+        }
+      },
+      {
+        "name": "I",
+        "meaning": {
+          "de": "Entladestrom durch den Widerstand",
+          "en": "discharge current through the resistor"
+        },
+        "unit": {
+          "de": "A",
+          "en": "A"
+        }
+      },
+      {
+        "name": "R",
+        "meaning": {
+          "de": "elektrischer Widerstand (2,2 kΩ)",
+          "en": "electrical resistance (2.2 kΩ)"
+        },
+        "unit": {
+          "de": "Ω",
+          "en": "Ω"
+        }
+      },
+      {
+        "name": "DeltaQ",
+        "meaning": {
+          "de": "Ladung, die in einem Zeitschritt abfließt",
+          "en": "charge that flows away in one time step"
+        },
+        "unit": {
+          "de": "C",
+          "en": "C"
+        }
+      },
+      {
+        "name": "DeltaT",
+        "meaning": {
+          "de": "Länge eines Zeitschritts",
+          "en": "length of one time step"
+        },
+        "unit": {
+          "de": "s",
+          "en": "s"
+        }
+      },
+      {
+        "name": "t",
+        "meaning": {
+          "de": "vergangene Zeit",
+          "en": "elapsed time"
+        },
+        "unit": {
+          "de": "s",
+          "en": "s"
+        }
+      },
+      {
+        "name": "Qexakt",
+        "meaning": {
+          "de": "Ladung nach der exakten Formel Q₀·e^(−t/RC), zum Vergleich",
+          "en": "charge from the exact formula Q₀·e^(−t/RC), for comparison"
+        },
+        "unit": {
+          "de": "C",
+          "en": "C"
+        }
+      },
+      {
+        "name": "Q0",
+        "meaning": {
+          "de": "Anfangsladung (4,23 mC, entspricht 9 V)",
+          "en": "initial charge (4.23 mC, equivalent to 9 V)"
+        },
+        "unit": {
+          "de": "C",
+          "en": "C"
+        }
+      }
+    ],
+    "lines": [
+      {
+        "code": "U := Q/C",
+        "explanation": {
+          "de": "Aus der Ladung wird die Spannung berechnet: U = Q/C. Am Anfang sind das 0,00423 C / 0,00047 F = 9 V.",
+          "en": "The voltage is calculated from the charge: U = Q/C. At the start that is 0.00423 C / 0.00047 F = 9 V."
+        }
+      },
+      {
+        "code": "I := U/R",
+        "explanation": {
+          "de": "Ohmsches Gesetz: Die Spannung treibt den Strom I = U/R durch den Widerstand. Anfangs sind das etwa 4,1 mA.",
+          "en": "Ohm's law: the voltage drives the current I = U/R through the resistor. At the start that is about 4.1 mA."
+        }
+      },
+      {
+        "code": "DeltaQ := I*DeltaT",
+        "explanation": {
+          "de": "Strom bedeutet „Ladung pro Zeit“. In einem Zeitschritt fließt also die Ladung I · Δt ab.",
+          "en": "Current means charge per unit time. So in one time step the charge I · Δt flows away."
+        }
+      },
+      {
+        "code": "Q := Q - DeltaQ",
+        "explanation": {
+          "de": "Diese Ladung fehlt jetzt auf dem Kondensator.",
+          "en": "This charge is now missing from the capacitor."
+        }
+      },
+      {
+        "code": "t := t + DeltaT",
+        "explanation": {
+          "de": "Die Zeit rückt um einen Zeitschritt (0,05 s) vor.",
+          "en": "Time moves on by one step (0.05 s)."
+        }
+      },
+      {
+        "code": "Qexakt := Q0*exp(-t/(R*C))",
+        "explanation": {
+          "de": "Zum Vergleich wird die exakte Lösung der Entladegleichung zur selben Zeit berechnet. R · C = 1,034 s ist die Zeitkonstante.",
+          "en": "For comparison, the exact solution of the discharge equation is calculated at the same time. R · C = 1.034 s is the time constant."
+        }
+      }
+    ],
+    "observe": {
+      "de": "Beide Kurven fallen zuerst steil und dann immer flacher ab – eine Exponentialfunktion. Nach etwa 0,72 s ist die Hälfte der Ladung weg, nach einer Zeitkonstante (1,03 s) sind noch rund 37 % übrig. Achte auf den kleinen Abstand: Die Simulation liegt immer etwas unter der exakten Kurve, bei t = 1 s etwa 2 % und bei t = 5 s etwa 11 % (0,030 mC statt 0,034 mC).",
+      "en": "Both curves fall steeply at first and then more and more gently – an exponential function. After about 0.72 s half the charge is gone; after one time constant (1.03 s) about 37 % is left. Look at the small gap: the simulation always lies a little below the exact curve, by about 2 % at t = 1 s and about 11 % at t = 5 s (0.030 mC instead of 0.034 mC)."
+    },
+    "tasks": [
+      {
+        "text": {
+          "de": "Verdopple den Widerstand R. Sag vorher, wie sich die Zeit bis zur halben Ladung ändert, und prüfe nach.",
+          "en": "Double the resistance R. Predict how the time until half the charge is gone changes, then check."
+        },
+        "hint": {
+          "de": "Die Zeitkonstante ist R · C. Wenn R doppelt so groß ist, fließt nur halb so viel Strom.",
+          "en": "The time constant is R · C. If R is twice as large, only half as much current flows."
+        }
+      },
+      {
+        "text": {
+          "de": "Halbiere DeltaT auf 0,025 s und verdopple die Zahl der Schritte. Wie groß ist jetzt der Unterschied zwischen Q und Qexakt bei t = 5 s?",
+          "en": "Halve DeltaT to 0.025 s and double the number of steps. How big is the difference between Q and Qexakt at t = 5 s now?"
+        },
+        "hint": {
+          "de": "Beim Euler-Verfahren halbiert sich der Fehler ungefähr, wenn du den Zeitschritt halbierst.",
+          "en": "With Euler's method the error roughly halves when you halve the time step."
+        }
+      },
+      {
+        "text": {
+          "de": "Wähle einen sehr großen Zeitschritt, z. B. DeltaT = 1,1 s. Was passiert mit Q? Erkläre, warum das Verfahren hier versagt.",
+          "en": "Choose a very large time step, e.g. DeltaT = 1.1 s. What happens to Q? Explain why the method fails here."
+        },
+        "hint": {
+          "de": "Berechne DeltaQ im ersten Schritt von Hand. Ist es größer als die ganze Ladung? Der Zeitschritt sollte deutlich kleiner als R · C sein.",
+          "en": "Work out DeltaQ for the first step by hand. Is it larger than the whole charge? The time step should be much smaller than R · C."
+        }
+      }
+    ],
+    "limits": {
+      "de": "Das Modell nimmt ideale Bauteile an: Der Widerstand ändert sich nicht mit der Temperatur, und der Kondensator verliert keine Ladung durch Leckströme. Das Euler-Verfahren rechnet in jedem Schritt mit dem Strom vom Anfang des Schritts und entlädt deshalb etwas zu schnell.",
+      "en": "The model assumes ideal components: the resistance does not change with temperature and the capacitor loses no charge through leakage. Euler's method uses the current from the beginning of each step and therefore discharges slightly too quickly."
+    },
+    "glossary": [
+      {
+        "term": {
+          "de": "Zeitkonstante",
+          "en": "time constant"
+        },
+        "definition": {
+          "de": "Das Produkt R · C. Nach dieser Zeit ist die Ladung auf etwa 37 % (1/e) des Anfangswerts gesunken.",
+          "en": "The product R · C. After this time the charge has fallen to about 37 % (1/e) of its initial value."
+        }
+      },
+      {
+        "term": {
+          "de": "Kapazität",
+          "en": "capacitance"
+        },
+        "definition": {
+          "de": "Gibt an, wie viel Ladung ein Kondensator pro Volt Spannung speichert (Einheit Farad).",
+          "en": "Tells you how much charge a capacitor stores per volt (unit: farad)."
+        }
+      },
+      {
+        "term": {
+          "de": "Euler-Verfahren",
+          "en": "Euler's method"
+        },
+        "definition": {
+          "de": "Rechenverfahren, bei dem man die Änderung im kleinen Zeitschritt mit der momentanen Änderungsrate abschätzt und aufaddiert.",
+          "en": "A method that estimates the change over a small time step from the current rate of change and adds it up step by step."
+        }
+      }
+    ]
+  },
+  {
+    "id": "lynx-and-hare",
+    "teaser": {
+      "de": "Warum gab es in Kanada etwa alle zehn Jahre besonders viele Luchse – kurz nachdem es besonders viele Hasen gab?",
+      "en": "Why did Canada see a boom in lynx roughly every ten years – shortly after a boom in hares?"
+    },
+    "phenomenon": {
+      "de": "Die Hudson's Bay Company hat über viele Jahrzehnte notiert, wie viele Felle von Schneehasen und Luchsen Jäger ablieferten. Die Zahlen steigen und fallen in Wellen von ungefähr zehn Jahren. Dabei kommen die Spitzen bei den Luchsen immer ein bis zwei Jahre nach denen der Hasen. Luchse fressen vor allem Schneehasen – hängt das zusammen?",
+      "en": "For many decades the Hudson's Bay Company recorded how many snowshoe hare and lynx pelts trappers brought in. The numbers rise and fall in waves of about ten years, and the lynx peaks always come one or two years after the hare peaks. Lynx feed mainly on snowshoe hares – are the two connected?"
+    },
+    "idea": {
+      "de": "In jedem kleinen Zeitschritt werden Hasen geboren, und zwar proportional zu ihrer Zahl. Gleichzeitig werden Hasen gefressen – umso mehr, je öfter sich Hasen und Luchse begegnen (Hasen mal Luchse). Luchse bekommen aus diesen Begegnungen Nachwuchs und sterben ohne Beute langsam aus. So jagen sich die beiden Bestände gegenseitig im Kreis.",
+      "en": "In every small time step hares are born in proportion to their number. At the same time hares are eaten – the more often hares and lynx meet (hares times lynx), the more. Lynx raise young thanks to these encounters and slowly die out without prey. In this way the two populations chase each other round and round."
+    },
+    "quantities": [
+      {
+        "name": "Geburten",
+        "meaning": {
+          "de": "neu geborene Hasen pro Jahr",
+          "en": "hares born per year"
+        },
+        "unit": {
+          "de": "Tausend Tiere pro Jahr",
+          "en": "thousand animals per year"
+        }
+      },
+      {
+        "name": "Alpha",
+        "meaning": {
+          "de": "Geburtenrate der Hasen",
+          "en": "birth rate of the hares"
+        },
+        "unit": {
+          "de": "1/Jahr",
+          "en": "1/year"
+        }
+      },
+      {
+        "name": "Hasen",
+        "meaning": {
+          "de": "Bestand der Schneehasen",
+          "en": "snowshoe hare population"
+        },
+        "unit": {
+          "de": "Tausend Tiere",
+          "en": "thousand animals"
+        }
+      },
+      {
+        "name": "Gefressen",
+        "meaning": {
+          "de": "von Luchsen gefressene Hasen pro Jahr",
+          "en": "hares eaten by lynx per year"
+        },
+        "unit": {
+          "de": "Tausend Tiere pro Jahr",
+          "en": "thousand animals per year"
+        }
+      },
+      {
+        "name": "Beta",
+        "meaning": {
+          "de": "Fressrate: wie erfolgreich Luchse bei einer Begegnung jagen",
+          "en": "predation rate: how successful lynx are when they meet a hare"
+        },
+        "unit": {
+          "de": "1/(Tausend Tiere · Jahr)",
+          "en": "1/(thousand animals · year)"
+        }
+      },
+      {
+        "name": "Luchse",
+        "meaning": {
+          "de": "Bestand der Luchse",
+          "en": "lynx population"
+        },
+        "unit": {
+          "de": "Tausend Tiere",
+          "en": "thousand animals"
+        }
+      },
+      {
+        "name": "Zuwachs",
+        "meaning": {
+          "de": "durch Beute ermöglichter Luchsnachwuchs pro Jahr",
+          "en": "lynx young supported by prey per year"
+        },
+        "unit": {
+          "de": "Tausend Tiere pro Jahr",
+          "en": "thousand animals per year"
+        }
+      },
+      {
+        "name": "Delta",
+        "meaning": {
+          "de": "Umwandlungsrate: wie viel Luchsnachwuchs die Begegnungen bringen",
+          "en": "conversion rate: how many lynx young the encounters produce"
+        },
+        "unit": {
+          "de": "1/(Tausend Tiere · Jahr)",
+          "en": "1/(thousand animals · year)"
+        }
+      },
+      {
+        "name": "Sterben",
+        "meaning": {
+          "de": "gestorbene Luchse pro Jahr",
+          "en": "lynx deaths per year"
+        },
+        "unit": {
+          "de": "Tausend Tiere pro Jahr",
+          "en": "thousand animals per year"
+        }
+      },
+      {
+        "name": "Gamma",
+        "meaning": {
+          "de": "Sterberate der Luchse",
+          "en": "death rate of the lynx"
+        },
+        "unit": {
+          "de": "1/Jahr",
+          "en": "1/year"
+        }
+      },
+      {
+        "name": "dt",
+        "meaning": {
+          "de": "Länge eines Zeitschritts (0,01 Jahre, etwa 3,7 Tage)",
+          "en": "length of one time step (0.01 years, about 3.7 days)"
+        },
+        "unit": {
+          "de": "Jahre",
+          "en": "years"
+        }
+      },
+      {
+        "name": "Zeit",
+        "meaning": {
+          "de": "Kalenderjahr",
+          "en": "calendar year"
+        },
+        "unit": {
+          "de": "Jahre",
+          "en": "years"
+        }
+      }
+    ],
+    "lines": [
+      {
+        "code": "Geburten := Alpha * Hasen",
+        "explanation": {
+          "de": "Hasengeburten: Je mehr Hasen, desto mehr Junge. Mit Alpha = 0,55 kommen pro Jahr 55 Junge auf 100 Hasen (ohne Luchse).",
+          "en": "Hare births: the more hares, the more young. With Alpha = 0.55 there are 55 young per 100 hares each year (ignoring lynx)."
+        }
+      },
+      {
+        "code": "Gefressen := Beta * Hasen * Luchse",
+        "explanation": {
+          "de": "Gefressene Hasen: proportional zu Hasen mal Luchse, also zur Zahl der Begegnungen.",
+          "en": "Hares eaten: proportional to hares times lynx, i.e. to the number of encounters."
+        }
+      },
+      {
+        "code": "Zuwachs := Delta * Hasen * Luchse",
+        "explanation": {
+          "de": "Luchsnachwuchs: hängt ebenfalls von den Begegnungen ab – satte Luchse ziehen mehr Junge groß.",
+          "en": "Lynx young: also depends on the encounters – well-fed lynx raise more young."
+        }
+      },
+      {
+        "code": "Sterben := Gamma * Luchse",
+        "explanation": {
+          "de": "Luchssterben: Ein fester Anteil der Luchse stirbt pro Jahr, Gamma = 0,8 bedeutet 80 % pro Jahr ohne Nachschub.",
+          "en": "Lynx deaths: a fixed fraction of lynx die each year; Gamma = 0.8 means 80 % per year if nothing replaces them."
+        }
+      },
+      {
+        "code": "Hasen := Hasen + (Geburten - Gefressen) * dt",
+        "explanation": {
+          "de": "Der Hasenbestand ändert sich um (Geburten minus Gefressene), multipliziert mit der Länge des Zeitschritts.",
+          "en": "The hare population changes by (births minus hares eaten), multiplied by the length of the time step."
+        }
+      },
+      {
+        "code": "Luchse := Luchse + (Zuwachs - Sterben) * dt",
+        "explanation": {
+          "de": "Der Luchsbestand ändert sich um (Zuwachs minus Sterben) mal dt.",
+          "en": "The lynx population changes by (young minus deaths) times dt."
+        }
+      },
+      {
+        "code": "Zeit := Zeit + dt",
+        "explanation": {
+          "de": "Die Zeit rückt um dt = 0,01 Jahre vor; nach 2000 Schritten ist man im Jahr 1920.",
+          "en": "Time moves on by dt = 0.01 years; after 2000 steps you reach the year 1920."
+        }
+      }
+    ],
+    "observe": {
+      "de": "Beide Kurven schwingen, aber versetzt: Die Hasen erreichen um 1903 und 1913,5 ihre Spitze (rund 82 000 bzw. 83 000), die Luchse etwa 1,5 Jahre später (1904,4 und 1915,0, rund 57 000). Eine ganze Welle dauert gut 10,5 Jahre. Vergleiche mit den Felldaten: 1920 liefert das Modell etwa 17 000 Hasen und 5 000 Luchse, gezählt wurden 24 700 und 8 600 Felle. Die Spitzen werden von Welle zu Welle leicht höher – das liegt am Rechenverfahren, nicht an der Natur.",
+      "en": "Both curves oscillate, but out of step: the hares peak around 1903 and 1913.5 (about 82,000 and 83,000), the lynx about 1.5 years later (1904.4 and 1915.0, about 57,000). A full cycle lasts just over 10.5 years. Compare with the pelt data: for 1920 the model gives about 17,000 hares and 5,000 lynx, while 24,700 and 8,600 pelts were recorded. The peaks grow slightly from one wave to the next – that is due to the numerical method, not to nature."
+    },
+    "tasks": [
+      {
+        "text": {
+          "de": "Starte mit doppelt so vielen Luchsen (8). Sag vorher: Kommt die erste Hasenspitze früher oder später, wird sie höher oder niedriger?",
+          "en": "Start with twice as many lynx (8). Predict: will the first hare peak come earlier or later, and will it be higher or lower?"
+        },
+        "hint": {
+          "de": "Mehr Luchse fressen von Anfang an mehr Hasen. Beobachte, wann die Hasenkurve zu sinken beginnt.",
+          "en": "More lynx eat more hares right from the start. Watch when the hare curve begins to fall."
+        }
+      },
+      {
+        "text": {
+          "de": "Setze Hasen = 33,3 und Luchse = 19,6. Was passiert? Erkläre mit den Formeln, warum.",
+          "en": "Set Hasen = 33.3 and Luchse = 19.6. What happens? Use the formulas to explain why."
+        },
+        "hint": {
+          "de": "Prüfe, ob Geburten = Gefressen und Zuwachs = Sterben. Das ist der Fall bei Hasen = Gamma/Delta und Luchse = Alpha/Beta.",
+          "en": "Check whether births equal hares eaten and young equal deaths. This happens when Hasen = Gamma/Delta and Luchse = Alpha/Beta."
+        }
+      },
+      {
+        "text": {
+          "de": "Erhöhe dt auf 0,1 und reduziere die Schritte auf 200. Vergleiche die Höhe der zweiten Hasenspitze mit der Rechnung bei dt = 0,01.",
+          "en": "Increase dt to 0.1 and reduce the number of steps to 200. Compare the height of the second hare peak with the run at dt = 0.01."
+        },
+        "hint": {
+          "de": "Mit dem groben Zeitschritt schaukeln sich die Schwingungen deutlich auf (zweite Spitze über 100 000 statt rund 83 000). Das ist ein Fehler des Euler-Verfahrens.",
+          "en": "With the coarse step the oscillations grow noticeably (second peak above 100,000 instead of about 83,000). This is an error of Euler's method."
+        }
+      }
+    ],
+    "limits": {
+      "de": "Die Felldaten sind Fangzahlen und keine Zählungen der echten Bestände; wie viel gejagt wurde, hing auch von Fellpreisen und Wetter ab. Im Modell können die Hasen ohne Luchse unbegrenzt wachsen, denn Futtermangel und andere Räuber fehlen. Außerdem gibt es keinen Zufall – echte Zyklen sind unregelmäßiger.",
+      "en": "The pelt data are trapping numbers, not counts of the real populations; how much was trapped also depended on fur prices and weather. In the model hares without lynx could grow without limit, because food shortage and other predators are missing. There is also no randomness – real cycles are less regular."
+    },
+    "glossary": [
+      {
+        "term": {
+          "de": "Räuber-Beute-Beziehung",
+          "en": "predator–prey relationship"
+        },
+        "definition": {
+          "de": "Zwei Arten, bei denen die eine (Räuber) die andere (Beute) frisst und deshalb beide Bestände voneinander abhängen.",
+          "en": "Two species where one (the predator) eats the other (the prey), so that each population depends on the other."
+        }
+      },
+      {
+        "term": {
+          "de": "Gleichgewichtspunkt",
+          "en": "equilibrium point"
+        },
+        "definition": {
+          "de": "Bestandszahlen, bei denen sich nichts mehr ändert, weil Zu- und Abnahme genau gleich groß sind.",
+          "en": "Population sizes at which nothing changes any more because gains and losses are exactly equal."
+        }
+      }
+    ]
+  },
+  {
+    "id": "sir-epidemic",
+    "teaser": {
+      "de": "Lüften, Masken, Abstand: Wie stark lässt sich der Gipfel einer Grippewelle drücken?",
+      "en": "Fresh air, masks, distance: how far can you flatten the peak of a flu wave?"
+    },
+    "phenomenon": {
+      "de": "Wenn eine Grippe in eine Schule kommt, erkranken erst wenige, dann immer mehr – und irgendwann ebbt die Welle ab. Wer die Grippe überstanden hat, ist danach eine Weile immun. Spannend ist: Am Ende erkranken meist nicht alle. Gesundheitsämter interessieren sich vor allem dafür, wann der Gipfel kommt und wie hoch er ist.",
+      "en": "When flu arrives at a school, a few people fall ill at first, then more and more – and at some point the wave dies down. Anyone who has recovered is immune for a while. Interestingly, not everyone usually catches it in the end. Health authorities mainly want to know when the peak will come and how high it will be."
+    },
+    "idea": {
+      "de": "Alle 1000 Personen gehören zu einer von drei Gruppen: Gesunde (noch ansteckbar), Kranke und Genesene (immun). In jedem kleinen Zeitschritt wechseln einige Gesunde zu den Kranken – umso mehr, je mehr Gesunde auf Kranke treffen. Gleichzeitig wird ein fester Anteil der Kranken wieder gesund und wechselt zu den Genesenen. Die Welle endet, wenn zu wenige Gesunde übrig sind, damit sich die Krankheit weiter ausbreiten kann.",
+      "en": "Each of the 1000 people belongs to one of three groups: susceptible (can still catch it), ill and recovered (immune). In every small time step some susceptible people move to the ill group – the more susceptible people meet ill ones, the more. At the same time a fixed fraction of the ill recover and move to the recovered group. The wave ends when too few susceptible people are left for the illness to keep spreading."
+    },
+    "quantities": [
+      {
+        "name": "Ansteckungen",
+        "meaning": {
+          "de": "Neuansteckungen pro Tag",
+          "en": "new infections per day"
+        },
+        "unit": {
+          "de": "Personen pro Tag",
+          "en": "people per day"
+        }
+      },
+      {
+        "name": "Beta",
+        "meaning": {
+          "de": "Ansteckungsrate: wie viele Ansteckungen eine kranke Person pro Tag verursacht, solange noch alle ansteckbar sind",
+          "en": "infection rate: how many people one ill person infects per day while everyone is still susceptible"
+        },
+        "unit": {
+          "de": "1/Tag",
+          "en": "1/day"
+        }
+      },
+      {
+        "name": "Gesunde",
+        "meaning": {
+          "de": "noch nicht erkrankte, ansteckbare Personen",
+          "en": "people who have not been ill yet and can still be infected"
+        },
+        "unit": {
+          "de": "Personen",
+          "en": "people"
+        }
+      },
+      {
+        "name": "Kranke",
+        "meaning": {
+          "de": "zurzeit erkrankte, ansteckende Personen",
+          "en": "people who are currently ill and infectious"
+        },
+        "unit": {
+          "de": "Personen",
+          "en": "people"
+        }
+      },
+      {
+        "name": "N",
+        "meaning": {
+          "de": "Gesamtzahl der Personen an der Schule",
+          "en": "total number of people at the school"
+        },
+        "unit": {
+          "de": "Personen",
+          "en": "people"
+        }
+      },
+      {
+        "name": "Genesungen",
+        "meaning": {
+          "de": "Personen, die pro Tag wieder gesund werden",
+          "en": "people who recover per day"
+        },
+        "unit": {
+          "de": "Personen pro Tag",
+          "en": "people per day"
+        }
+      },
+      {
+        "name": "Gamma",
+        "meaning": {
+          "de": "Genesungsrate (1/Gamma = 5 Tage mittlere Krankheitsdauer)",
+          "en": "recovery rate (1/Gamma = 5 days average length of illness)"
+        },
+        "unit": {
+          "de": "1/Tag",
+          "en": "1/day"
+        }
+      },
+      {
+        "name": "dt",
+        "meaning": {
+          "de": "Länge eines Zeitschritts",
+          "en": "length of one time step"
+        },
+        "unit": {
+          "de": "Tage",
+          "en": "days"
+        }
+      },
+      {
+        "name": "Genesene",
+        "meaning": {
+          "de": "wieder gesunde, immune Personen",
+          "en": "recovered, immune people"
+        },
+        "unit": {
+          "de": "Personen",
+          "en": "people"
+        }
+      },
+      {
+        "name": "Zeit",
+        "meaning": {
+          "de": "Tage seit Beginn der Welle",
+          "en": "days since the start of the wave"
+        },
+        "unit": {
+          "de": "Tage",
+          "en": "days"
+        }
+      }
+    ],
+    "lines": [
+      {
+        "code": "Ansteckungen := Beta * Gesunde * Kranke / N",
+        "explanation": {
+          "de": "Neuansteckungen sind proportional zu Gesunde mal Kranke. Das Teilen durch N macht daraus den Anteil der Kontakte, die eine kranke Person mit Gesunden hat.",
+          "en": "New infections are proportional to susceptible times ill. Dividing by N turns this into the share of an ill person's contacts that are with susceptible people."
+        }
+      },
+      {
+        "code": "Genesungen := Gamma * Kranke",
+        "explanation": {
+          "de": "Pro Tag wird ein Fünftel (Gamma = 0,2) der Kranken wieder gesund.",
+          "en": "Each day a fifth (Gamma = 0.2) of the ill recover."
+        }
+      },
+      {
+        "code": "Gesunde := Gesunde - Ansteckungen * dt",
+        "explanation": {
+          "de": "Die Neuangesteckten fehlen jetzt bei den Gesunden. Mal dt, weil ein Schritt nur 0,1 Tage lang ist.",
+          "en": "The newly infected are removed from the susceptible group. Times dt, because one step is only 0.1 days long."
+        }
+      },
+      {
+        "code": "Kranke := Kranke + (Ansteckungen - Genesungen) * dt",
+        "explanation": {
+          "de": "Die Kranken bekommen die Neuangesteckten dazu und verlieren die Genesenen.",
+          "en": "The ill group gains the newly infected and loses those who recover."
+        }
+      },
+      {
+        "code": "Genesene := Genesene + Genesungen * dt",
+        "explanation": {
+          "de": "Wer gesund geworden ist, landet bei den Genesenen.",
+          "en": "Anyone who has recovered joins the recovered group."
+        }
+      },
+      {
+        "code": "Zeit := Zeit + dt",
+        "explanation": {
+          "de": "Die Uhr läuft 0,1 Tage weiter.",
+          "en": "The clock moves on by 0.1 days."
+        }
+      }
+    ],
+    "observe": {
+      "de": "Die Zahl der Kranken steigt erst langsam, dann steil an und erreicht nach etwa 21 Tagen ihren Gipfel mit rund 236 gleichzeitig Kranken. Danach sinkt sie, obwohl noch viele Gesunde da sind. Nach 100 Tagen sind etwa 106 Personen (gut 10 %) nie krank geworden. Die Summe aller drei Gruppen bleibt immer genau 1000.",
+      "en": "The number of ill people rises slowly, then steeply, and peaks after about 21 days with around 236 people ill at the same time. After that it falls, even though many susceptible people are left. After 100 days about 106 people (just over 10 %) have never been ill. The three groups always add up to exactly 1000."
+    },
+    "tasks": [
+      {
+        "text": {
+          "de": "Senke Beta von 0,5 auf 0,4 (etwa durch regelmäßiges Lüften). Sag vorher, wie sich Höhe und Zeitpunkt des Gipfels ändern.",
+          "en": "Lower Beta from 0.5 to 0.4 (for example by airing classrooms regularly). Predict how the height and timing of the peak change."
+        },
+        "hint": {
+          "de": "Mit Beta = 0,4 liegt der Gipfel bei etwa 156 Kranken um Tag 28. Die Welle wird flacher und kommt später.",
+          "en": "With Beta = 0.4 the peak is about 156 ill people around day 28. The wave becomes flatter and arrives later."
+        }
+      },
+      {
+        "text": {
+          "de": "Probiere Beta = 0,3 und Beta = 0,2. Bei welchem Wert gibt es praktisch keine Welle mehr? Berechne jeweils R0 = Beta/Gamma.",
+          "en": "Try Beta = 0.3 and Beta = 0.2. At which value is there practically no wave any more? Work out R0 = Beta/Gamma each time."
+        },
+        "hint": {
+          "de": "Ist R0 kleiner oder gleich 1, steckt eine kranke Person im Mittel höchstens eine weitere an – die Zahl der Kranken kann nicht wachsen.",
+          "en": "If R0 is 1 or less, an ill person infects at most one other person on average – the number of ill people cannot grow."
+        }
+      },
+      {
+        "text": {
+          "de": "Erweitere das Modell um eine Impfung: Ein Teil der Gesunden wechselt jeden Tag direkt zu den Genesenen (z. B. Impfungen := 0,01*Gesunde). Wie viele Erkrankungen lassen sich so vermeiden?",
+          "en": "Extend the model with vaccination: each day some susceptible people move straight to the recovered group (e.g. Impfungen := 0.01*Gesunde). How many cases can this prevent?"
+        },
+        "hint": {
+          "de": "Ziehe Impfungen*dt von den Gesunden ab und addiere es zu den Genesenen. Vergleiche die Zahl der Genesenen ohne Impfung mit der Zahl der tatsächlich Erkrankten.",
+          "en": "Subtract Impfungen*dt from the susceptible group and add it to the recovered group. Compare the number of recovered without vaccination with the number who were actually ill."
+        }
+      }
+    ],
+    "limits": {
+      "de": "Das Modell nimmt an, dass sich alle gleich häufig begegnen und dass jede kranke Person gleich ansteckend ist. In Wirklichkeit gibt es Klassen, Freundeskreise, Wochenenden und Ferien. Auch die Zeit, bevor man Krankheitszeichen hat, und das Zuhausebleiben von Kranken fehlen.",
+      "en": "The model assumes that everyone meets everyone equally often and that every ill person is equally infectious. In reality there are classes, friendship groups, weekends and holidays. It also leaves out the time before symptoms appear and the fact that ill pupils stay at home."
+    },
+    "glossary": [
+      {
+        "term": {
+          "de": "Basisreproduktionszahl R0",
+          "en": "basic reproduction number R0"
+        },
+        "definition": {
+          "de": "Wie viele Personen eine kranke Person im Mittel ansteckt, wenn noch alle ansteckbar sind. Hier R0 = Beta/Gamma = 2,5.",
+          "en": "How many people one ill person infects on average when everyone is still susceptible. Here R0 = Beta/Gamma = 2.5."
+        }
+      },
+      {
+        "term": {
+          "de": "Immunität",
+          "en": "immunity"
+        },
+        "definition": {
+          "de": "Schutz vor einer Krankheit, z. B. nach einer überstandenen Infektion oder einer Impfung.",
+          "en": "Protection against a disease, for example after recovering from an infection or after vaccination."
+        }
+      },
+      {
+        "term": {
+          "de": "Herdenimmunität",
+          "en": "herd immunity"
+        },
+        "definition": {
+          "de": "Wenn so viele immun sind, dass sich eine Krankheit nicht mehr ausbreiten kann – dann sind auch Nicht-Immune geschützt.",
+          "en": "When so many people are immune that a disease can no longer spread – which also protects those who are not immune."
+        }
+      }
+    ]
+  },
+  {
+    "id": "newtons-law-of-cooling",
+    "teaser": {
+      "de": "Wie lange musst du warten, bis du deinen Kaffee trinken kannst, ohne dir die Zunge zu verbrennen?",
+      "en": "How long do you have to wait before you can drink your coffee without burning your tongue?"
+    },
+    "phenomenon": {
+      "de": "Ein frisch gebrühter Kaffee ist fast 90 °C heiß. Stellst du die Tasse auf den Tisch, wird er kühler – anfangs schnell, später immer langsamer. Kälter als das Zimmer wird er nie. Das gleiche Verhalten zeigen auch eine heiße Suppe, ein Bad oder ein Motor nach dem Abstellen.",
+      "en": "A freshly brewed coffee is almost 90 °C. If you leave the cup on the table it cools down – quickly at first, then more and more slowly. It never gets colder than the room. Hot soup, a bath or an engine after it has been switched off behave in the same way."
+    },
+    "idea": {
+      "de": "Wie schnell der Kaffee abkühlt, hängt vom Temperaturunterschied zum Zimmer ab: großer Unterschied, schnelle Abkühlung. In jedem kleinen Zeitschritt sinkt die Temperatur deshalb um k mal Temperaturunterschied mal Zeitschritt. Je näher der Kaffee der Zimmertemperatur kommt, desto kleiner werden die Schritte.",
+      "en": "How fast the coffee cools depends on the temperature difference to the room: a big difference means fast cooling. So in every small time step the temperature falls by k times the temperature difference times the time step. The closer the coffee gets to room temperature, the smaller the steps become."
+    },
+    "quantities": [
+      {
+        "name": "Abkuehlung",
+        "meaning": {
+          "de": "Abkühlgeschwindigkeit: Temperaturabnahme pro Minute",
+          "en": "cooling rate: drop in temperature per minute"
+        },
+        "unit": {
+          "de": "°C/min",
+          "en": "°C/min"
+        }
+      },
+      {
+        "name": "k",
+        "meaning": {
+          "de": "Abkühlkonstante (hängt von Tasse, Deckel, Luftzug ab)",
+          "en": "cooling constant (depends on the cup, lid, draughts)"
+        },
+        "unit": {
+          "de": "1/min",
+          "en": "1/min"
+        }
+      },
+      {
+        "name": "Temperatur",
+        "meaning": {
+          "de": "Temperatur des Kaffees",
+          "en": "temperature of the coffee"
+        },
+        "unit": {
+          "de": "°C",
+          "en": "°C"
+        }
+      },
+      {
+        "name": "Raumtemperatur",
+        "meaning": {
+          "de": "Temperatur im Zimmer",
+          "en": "room temperature"
+        },
+        "unit": {
+          "de": "°C",
+          "en": "°C"
+        }
+      },
+      {
+        "name": "dt",
+        "meaning": {
+          "de": "Länge eines Zeitschritts",
+          "en": "length of one time step"
+        },
+        "unit": {
+          "de": "min",
+          "en": "min"
+        }
+      },
+      {
+        "name": "Zeit",
+        "meaning": {
+          "de": "Zeit seit dem Aufbrühen",
+          "en": "time since the coffee was made"
+        },
+        "unit": {
+          "de": "min",
+          "en": "min"
+        }
+      }
+    ],
+    "lines": [
+      {
+        "code": "Abkuehlung := k * (Temperatur - Raumtemperatur)",
+        "explanation": {
+          "de": "Die Abkühlgeschwindigkeit ist proportional zum Temperaturunterschied. Am Anfang: 0,04 · (90 − 20) = 2,8 °C pro Minute.",
+          "en": "The cooling rate is proportional to the temperature difference. At the start: 0.04 · (90 − 20) = 2.8 °C per minute."
+        }
+      },
+      {
+        "code": "Temperatur := Temperatur - Abkuehlung * dt",
+        "explanation": {
+          "de": "In einem Zeitschritt von 0,1 min sinkt die Temperatur um Abkühlung mal dt.",
+          "en": "In a time step of 0.1 min the temperature drops by the cooling rate times dt."
+        }
+      },
+      {
+        "code": "Zeit := Zeit + dt",
+        "explanation": {
+          "de": "Die Uhr läuft 0,1 Minuten (6 Sekunden) weiter.",
+          "en": "The clock moves on by 0.1 minutes (6 seconds)."
+        }
+      }
+    ],
+    "observe": {
+      "de": "Die Temperaturkurve fällt zuerst steil und wird dann immer flacher; sie nähert sich der Raumtemperatur von 20 °C, erreicht sie aber nie ganz. Nach 10 Minuten hat der Kaffee noch etwa 67 °C, Trinktemperatur (60 °C) erreicht er nach ungefähr 14 Minuten. Nach einer Stunde ist er mit gut 26 °C fast auf Zimmertemperatur.",
+      "en": "The temperature curve falls steeply at first and then gets flatter and flatter; it approaches the room temperature of 20 °C but never quite reaches it. After 10 minutes the coffee is still about 67 °C, and it reaches drinking temperature (60 °C) after roughly 14 minutes. After an hour it is just over 26 °C, almost at room temperature."
+    },
+    "tasks": [
+      {
+        "text": {
+          "de": "Stell dir vor, die Tasse steht draußen bei 0 °C. Sag vorher: Wird der Kaffee früher oder später trinkbar? Prüfe mit Raumtemperatur = 0.",
+          "en": "Imagine the cup is outside at 0 °C. Predict: will the coffee be drinkable sooner or later? Check with Raumtemperatur = 0."
+        },
+        "hint": {
+          "de": "Der Temperaturunterschied ist jetzt größer, also kühlt der Kaffee schneller ab.",
+          "en": "The temperature difference is now larger, so the coffee cools faster."
+        }
+      },
+      {
+        "text": {
+          "de": "Miss selbst: Gieß heißes Wasser in eine Tasse und notiere jede Minute die Temperatur. Passe k so an, dass die Simulation zu deinen Messwerten passt.",
+          "en": "Measure it yourself: pour hot water into a mug and note the temperature every minute. Adjust k until the simulation matches your measurements."
+        },
+        "hint": {
+          "de": "Ist die gemessene Kurve steiler als die simulierte, musst du k vergrößern. Ein Deckel macht k kleiner.",
+          "en": "If your measured curve is steeper than the simulated one, increase k. A lid makes k smaller."
+        }
+      },
+      {
+        "text": {
+          "de": "Milch vorher oder nachher? Gib nach 10 Minuten kalte Milch dazu (Mischtemperatur ausrechnen und als neue Temperatur einsetzen) und vergleiche mit Milch gleich am Anfang. Welcher Kaffee ist nach 15 Minuten kühler?",
+          "en": "Milk first or later? Add cold milk after 10 minutes (work out the mixing temperature and use it as the new temperature) and compare with adding the milk right at the start. Which coffee is cooler after 15 minutes?"
+        },
+        "hint": {
+          "de": "Mischtemperatur = (m₁·T₁ + m₂·T₂)/(m₁ + m₂). Denke daran: Heißer Kaffee verliert schneller Wärme, also lohnt es sich, ihn lange heiß zu lassen.",
+          "en": "Mixing temperature = (m₁·T₁ + m₂·T₂)/(m₁ + m₂). Remember: hot coffee loses heat faster, so it pays to leave it hot for as long as possible."
+        }
+      }
+    ],
+    "limits": {
+      "de": "Das Modell betrachtet den Kaffee als überall gleich warm. Verdunstung an der Oberfläche, die Erwärmung der Tasse selbst und Luftzug sind nur grob in k versteckt. Bei sehr heißen Getränken kühlt es deshalb am Anfang oft schneller ab als vorhergesagt.",
+      "en": "The model treats the coffee as having the same temperature everywhere. Evaporation from the surface, the warming of the cup itself and draughts are only roughly hidden inside k. With very hot drinks the real cooling is therefore often faster at the start than predicted."
+    },
+    "glossary": [
+      {
+        "term": {
+          "de": "Newtonsches Abkühlungsgesetz",
+          "en": "Newton's law of cooling"
+        },
+        "definition": {
+          "de": "Die Abkühlgeschwindigkeit eines Körpers ist proportional zum Temperaturunterschied zur Umgebung.",
+          "en": "The rate at which an object cools is proportional to its temperature difference from the surroundings."
+        }
+      },
+      {
+        "term": {
+          "de": "Grenzwert",
+          "en": "limit"
+        },
+        "definition": {
+          "de": "Ein Wert, dem sich eine Größe immer weiter nähert, ohne ihn zu überschreiten – hier die Raumtemperatur.",
+          "en": "A value that a quantity gets closer and closer to without going past it – here the room temperature."
+        }
+      }
+    ]
+  },
+  {
+    "id": "skydiver-air-resistance",
+    "teaser": {
+      "de": "Warum wird ein Fallschirmspringer im freien Fall nicht immer schneller?",
+      "en": "Why doesn't a skydiver keep getting faster in free fall?"
+    },
+    "phenomenon": {
+      "de": "Ohne Luft würde ein Körper jede Sekunde um fast 10 m/s schneller werden. Beim Fallschirmsprung spürt man aber einen immer stärkeren Fahrtwind. Nach etwa zehn Sekunden fällt man mit fast gleichbleibender Geschwindigkeit, in Bauchlage etwa 180 km/h. Erst der Fallschirm bremst dann auf eine sichere Landegeschwindigkeit ab.",
+      "en": "Without air an object would gain almost 10 m/s of speed every second. In a skydive, however, you feel an ever stronger rush of air. After about ten seconds you fall at an almost constant speed of about 180 km/h when lying belly-down. Only the parachute then slows you to a safe landing speed."
+    },
+    "idea": {
+      "de": "Auf den Springer wirken zwei Kräfte: die Gewichtskraft nach unten (immer gleich) und die Luftwiderstandskraft nach oben, die mit dem Quadrat der Geschwindigkeit wächst. In jedem kleinen Zeitschritt bestimmt der Unterschied der beiden Kräfte die Beschleunigung, und die Geschwindigkeit ändert sich um Beschleunigung mal Zeitschritt. Je schneller der Springer wird, desto kleiner wird der Kraftüberschuss – bis beide Kräfte gleich groß sind.",
+      "en": "Two forces act on the skydiver: weight pulling down (always the same) and air resistance pushing up, which grows with the square of the speed. In every small time step the difference between the two forces sets the acceleration, and the speed changes by acceleration times time step. The faster the skydiver goes, the smaller the leftover force – until both forces are equal."
+    },
+    "quantities": [
+      {
+        "name": "Gewichtskraft",
+        "meaning": {
+          "de": "Gewichtskraft auf den Springer",
+          "en": "weight of the skydiver"
+        },
+        "unit": {
+          "de": "N",
+          "en": "N"
+        }
+      },
+      {
+        "name": "Masse",
+        "meaning": {
+          "de": "Masse des Springers mit Ausrüstung",
+          "en": "mass of the skydiver including equipment"
+        },
+        "unit": {
+          "de": "kg",
+          "en": "kg"
+        }
+      },
+      {
+        "name": "g",
+        "meaning": {
+          "de": "Fallbeschleunigung (Ortsfaktor)",
+          "en": "acceleration due to gravity"
+        },
+        "unit": {
+          "de": "m/s²",
+          "en": "m/s²"
+        }
+      },
+      {
+        "name": "Reibungskraft",
+        "meaning": {
+          "de": "Luftwiderstandskraft",
+          "en": "air resistance (drag) force"
+        },
+        "unit": {
+          "de": "N",
+          "en": "N"
+        }
+      },
+      {
+        "name": "Cw",
+        "meaning": {
+          "de": "Widerstandsbeiwert: wie „windschnittig“ die Körperform ist",
+          "en": "drag coefficient: how streamlined the body shape is"
+        },
+        "unit": {
+          "de": "",
+          "en": ""
+        }
+      },
+      {
+        "name": "Rho",
+        "meaning": {
+          "de": "Dichte der Luft",
+          "en": "density of the air"
+        },
+        "unit": {
+          "de": "kg/m³",
+          "en": "kg/m³"
+        }
+      },
+      {
+        "name": "Flaeche",
+        "meaning": {
+          "de": "Querschnittsfläche, die der Luft entgegensteht",
+          "en": "cross-sectional area facing the airflow"
+        },
+        "unit": {
+          "de": "m²",
+          "en": "m²"
+        }
+      },
+      {
+        "name": "V",
+        "meaning": {
+          "de": "Fallgeschwindigkeit",
+          "en": "falling speed"
+        },
+        "unit": {
+          "de": "m/s",
+          "en": "m/s"
+        }
+      },
+      {
+        "name": "Beschl",
+        "meaning": {
+          "de": "Beschleunigung",
+          "en": "acceleration"
+        },
+        "unit": {
+          "de": "m/s²",
+          "en": "m/s²"
+        }
+      },
+      {
+        "name": "dt",
+        "meaning": {
+          "de": "Länge eines Zeitschritts",
+          "en": "length of one time step"
+        },
+        "unit": {
+          "de": "s",
+          "en": "s"
+        }
+      },
+      {
+        "name": "Hoehe",
+        "meaning": {
+          "de": "Höhe über dem Boden",
+          "en": "height above the ground"
+        },
+        "unit": {
+          "de": "m",
+          "en": "m"
+        }
+      },
+      {
+        "name": "Kmh",
+        "meaning": {
+          "de": "Fallgeschwindigkeit in km/h",
+          "en": "falling speed in km/h"
+        },
+        "unit": {
+          "de": "km/h",
+          "en": "km/h"
+        }
+      },
+      {
+        "name": "Zeit",
+        "meaning": {
+          "de": "Zeit seit dem Absprung",
+          "en": "time since jumping"
+        },
+        "unit": {
+          "de": "s",
+          "en": "s"
+        }
+      }
+    ],
+    "lines": [
+      {
+        "code": "Gewichtskraft := Masse * g",
+        "explanation": {
+          "de": "Die Gewichtskraft ist Masse mal Fallbeschleunigung: 80 kg · 9,81 m/s² ≈ 785 N.",
+          "en": "Weight is mass times gravitational acceleration: 80 kg · 9.81 m/s² ≈ 785 N."
+        }
+      },
+      {
+        "code": "Reibungskraft := 0,5 * Cw * Rho * Flaeche * V * V",
+        "explanation": {
+          "de": "Luftwiderstand nach Newton: ½ · cw · ρ · A · v². Doppelte Geschwindigkeit bedeutet vierfache Kraft.",
+          "en": "Newtonian drag: ½ · cw · ρ · A · v². Twice the speed means four times the force."
+        }
+      },
+      {
+        "code": "Beschl := (Gewichtskraft - Reibungskraft) / Masse",
+        "explanation": {
+          "de": "Zweites Newtonsches Gesetz: Die übrig bleibende Kraft geteilt durch die Masse ergibt die Beschleunigung.",
+          "en": "Newton's second law: the leftover force divided by the mass gives the acceleration."
+        }
+      },
+      {
+        "code": "V := V + Beschl * dt",
+        "explanation": {
+          "de": "Die Geschwindigkeit wächst um Beschleunigung mal Zeitschritt.",
+          "en": "The speed increases by acceleration times time step."
+        }
+      },
+      {
+        "code": "Hoehe := Hoehe - V * dt",
+        "explanation": {
+          "de": "In einem Zeitschritt sinkt die Höhe um Geschwindigkeit mal Zeitschritt.",
+          "en": "In one time step the height drops by speed times time step."
+        }
+      },
+      {
+        "code": "Kmh := V * 3,6",
+        "explanation": {
+          "de": "Umrechnung in km/h: 1 m/s = 3,6 km/h.",
+          "en": "Conversion to km/h: 1 m/s = 3.6 km/h."
+        }
+      },
+      {
+        "code": "Zeit := Zeit + dt",
+        "explanation": {
+          "de": "Die Uhr läuft eine hundertstel Sekunde weiter.",
+          "en": "The clock moves on by one hundredth of a second."
+        }
+      }
+    ],
+    "observe": {
+      "de": "Die Geschwindigkeit steigt zuerst fast so schnell wie im freien Fall und nähert sich dann einem Grenzwert von etwa 50 m/s (180 km/h). Nach 10 Sekunden ist der Springer schon bei rund 173 km/h und hat etwa 330 m zurückgelegt. Achte darauf, dass die Kurve nach etwa 9 Sekunden nur noch ganz langsam ansteigt: Dort sind schon 95 % der Endgeschwindigkeit erreicht.",
+      "en": "The speed rises almost as fast as in free fall at first and then approaches a limit of about 50 m/s (180 km/h). After 10 seconds the skydiver is already at about 173 km/h and has fallen about 330 m. Notice that after roughly 9 seconds the curve rises only very slowly: by then 95 % of the terminal velocity has been reached."
+    },
+    "tasks": [
+      {
+        "text": {
+          "de": "Ein schwererer Springer (Masse 100 kg): Sag vorher, ob seine Endgeschwindigkeit größer oder kleiner ist, und prüfe nach.",
+          "en": "A heavier skydiver (mass 100 kg): predict whether the terminal velocity will be higher or lower, then check."
+        },
+        "hint": {
+          "de": "Mehr Gewichtskraft braucht mehr Luftwiderstand zum Ausgleich – also eine höhere Geschwindigkeit. Es sind etwa 200 km/h.",
+          "en": "More weight needs more drag to balance it – and so a higher speed. It comes to about 200 km/h."
+        }
+      },
+      {
+        "text": {
+          "de": "Berechne die Endgeschwindigkeit ohne Simulation, indem du Gewichtskraft = Reibungskraft setzt und nach v auflöst. Stimmt dein Ergebnis mit der Simulation überein?",
+          "en": "Calculate the terminal velocity without the simulation by setting weight = drag and solving for v. Does your result match the simulation?"
+        },
+        "hint": {
+          "de": "v = √(2·m·g / (cw·ρ·A)). Setze die Startwerte ein.",
+          "en": "v = √(2·m·g / (cw·ρ·A)). Put in the starting values."
+        }
+      },
+      {
+        "text": {
+          "de": "In 4000 m Höhe ist die Luft dünner (ρ ≈ 0,8 kg/m³). Ergänze eine Zeile, die Rho aus der Höhe berechnet, z. B. Rho := 1,2*exp(-Hoehe/8000). Wie ändert sich die Geschwindigkeit in den ersten 30 Sekunden?",
+          "en": "At 4000 m the air is thinner (ρ ≈ 0.8 kg/m³). Add a line that calculates Rho from the height, e.g. Rho := 1.2*exp(-Hoehe/8000). How does the speed change during the first 30 seconds?"
+        },
+        "hint": {
+          "de": "Die Zeile muss vor der Reibungskraft stehen. In dünner Luft ist der Widerstand kleiner, deshalb wird der Springer zuerst schneller und bremst beim Sinken langsam ab.",
+          "en": "The line must come before the drag line. In thin air there is less drag, so the skydiver gets faster at first and slowly slows down while descending."
+        }
+      }
+    ],
+    "limits": {
+      "de": "Die Luftdichte ist im Modell überall gleich, obwohl sie in 4000 m Höhe nur etwa zwei Drittel so groß ist wie am Boden. Der cw-Wert und die Fläche sind nur grob geschätzt, und Körperhaltung, Wind und Auftrieb fehlen. Die Simulation hört nicht beim Öffnen des Schirms auf – das müsstest du selbst ergänzen.",
+      "en": "The air density is the same everywhere in the model, although at 4000 m it is only about two thirds of the value at ground level. The drag coefficient and area are only rough estimates, and changes of posture, wind and lift are missing. The simulation does not stop when the parachute opens – you would have to add that yourself."
+    },
+    "glossary": [
+      {
+        "term": {
+          "de": "Endgeschwindigkeit",
+          "en": "terminal velocity"
+        },
+        "definition": {
+          "de": "Die Geschwindigkeit, bei der Luftwiderstand und Gewichtskraft gleich groß sind; schneller wird der Körper nicht mehr.",
+          "en": "The speed at which drag and weight are equal; the object does not get any faster."
+        }
+      },
+      {
+        "term": {
+          "de": "cw-Wert",
+          "en": "drag coefficient"
+        },
+        "definition": {
+          "de": "Zahl ohne Einheit, die beschreibt, wie stark eine Körperform den Luftstrom bremst.",
+          "en": "A number without units that describes how strongly a shape resists the flow of air."
+        }
+      }
+    ]
+  },
+  {
+    "id": "damped-spring-pendulum",
+    "teaser": {
+      "de": "Ein Gewicht an einer Feder wippt auf und ab – wie lange dauert ein Hin und Her, und warum wird es langsam kleiner?",
+      "en": "A weight on a spring bobs up and down – how long does one bounce take, and why does it slowly die away?"
+    },
+    "phenomenon": {
+      "de": "Hängst du ein Gewicht an eine Schraubenfeder, ziehst es nach unten und lässt los, schwingt es auf und ab. Die Schwingung wiederholt sich in gleichen Zeitabständen, wird aber allmählich schwächer. Solche Schwingungen gibt es überall: bei Stoßdämpfern im Auto, beim Trampolin oder bei einem Lautsprecher.",
+      "en": "If you hang a weight on a coil spring, pull it down and let go, it bounces up and down. The motion repeats at equal time intervals but gradually gets weaker. Oscillations like this are everywhere: in car shock absorbers, on a trampoline or in a loudspeaker."
+    },
+    "idea": {
+      "de": "Die Feder zieht den Körper immer zur Ruhelage zurück, und zwar umso stärker, je weiter er ausgelenkt ist. Dazu kommt eine kleine Reibungskraft, die gegen die Bewegung wirkt. In jedem kleinen Zeitschritt bestimmen beide Kräfte die Beschleunigung; daraus ergibt sich die neue Geschwindigkeit und mit ihr die neue Auslenkung. Weil der Körper über die Ruhelage hinausschießt, entsteht ein ständiges Hin und Her.",
+      "en": "The spring always pulls the mass back towards its rest position, and the further it is displaced the harder it pulls. On top of that there is a small friction force acting against the motion. In every small time step the two forces determine the acceleration; this gives the new velocity and, from it, the new displacement. Because the mass overshoots the rest position, it keeps moving back and forth."
+    },
+    "quantities": [
+      {
+        "name": "Federkraft",
+        "meaning": {
+          "de": "rücktreibende Kraft der Feder",
+          "en": "restoring force of the spring"
+        },
+        "unit": {
+          "de": "N",
+          "en": "N"
+        }
+      },
+      {
+        "name": "D",
+        "meaning": {
+          "de": "Federkonstante: wie „hart“ die Feder ist",
+          "en": "spring constant: how stiff the spring is"
+        },
+        "unit": {
+          "de": "N/m",
+          "en": "N/m"
+        }
+      },
+      {
+        "name": "S",
+        "meaning": {
+          "de": "Auslenkung aus der Ruhelage",
+          "en": "displacement from the rest position"
+        },
+        "unit": {
+          "de": "m",
+          "en": "m"
+        }
+      },
+      {
+        "name": "Reibung",
+        "meaning": {
+          "de": "Reibungskraft (bremst die Bewegung)",
+          "en": "friction force (slows the motion down)"
+        },
+        "unit": {
+          "de": "N",
+          "en": "N"
+        }
+      },
+      {
+        "name": "Daempfung",
+        "meaning": {
+          "de": "Dämpfungskonstante: wie stark die Reibung mit der Geschwindigkeit wächst",
+          "en": "damping constant: how strongly friction grows with speed"
+        },
+        "unit": {
+          "de": "kg/s (= N·s/m)",
+          "en": "kg/s (= N·s/m)"
+        }
+      },
+      {
+        "name": "V",
+        "meaning": {
+          "de": "Geschwindigkeit des Körpers",
+          "en": "velocity of the mass"
+        },
+        "unit": {
+          "de": "m/s",
+          "en": "m/s"
+        }
+      },
+      {
+        "name": "Beschl",
+        "meaning": {
+          "de": "Beschleunigung des Körpers",
+          "en": "acceleration of the mass"
+        },
+        "unit": {
+          "de": "m/s²",
+          "en": "m/s²"
+        }
+      },
+      {
+        "name": "Masse",
+        "meaning": {
+          "de": "Masse des Körpers",
+          "en": "mass of the body"
+        },
+        "unit": {
+          "de": "kg",
+          "en": "kg"
+        }
+      },
+      {
+        "name": "dt",
+        "meaning": {
+          "de": "Länge eines Zeitschritts (1 ms)",
+          "en": "length of one time step (1 ms)"
+        },
+        "unit": {
+          "de": "s",
+          "en": "s"
+        }
+      },
+      {
+        "name": "Zeit",
+        "meaning": {
+          "de": "vergangene Zeit",
+          "en": "elapsed time"
+        },
+        "unit": {
+          "de": "s",
+          "en": "s"
+        }
+      }
+    ],
+    "lines": [
+      {
+        "code": "Federkraft := -D * S",
+        "explanation": {
+          "de": "Hookesches Gesetz: Die Federkraft ist proportional zur Auslenkung. Das Minuszeichen bedeutet: Sie zeigt immer zurück zur Ruhelage.",
+          "en": "Hooke's law: the spring force is proportional to the displacement. The minus sign means it always points back towards the rest position."
+        }
+      },
+      {
+        "code": "Reibung := -Daempfung * V",
+        "explanation": {
+          "de": "Die Reibungskraft ist proportional zur Geschwindigkeit und wirkt ihr entgegen.",
+          "en": "The friction force is proportional to the velocity and acts against it."
+        }
+      },
+      {
+        "code": "Beschl := (Federkraft + Reibung) / Masse",
+        "explanation": {
+          "de": "Zweites Newtonsches Gesetz: Gesamtkraft geteilt durch Masse ergibt die Beschleunigung.",
+          "en": "Newton's second law: total force divided by mass gives the acceleration."
+        }
+      },
+      {
+        "code": "V := V + Beschl * dt",
+        "explanation": {
+          "de": "Die Geschwindigkeit ändert sich um Beschleunigung mal Zeitschritt.",
+          "en": "The velocity changes by acceleration times time step."
+        }
+      },
+      {
+        "code": "S := S + V * dt",
+        "explanation": {
+          "de": "Die Auslenkung ändert sich um Geschwindigkeit mal Zeitschritt – mit der gerade neu berechneten Geschwindigkeit. Diese Reihenfolge (Euler-Cromer) hält die Schwingung stabil.",
+          "en": "The displacement changes by velocity times time step – using the velocity just calculated. This order (Euler–Cromer) keeps the oscillation stable."
+        }
+      },
+      {
+        "code": "Zeit := Zeit + dt",
+        "explanation": {
+          "de": "Die Uhr läuft eine Millisekunde weiter.",
+          "en": "The clock moves on by one millisecond."
+        }
+      }
+    ],
+    "observe": {
+      "de": "Die Kurve ist eine Sinusschwingung, deren Ausschläge langsam kleiner werden. Eine volle Schwingung dauert 0,628 s – genau wie die Formel T = 2π·√(m/D) vorhersagt. Die Spitzen nehmen gleichmäßig ab: Nach etwa 4,4 s ist der Ausschlag nur noch gut 3,2 cm, nach 5 s liegt die Hüllkurve bei rund 3 cm.",
+      "en": "The curve is a sine-shaped oscillation whose swings slowly get smaller. One full oscillation takes 0.628 s – exactly as the formula T = 2π·√(m/D) predicts. The peaks shrink steadily: after about 4.4 s the swing is only just over 3.2 cm, and at 5 s the envelope is about 3 cm."
+    },
+    "tasks": [
+      {
+        "text": {
+          "de": "Vervierfache die Masse auf 0,8 kg. Sag mit der Formel vorher, wie lange eine Schwingung jetzt dauert, und miss in der Simulation nach.",
+          "en": "Increase the mass fourfold to 0.8 kg. Use the formula to predict how long one oscillation now takes, then measure it in the simulation."
+        },
+        "hint": {
+          "de": "Wegen der Wurzel bewirkt die vierfache Masse eine doppelte Periodendauer: etwa 1,26 s.",
+          "en": "Because of the square root, four times the mass gives twice the period: about 1.26 s."
+        }
+      },
+      {
+        "text": {
+          "de": "Erhöhe die Dämpfung schrittweise (0,4; 2; 4). Ab wann schwingt der Körper gar nicht mehr über die Ruhelage hinaus?",
+          "en": "Increase the damping step by step (0.4; 2; 4). From what value does the mass no longer swing past the rest position?"
+        },
+        "hint": {
+          "de": "Bei Daempfung = 2·√(D·m) = 4 kg/s spricht man vom aperiodischen Grenzfall: Der Körper kriecht nur noch zur Ruhelage zurück. So sollen Stoßdämpfer arbeiten.",
+          "en": "At Daempfung = 2·√(D·m) = 4 kg/s you reach critical damping: the mass just creeps back to its rest position. This is how shock absorbers are designed to work."
+        }
+      },
+      {
+        "text": {
+          "de": "Vertausche die Zeilen für V und S, sodass S mit der alten Geschwindigkeit berechnet wird, und setze die Dämpfung auf 0. Was passiert mit der Amplitude? Warum ist das physikalisch unmöglich?",
+          "en": "Swap the lines for V and S so that S is calculated with the old velocity, and set the damping to 0. What happens to the amplitude? Why is this physically impossible?"
+        },
+        "hint": {
+          "de": "Mit dem reinen Euler-Verfahren wächst der Ausschlag in 5 s von 5 cm auf über 6 cm – die Simulation erzeugt Energie aus dem Nichts. Das ist ein Rechenfehler, kein physikalischer Effekt.",
+          "en": "With the plain Euler method the swing grows from 5 cm to over 6 cm in 5 s – the simulation creates energy out of nothing. That is a numerical error, not a physical effect."
+        }
+      }
+    ],
+    "limits": {
+      "de": "Die Feder wird als masselos und ideal angenommen; bei großen Auslenkungen gilt das Hookesche Gesetz nicht mehr. Echte Reibung hängt nicht immer einfach proportional von der Geschwindigkeit ab, z. B. bei Luftwiderstand oder Reibung an einer Führung.",
+      "en": "The spring is assumed to be massless and ideal; for large displacements Hooke's law no longer holds. Real friction is not always simply proportional to velocity, for example with air resistance or friction against a guide rail."
+    },
+    "glossary": [
+      {
+        "term": {
+          "de": "Periodendauer",
+          "en": "period"
+        },
+        "definition": {
+          "de": "Die Zeit für eine vollständige Hin- und Herbewegung.",
+          "en": "The time taken for one complete back-and-forth movement."
+        }
+      },
+      {
+        "term": {
+          "de": "Amplitude",
+          "en": "amplitude"
+        },
+        "definition": {
+          "de": "Der größte Ausschlag einer Schwingung aus der Ruhelage.",
+          "en": "The largest displacement of an oscillation from the rest position."
+        }
+      },
+      {
+        "term": {
+          "de": "Dämpfung",
+          "en": "damping"
+        },
+        "definition": {
+          "de": "Energieverlust durch Reibung, der eine Schwingung allmählich abklingen lässt.",
+          "en": "Loss of energy through friction that makes an oscillation gradually die away."
+        }
+      }
+    ]
+  },
+  {
+    "id": "drug-level-ibuprofen",
+    "teaser": {
+      "de": "Warum steht auf dem Beipackzettel „alle 8 Stunden“ – und nicht „wann immer es wehtut“?",
+      "en": "Why does the leaflet say 'every 8 hours' rather than 'whenever it hurts'?"
+    },
+    "phenomenon": {
+      "de": "Eine Schmerztablette wirkt nicht sofort: Der Wirkstoff muss erst aus dem Magen-Darm-Trakt ins Blut gelangen. Gleichzeitig baut der Körper ihn ab, vor allem über die Leber, und scheidet ihn über die Nieren aus. Deshalb steigt die Wirkstoffmenge nach jeder Tablette an und sinkt danach wieder. Ärztinnen und Apotheker wählen den Abstand zwischen den Einnahmen so, dass genug Wirkstoff da ist, aber nicht zu viel.",
+      "en": "A painkiller does not work straight away: the drug first has to get from the gut into the blood. At the same time the body breaks it down, mainly in the liver, and gets rid of it through the kidneys. So the amount of drug rises after each tablet and then falls again. Doctors and pharmacists choose the interval between doses so that there is enough drug, but not too much."
+    },
+    "idea": {
+      "de": "Das Modell hat zwei Speicher: Magen/Darm und den übrigen Körper. In jedem kleinen Zeitschritt wandert ein fester Anteil des Wirkstoffs vom Magen in den Körper, und ein fester Anteil im Körper wird abgebaut. Alle 8 Stunden kommt eine neue Tablette mit 400 mg in den Magen. Aus dem Zusammenspiel von Aufnahme und Abbau entsteht ein Sägezahnmuster.",
+      "en": "The model has two compartments: the gut and the rest of the body. In every small time step a fixed fraction of the drug moves from the gut into the body, and a fixed fraction of the drug in the body is broken down. Every 8 hours a new 400 mg tablet arrives in the gut. The interplay of absorption and elimination produces a sawtooth pattern."
+    },
+    "quantities": [
+      {
+        "name": "Gabe",
+        "meaning": {
+          "de": "Wirkstoffmenge, die in diesem Zeitschritt eingenommen wird (400 mg oder 0)",
+          "en": "amount of drug taken in this time step (400 mg or 0)"
+        },
+        "unit": {
+          "de": "mg",
+          "en": "mg"
+        }
+      },
+      {
+        "name": "Dosis",
+        "meaning": {
+          "de": "Wirkstoffmenge einer Tablette",
+          "en": "amount of drug in one tablet"
+        },
+        "unit": {
+          "de": "mg",
+          "en": "mg"
+        }
+      },
+      {
+        "name": "Zaehler",
+        "meaning": {
+          "de": "zählt die Zeitschritte",
+          "en": "counts the time steps"
+        },
+        "unit": {
+          "de": "Schritte",
+          "en": "steps"
+        }
+      },
+      {
+        "name": "Takt",
+        "meaning": {
+          "de": "Abstand zwischen zwei Einnahmen, gemessen in Zeitschritten (80 Schritte = 8 h)",
+          "en": "interval between two doses, measured in time steps (80 steps = 8 h)"
+        },
+        "unit": {
+          "de": "Schritte",
+          "en": "steps"
+        }
+      },
+      {
+        "name": "Magen",
+        "meaning": {
+          "de": "Wirkstoffmenge im Magen-Darm-Trakt",
+          "en": "amount of drug in the gut"
+        },
+        "unit": {
+          "de": "mg",
+          "en": "mg"
+        }
+      },
+      {
+        "name": "Ke",
+        "meaning": {
+          "de": "Abbaurate im Körper",
+          "en": "elimination rate in the body"
+        },
+        "unit": {
+          "de": "1/h",
+          "en": "1/h"
+        }
+      },
+      {
+        "name": "Halbwertszeit",
+        "meaning": {
+          "de": "Zeit, in der die Hälfte des Wirkstoffs im Körper abgebaut wird",
+          "en": "time in which half of the drug in the body is eliminated"
+        },
+        "unit": {
+          "de": "h",
+          "en": "h"
+        }
+      },
+      {
+        "name": "Aufnahme",
+        "meaning": {
+          "de": "Wirkstoff, der pro Stunde vom Magen ins Blut übergeht",
+          "en": "amount of drug passing from the gut into the blood per hour"
+        },
+        "unit": {
+          "de": "mg/h",
+          "en": "mg/h"
+        }
+      },
+      {
+        "name": "Ka",
+        "meaning": {
+          "de": "Aufnahmerate aus dem Magen-Darm-Trakt",
+          "en": "absorption rate from the gut"
+        },
+        "unit": {
+          "de": "1/h",
+          "en": "1/h"
+        }
+      },
+      {
+        "name": "Abbau",
+        "meaning": {
+          "de": "Wirkstoff, der pro Stunde im Körper abgebaut wird",
+          "en": "amount of drug eliminated from the body per hour"
+        },
+        "unit": {
+          "de": "mg/h",
+          "en": "mg/h"
+        }
+      },
+      {
+        "name": "Koerper",
+        "meaning": {
+          "de": "Wirkstoffmenge im Körper (Blut und Gewebe)",
+          "en": "amount of drug in the body (blood and tissues)"
+        },
+        "unit": {
+          "de": "mg",
+          "en": "mg"
+        }
+      },
+      {
+        "name": "dt",
+        "meaning": {
+          "de": "Länge eines Zeitschritts (6 Minuten)",
+          "en": "length of one time step (6 minutes)"
+        },
+        "unit": {
+          "de": "h",
+          "en": "h"
+        }
+      },
+      {
+        "name": "Zeit",
+        "meaning": {
+          "de": "Zeit seit der ersten Tablette",
+          "en": "time since the first tablet"
+        },
+        "unit": {
+          "de": "h",
+          "en": "h"
+        }
+      }
+    ],
+    "lines": [
+      {
+        "code": "Gabe := Dosis * int(1 - frac(Zaehler / Takt) + 0,0001)",
+        "explanation": {
+          "de": "Ein Trick, der nur dann 400 mg ergibt, wenn Zaehler ein Vielfaches von Takt ist: frac liefert den Nachkommaanteil (dann 0), int schneidet die Nachkommastellen ab. Sonst ist Gabe = 0.",
+          "en": "A trick that gives 400 mg only when Zaehler is a multiple of Takt: frac returns the fractional part (0 in that case), and int cuts off everything after the decimal point. Otherwise Gabe = 0."
+        }
+      },
+      {
+        "code": "Magen := Magen + Gabe",
+        "explanation": {
+          "de": "Die eingenommene Tablette landet im Magen.",
+          "en": "The tablet that has just been taken ends up in the gut."
+        }
+      },
+      {
+        "code": "Ke := ln(2) / Halbwertszeit",
+        "explanation": {
+          "de": "Aus der Halbwertszeit wird die Abbaurate berechnet: Ke = ln 2 / 2 h ≈ 0,35 pro Stunde.",
+          "en": "The elimination rate is calculated from the half-life: Ke = ln 2 / 2 h ≈ 0.35 per hour."
+        }
+      },
+      {
+        "code": "Aufnahme := Ka * Magen",
+        "explanation": {
+          "de": "Pro Stunde geht der Anteil Ka = 1,5 des Mageninhalts ins Blut über – je mehr im Magen ist, desto mehr.",
+          "en": "Per hour a fraction Ka = 1.5 of the gut contents passes into the blood – the more there is in the gut, the more passes over."
+        }
+      },
+      {
+        "code": "Abbau := Ke * Koerper",
+        "explanation": {
+          "de": "Der Abbau ist proportional zur Wirkstoffmenge im Körper.",
+          "en": "Elimination is proportional to the amount of drug in the body."
+        }
+      },
+      {
+        "code": "Magen := Magen - Aufnahme * dt",
+        "explanation": {
+          "de": "Der Magen verliert, was aufgenommen wird.",
+          "en": "The gut loses whatever is absorbed."
+        }
+      },
+      {
+        "code": "Koerper := Koerper + (Aufnahme - Abbau) * dt",
+        "explanation": {
+          "de": "Der Körper gewinnt die Aufnahme und verliert den Abbau.",
+          "en": "The body gains what is absorbed and loses what is eliminated."
+        }
+      },
+      {
+        "code": "Zaehler := Zaehler + 1",
+        "explanation": {
+          "de": "Der Schrittzähler wird um eins erhöht.",
+          "en": "The step counter goes up by one."
+        }
+      },
+      {
+        "code": "Zeit := Zeit + dt",
+        "explanation": {
+          "de": "Die Uhr läuft 0,1 Stunden (6 Minuten) weiter.",
+          "en": "The clock moves on by 0.1 hours (6 minutes)."
+        }
+      }
+    ],
+    "observe": {
+      "de": "Nach jeder Tablette steigt die Menge im Körper rasch an und erreicht gut eine Stunde später ihr Maximum: beim ersten Mal etwa 267 mg, ab der dritten Tablette etwa 288 mg. Vor der nächsten Einnahme sind nur noch rund 31–34 mg übrig. Achte darauf, dass die Spitzen kaum höher werden: Bei 8 Stunden Abstand und 2 Stunden Halbwertszeit reichert sich der Wirkstoff fast nicht an.",
+      "en": "After each tablet the amount in the body rises quickly and peaks a little over an hour later: about 267 mg the first time and about 288 mg from the third tablet onwards. Just before the next dose only about 31–34 mg is left. Notice that the peaks hardly grow: with 8 hours between doses and a 2-hour half-life the drug barely builds up."
+    },
+    "tasks": [
+      {
+        "text": {
+          "de": "Lies ab, wie viel Wirkstoff 2, 4 und 6 Stunden nach der ersten Tablette im Körper ist. Passt das ungefähr zur Halbwertszeit von 2 Stunden?",
+          "en": "Read off how much drug is in the body 2, 4 and 6 hours after the first tablet. Does this roughly fit a half-life of 2 hours?"
+        },
+        "hint": {
+          "de": "Sobald der Magen fast leer ist, sollte sich die Menge alle 2 Stunden etwa halbieren.",
+          "en": "Once the gut is almost empty, the amount should roughly halve every 2 hours."
+        }
+      },
+      {
+        "text": {
+          "de": "Gedankenexperiment (keine Empfehlung!): Setze Takt auf 40, also alle 4 Stunden eine Tablette. Wie verändern sich Höchst- und Tiefstwerte? Warum ist das gefährlich?",
+          "en": "Thought experiment (not advice!): set Takt to 40, i.e. a tablet every 4 hours. How do the highest and lowest values change? Why is this dangerous?"
+        },
+        "hint": {
+          "de": "Die Spitzen steigen auf etwa 380 mg, die Tiefstwerte auf etwa 167 mg. Außerdem wären das 2400 mg am Tag – doppelt so viel wie die rezeptfrei erlaubte Tageshöchstdosis.",
+          "en": "The peaks rise to about 380 mg and the lowest values to about 167 mg. That would also be 2400 mg a day – twice the maximum daily dose allowed without a prescription."
+        }
+      },
+      {
+        "text": {
+          "de": "Ändere dt auf 0,05 h. Was musst du außerdem ändern, damit die Tabletten weiterhin alle 8 Stunden genommen werden? Vergleiche die Ergebnisse.",
+          "en": "Change dt to 0.05 h. What else do you have to change so that the tablets are still taken every 8 hours? Compare the results."
+        },
+        "hint": {
+          "de": "Takt zählt Schritte, nicht Stunden: 8 h / 0,05 h = 160 Schritte. Vergiss nicht, auch die Zahl der Schritte zu verdoppeln.",
+          "en": "Takt counts steps, not hours: 8 h / 0.05 h = 160 steps. Don't forget to double the number of steps as well."
+        }
+      }
+    ],
+    "limits": {
+      "de": "Das Modell rechnet mit Mengen in mg und nicht mit der Konzentration im Blut, die für die Wirkung entscheidend ist. Aufnahme und Abbau sind bei jedem Menschen verschieden und hängen z. B. von Essen, Alter und Leberfunktion ab. Diese Simulation ist kein medizinischer Rat.",
+      "en": "The model works with amounts in mg, not with the concentration in the blood, which is what matters for the effect. Absorption and elimination differ from person to person and depend on things like food, age and liver function. This simulation is not medical advice."
+    },
+    "glossary": [
+      {
+        "term": {
+          "de": "Halbwertszeit",
+          "en": "half-life"
+        },
+        "definition": {
+          "de": "Die Zeit, nach der nur noch die Hälfte einer Menge übrig ist.",
+          "en": "The time after which only half of an amount is left."
+        }
+      },
+      {
+        "term": {
+          "de": "Kompartiment",
+          "en": "compartment"
+        },
+        "definition": {
+          "de": "Ein gedachter „Behälter“ im Modell, in dem sich eine Menge sammelt, z. B. Magen oder Blut.",
+          "en": "An imagined container in the model where an amount collects, such as the gut or the blood."
+        }
+      }
+    ]
+  },
+  {
+    "id": "radioactive-decay",
+    "teaser": {
+      "de": "Wie lange dauert es, bis von einer frisch gewonnenen radioaktiven Probe nur noch die Hälfte strahlt?",
+      "en": "How long does it take until only half of a freshly prepared radioactive sample is still active?"
+    },
+    "phenomenon": {
+      "de": "Im Physikunterricht kann man aus einem Cäsium-Barium-Generator eine Lösung mit Barium-137m gewinnen. Diese Atomkerne sind instabil und geben Gammastrahlung ab, die ein Zählrohr hörbar macht. Das Knacken wird innerhalb weniger Minuten deutlich seltener. Welcher Kern als nächster zerfällt, ist reiner Zufall – trotzdem verhält sich die ganze Probe sehr regelmäßig.",
+      "en": "In physics lessons you can wash a solution of barium-137m out of a caesium–barium generator. These nuclei are unstable and emit gamma radiation, which a Geiger counter makes audible. Within a few minutes the clicks become much less frequent. Which nucleus decays next is pure chance – yet the sample as a whole behaves very regularly."
+    },
+    "idea": {
+      "de": "In jeder Sekunde zerfällt ein fester Bruchteil der noch vorhandenen Bariumkerne, hier knapp 0,45 %. Sind viele Kerne da, gibt es viele Zerfälle; sind nur noch wenige da, gibt es auch nur wenige. Die Zahl der Kerne nimmt in jedem Zeitschritt um die Zahl der Zerfälle ab.",
+      "en": "Every second a fixed fraction of the remaining barium nuclei decays, here just under 0.45 %. When there are many nuclei there are many decays; when only a few are left there are only a few decays. In every time step the number of nuclei goes down by the number of decays."
+    },
+    "quantities": [
+      {
+        "name": "Zerfaelle",
+        "meaning": {
+          "de": "Zahl der Kerne, die in dieser Sekunde zerfallen",
+          "en": "number of nuclei decaying in this second"
+        },
+        "unit": {
+          "de": "Kerne pro s",
+          "en": "nuclei per s"
+        }
+      },
+      {
+        "name": "FZerfaelle",
+        "meaning": {
+          "de": "Zerfallskonstante: Anteil der Kerne, der pro Sekunde zerfällt",
+          "en": "decay constant: fraction of nuclei that decays each second"
+        },
+        "unit": {
+          "de": "1/s",
+          "en": "1/s"
+        }
+      },
+      {
+        "name": "Barium",
+        "meaning": {
+          "de": "Zahl der noch nicht zerfallenen Barium-137m-Kerne",
+          "en": "number of barium-137m nuclei that have not yet decayed"
+        },
+        "unit": {
+          "de": "Kerne",
+          "en": "nuclei"
+        }
+      },
+      {
+        "name": "Zeit",
+        "meaning": {
+          "de": "Zeit seit dem Herauslösen",
+          "en": "time since the barium was washed out"
+        },
+        "unit": {
+          "de": "s",
+          "en": "s"
+        }
+      }
+    ],
+    "lines": [
+      {
+        "code": "Zerfaelle := FZerfaelle*Barium",
+        "explanation": {
+          "de": "Die Zerfälle in dieser Sekunde sind proportional zur Zahl der vorhandenen Kerne. Am Anfang: 0,004527 · 100 000 ≈ 453.",
+          "en": "The decays in this second are proportional to the number of nuclei present. At the start: 0.004527 · 100,000 ≈ 453."
+        }
+      },
+      {
+        "code": "Barium := Barium - Zerfaelle",
+        "explanation": {
+          "de": "Die zerfallenen Kerne werden abgezogen (sie werden zu stabilem Barium-137).",
+          "en": "The decayed nuclei are subtracted (they become stable barium-137)."
+        }
+      },
+      {
+        "code": "Zeit := Zeit + 1",
+        "explanation": {
+          "de": "Die Uhr läuft eine Sekunde weiter.",
+          "en": "The clock moves on by one second."
+        }
+      }
+    ],
+    "observe": {
+      "de": "Die Kurve fällt anfangs steil und dann immer flacher ab, sie erreicht null aber nie ganz (Exponentialfunktion). Nach 153 Sekunden (gut 2,5 Minuten) ist nur noch die Hälfte der Kerne übrig, nach 306 Sekunden ein Viertel. Nach 15 Minuten sind von 100 000 Kernen nur noch etwa 1700 vorhanden.",
+      "en": "The curve drops steeply at first and then more and more gently, but it never quite reaches zero (an exponential function). After 153 seconds (just over 2.5 minutes) only half the nuclei are left, and after 306 seconds a quarter. After 15 minutes only about 1,700 of the 100,000 nuclei remain."
+    },
+    "tasks": [
+      {
+        "text": {
+          "de": "Starte mit 200 000 statt 100 000 Kernen. Sag vorher: Ändert sich die Halbwertszeit?",
+          "en": "Start with 200,000 nuclei instead of 100,000. Predict: does the half-life change?"
+        },
+        "hint": {
+          "de": "Es zerfallen doppelt so viele Kerne pro Sekunde, aber es sind auch doppelt so viele da. Der Anteil bleibt gleich.",
+          "en": "Twice as many nuclei decay per second, but there are also twice as many. The fraction stays the same."
+        }
+      },
+      {
+        "text": {
+          "de": "Lass dir zusätzlich Zerfaelle anzeigen. Diese Größe entspricht der Zählrate am Zählrohr. Wie lange dauert es, bis sie auf die Hälfte gesunken ist?",
+          "en": "Also plot Zerfaelle. This quantity corresponds to the count rate of a Geiger counter. How long does it take to fall to half?"
+        },
+        "hint": {
+          "de": "Weil die Zerfälle proportional zur Zahl der Kerne sind, halbieren sie sich in derselben Zeit. Deshalb kann man die Halbwertszeit aus einer Zählratenmessung bestimmen.",
+          "en": "Because the decays are proportional to the number of nuclei, they halve in the same time. That is why you can find the half-life from a count-rate measurement."
+        }
+      },
+      {
+        "text": {
+          "de": "Ein Zählrohr erfasst nur einen Teil der Strahlung und zählt immer auch etwas Umgebungsstrahlung (Nulleffekt). Ergänze eine Größe Zaehlrate := 0,05*Zerfaelle + 0,3 und vergleiche den Verlauf mit einer echten Messung.",
+          "en": "A Geiger counter only detects part of the radiation and always picks up some background radiation as well. Add a quantity Zaehlrate := 0.05*Zerfaelle + 0.3 and compare its shape with a real measurement."
+        },
+        "hint": {
+          "de": "Der Nulleffekt sorgt dafür, dass die Zählrate nicht auf null, sondern auf einen kleinen Grundwert absinkt. Den musst du vor der Auswertung abziehen.",
+          "en": "The background means the count rate does not fall to zero but to a small baseline. You have to subtract it before analysing the data."
+        }
+      }
+    ],
+    "limits": {
+      "de": "Radioaktiver Zerfall ist zufällig; bei wenigen Kernen schwankt die Zahl der Zerfälle stark, während das Modell immer glatte Werte (sogar Bruchteile von Kernen) liefert. Außerdem rechnet das Modell in ganzen Sekunden und ist dadurch nur näherungsweise genau.",
+      "en": "Radioactive decay is random; with only a few nuclei the number of decays fluctuates a lot, whereas the model always gives smooth values (even fractions of a nucleus). The model also works in whole seconds, so it is only approximately accurate."
+    },
+    "glossary": [
+      {
+        "term": {
+          "de": "Halbwertszeit",
+          "en": "half-life"
+        },
+        "definition": {
+          "de": "Die Zeit, nach der die Hälfte der radioaktiven Kerne zerfallen ist; bei Barium-137m etwa 2,55 Minuten.",
+          "en": "The time after which half of the radioactive nuclei have decayed; about 2.55 minutes for barium-137m."
+        }
+      },
+      {
+        "term": {
+          "de": "Zerfallskonstante",
+          "en": "decay constant"
+        },
+        "definition": {
+          "de": "Der Anteil der Kerne, der pro Zeiteinheit zerfällt. Sie hängt mit der Halbwertszeit über λ = ln 2 / T½ zusammen.",
+          "en": "The fraction of nuclei that decays per unit of time. It is linked to the half-life by λ = ln 2 / T½."
+        }
+      },
+      {
+        "term": {
+          "de": "Nulleffekt",
+          "en": "background radiation"
+        },
+        "definition": {
+          "de": "Strahlung aus der Umgebung, die ein Zählrohr auch ohne Probe registriert.",
+          "en": "Radiation from the surroundings that a Geiger counter detects even without a sample."
+        }
+      }
+    ]
+  },
+  {
+    "id": "iss-orbit",
+    "teaser": {
+      "de": "Die ISS fällt ständig auf die Erde zu – und trifft sie trotzdem nie. Wie geht das?",
+      "en": "The ISS is constantly falling towards Earth – and yet it never hits it. How does that work?"
+    },
+    "phenomenon": {
+      "de": "Die Internationale Raumstation fliegt in rund 420 km Höhe und umrundet die Erde in etwa anderthalb Stunden. Bei klarem Himmel kannst du sie abends als hellen, schnell wandernden Lichtpunkt sehen. Die Erde zieht die Station dauernd an. Weil sie aber sehr schnell seitwärts fliegt, „fällt“ sie immer an der Erde vorbei.",
+      "en": "The International Space Station flies at about 420 km altitude and circles Earth in roughly an hour and a half. On a clear evening you can see it as a bright, fast-moving point of light. Earth's gravity pulls on the station all the time. But because it is moving sideways very fast, it keeps 'falling' past Earth."
+    },
+    "idea": {
+      "de": "Der Erdmittelpunkt liegt im Ursprung eines Koordinatensystems, die Station am Punkt (X, Y). In jedem kleinen Zeitschritt wird berechnet, wie stark die Erde die Station gerade anzieht – die Beschleunigung zeigt zum Erdmittelpunkt und wird mit dem Quadrat des Abstands kleiner. Damit ändert sich die Geschwindigkeit in x- und y-Richtung, und mit der neuen Geschwindigkeit rückt die Station ein Stück weiter. Aus vielen kleinen Schritten entsteht eine Kreisbahn.",
+      "en": "Earth's centre sits at the origin of a coordinate system and the station at the point (X, Y). In every small time step the model works out how strongly Earth is pulling on the station – the acceleration points towards Earth's centre and gets weaker with the square of the distance. This changes the velocity in the x and y directions, and with the new velocity the station moves on a little. Many small steps add up to a circular orbit."
+    },
+    "quantities": [
+      {
+        "name": "Abstand",
+        "meaning": {
+          "de": "Abstand der Station vom Erdmittelpunkt",
+          "en": "distance of the station from Earth's centre"
+        },
+        "unit": {
+          "de": "m",
+          "en": "m"
+        }
+      },
+      {
+        "name": "X",
+        "meaning": {
+          "de": "x-Koordinate der Station",
+          "en": "x-coordinate of the station"
+        },
+        "unit": {
+          "de": "m",
+          "en": "m"
+        }
+      },
+      {
+        "name": "Y",
+        "meaning": {
+          "de": "y-Koordinate der Station",
+          "en": "y-coordinate of the station"
+        },
+        "unit": {
+          "de": "m",
+          "en": "m"
+        }
+      },
+      {
+        "name": "AX",
+        "meaning": {
+          "de": "Beschleunigung in x-Richtung",
+          "en": "acceleration in the x direction"
+        },
+        "unit": {
+          "de": "m/s²",
+          "en": "m/s²"
+        }
+      },
+      {
+        "name": "GM",
+        "meaning": {
+          "de": "Gravitationskonstante mal Erdmasse (Gravitationsparameter der Erde)",
+          "en": "gravitational constant times Earth's mass (Earth's gravitational parameter)"
+        },
+        "unit": {
+          "de": "m³/s²",
+          "en": "m³/s²"
+        }
+      },
+      {
+        "name": "AY",
+        "meaning": {
+          "de": "Beschleunigung in y-Richtung",
+          "en": "acceleration in the y direction"
+        },
+        "unit": {
+          "de": "m/s²",
+          "en": "m/s²"
+        }
+      },
+      {
+        "name": "VX",
+        "meaning": {
+          "de": "Geschwindigkeit in x-Richtung",
+          "en": "velocity in the x direction"
+        },
+        "unit": {
+          "de": "m/s",
+          "en": "m/s"
+        }
+      },
+      {
+        "name": "dt",
+        "meaning": {
+          "de": "Länge eines Zeitschritts",
+          "en": "length of one time step"
+        },
+        "unit": {
+          "de": "s",
+          "en": "s"
+        }
+      },
+      {
+        "name": "VY",
+        "meaning": {
+          "de": "Geschwindigkeit in y-Richtung",
+          "en": "velocity in the y direction"
+        },
+        "unit": {
+          "de": "m/s",
+          "en": "m/s"
+        }
+      },
+      {
+        "name": "Hoehe",
+        "meaning": {
+          "de": "Höhe über der Erdoberfläche",
+          "en": "altitude above Earth's surface"
+        },
+        "unit": {
+          "de": "km",
+          "en": "km"
+        }
+      },
+      {
+        "name": "Erdradius",
+        "meaning": {
+          "de": "mittlerer Radius der Erde",
+          "en": "mean radius of Earth"
+        },
+        "unit": {
+          "de": "m",
+          "en": "m"
+        }
+      },
+      {
+        "name": "Zeit",
+        "meaning": {
+          "de": "vergangene Zeit",
+          "en": "elapsed time"
+        },
+        "unit": {
+          "de": "s",
+          "en": "s"
+        }
+      }
+    ],
+    "lines": [
+      {
+        "code": "Abstand := sqrt(sqr(X) + sqr(Y))",
+        "explanation": {
+          "de": "Satz des Pythagoras: Abstand vom Erdmittelpunkt aus den Koordinaten (sqr heißt „Quadrat“).",
+          "en": "Pythagoras' theorem: the distance from Earth's centre from the coordinates (sqr means 'square')."
+        }
+      },
+      {
+        "code": "AX := -GM * X / (Abstand * Abstand * Abstand)",
+        "explanation": {
+          "de": "x-Anteil der Gravitationsbeschleunigung: Betrag GM/r² mal X/r. Das Minus sorgt dafür, dass sie zur Erde hin zeigt.",
+          "en": "x-component of the gravitational acceleration: magnitude GM/r² times X/r. The minus sign makes it point towards Earth."
+        }
+      },
+      {
+        "code": "AY := -GM * Y / (Abstand * Abstand * Abstand)",
+        "explanation": {
+          "de": "Genauso der y-Anteil.",
+          "en": "The same for the y-component."
+        }
+      },
+      {
+        "code": "VX := VX + AX * dt",
+        "explanation": {
+          "de": "Die Geschwindigkeit in x-Richtung ändert sich um AX mal dt.",
+          "en": "The velocity in the x direction changes by AX times dt."
+        }
+      },
+      {
+        "code": "VY := VY + AY * dt",
+        "explanation": {
+          "de": "Die Geschwindigkeit in y-Richtung ändert sich um AY mal dt.",
+          "en": "The velocity in the y direction changes by AY times dt."
+        }
+      },
+      {
+        "code": "X := X + VX * dt",
+        "explanation": {
+          "de": "Die Station rückt in x-Richtung weiter – mit der eben berechneten neuen Geschwindigkeit (Euler-Cromer).",
+          "en": "The station moves on in the x direction – using the velocity just calculated (Euler–Cromer)."
+        }
+      },
+      {
+        "code": "Y := Y + VY * dt",
+        "explanation": {
+          "de": "Ebenso in y-Richtung.",
+          "en": "Likewise in the y direction."
+        }
+      },
+      {
+        "code": "Hoehe := (sqrt(sqr(X) + sqr(Y)) - Erdradius) / 1000",
+        "explanation": {
+          "de": "Höhe über der Oberfläche in Kilometern: Abstand minus Erdradius, geteilt durch 1000.",
+          "en": "Altitude above the surface in kilometres: distance minus Earth's radius, divided by 1000."
+        }
+      },
+      {
+        "code": "Zeit := Zeit + dt",
+        "explanation": {
+          "de": "Die Uhr läuft eine Sekunde weiter.",
+          "en": "The clock moves on by one second."
+        }
+      }
+    ],
+    "observe": {
+      "de": "Im x-y-Diagramm entsteht ein Kreis um den Erdmittelpunkt. Nach etwa 5570 Sekunden, also rund 92,8 Minuten, ist die Station wieder am Startpunkt – fast genau die Umlaufzeit der echten ISS. Wenn du die Höhe gegen die Zeit aufträgst, siehst du kleine Schwankungen zwischen etwa 416 und 423 km; sie entstehen durch das Rechenverfahren.",
+      "en": "The x–y plot shows a circle around Earth's centre. After about 5,570 seconds, i.e. about 92.8 minutes, the station is back at its starting point – almost exactly the orbital period of the real ISS. If you plot altitude against time you will see small wobbles between about 416 and 423 km; they come from the numerical method."
+    },
+    "tasks": [
+      {
+        "text": {
+          "de": "Erhöhe die Startgeschwindigkeit VY auf 7800 m/s. Sag vorher, wie die Bahn aussehen wird, und prüfe nach.",
+          "en": "Increase the starting speed VY to 7800 m/s. Predict what the orbit will look like, then check."
+        },
+        "hint": {
+          "de": "Die Bahn wird eine Ellipse: Auf der gegenüberliegenden Seite steigt die Station bis auf über 900 km Höhe.",
+          "en": "The orbit becomes an ellipse: on the opposite side the station climbs to more than 900 km altitude."
+        }
+      },
+      {
+        "text": {
+          "de": "Verringere VY auf 7500 m/s und trage die Höhe gegen die Zeit auf. Was würde mit einer echten Station passieren? Was macht das Modell daraus?",
+          "en": "Reduce VY to 7500 m/s and plot altitude against time. What would happen to a real station? What does the model make of it?"
+        },
+        "hint": {
+          "de": "Die Höhe wird negativ – die Station würde in die Atmosphäre eintauchen und verglühen. Das Modell kennt aber keine Erdoberfläche und rechnet einfach weiter.",
+          "en": "The altitude becomes negative – the station would plunge into the atmosphere and burn up. But the model knows nothing about Earth's surface and simply carries on calculating."
+        }
+      },
+      {
+        "text": {
+          "de": "Berechne die Kreisbahngeschwindigkeit aus Gravitationskraft = Zentripetalkraft und prüfe, ob 7661 m/s stimmt. Bestimme danach Geschwindigkeit und Umlaufzeit für einen geostationären Satelliten (Abstand 42 164 km) und teste sie im Modell.",
+          "en": "Calculate the circular orbit speed from gravitational force = centripetal force and check that 7661 m/s is right. Then work out the speed and period for a geostationary satellite (distance 42,164 km) and test them in the model."
+        },
+        "hint": {
+          "de": "v = √(GM/r). Für den geostationären Satelliten passt du X und VY an (etwa 3075 m/s). Ein Umlauf dauert knapp 24 Stunden (rund 86 000 s) – setze dt auf 10 s und rechne etwa 8700 Schritte.",
+          "en": "v = √(GM/r). For the geostationary satellite, change X and VY (about 3075 m/s). One orbit takes just under 24 hours (roughly 86,000 s) – set dt to 10 s and run about 8,700 steps."
+        }
+      }
+    ],
+    "limits": {
+      "de": "Das Modell lässt die dünne Restatmosphäre weg, die die echte ISS ständig abbremst – sie muss regelmäßig mit Triebwerken angehoben werden. Auch die Abplattung der Erde und die Anziehung von Mond und Sonne fehlen. Die Bahn liegt außerdem nur in einer Ebene.",
+      "en": "The model leaves out the thin remaining atmosphere that constantly slows the real ISS down – it has to be boosted regularly with its engines. Earth's flattening and the pull of the Moon and the Sun are also missing. And the orbit lies in a single plane."
+    },
+    "glossary": [
+      {
+        "term": {
+          "de": "Umlaufzeit",
+          "en": "orbital period"
+        },
+        "definition": {
+          "de": "Die Zeit für einen vollständigen Umlauf um die Erde.",
+          "en": "The time taken for one complete orbit around Earth."
+        }
+      },
+      {
+        "term": {
+          "de": "Gravitationsgesetz",
+          "en": "law of gravitation"
+        },
+        "definition": {
+          "de": "Zwei Massen ziehen sich an; die Kraft wird mit dem Quadrat des Abstands kleiner.",
+          "en": "Two masses attract each other; the force gets weaker with the square of the distance."
+        }
+      },
+      {
+        "term": {
+          "de": "Ellipse",
+          "en": "ellipse"
+        },
+        "definition": {
+          "de": "Eine „gestauchte“ Kreisform; viele Satelliten- und Planetenbahnen sind Ellipsen.",
+          "en": "A squashed circle; many satellite and planetary orbits are ellipses."
+        }
+      }
+    ]
+  },
+  {
+    "id": "earth-energy-balance",
+    "teaser": {
+      "de": "Wie viel wärmer würde die Erde, wenn sich das CO₂ in der Luft verdoppelt – und warum ist die einfache Antwort zu klein?",
+      "en": "How much warmer would Earth get if the CO₂ in the air doubled – and why is the simple answer too small?"
+    },
+    "phenomenon": {
+      "de": "Die Sonne liefert der Erde ständig Energie, und die Erde strahlt Wärme ins All ab. Solange beides gleich groß ist, bleibt die mittlere Temperatur gleich. Kohlenstoffdioxid in der Luft hält einen Teil der Wärmestrahlung zurück. Steigt seine Konzentration, gibt die Erde vorübergehend weniger Energie ab, als sie bekommt – und erwärmt sich.",
+      "en": "The Sun keeps supplying Earth with energy and Earth radiates heat out into space. As long as the two are equal, the average temperature stays the same. Carbon dioxide in the air holds back some of the heat radiation. When its concentration rises, Earth temporarily gives off less energy than it receives – and warms up."
+    },
+    "idea": {
+      "de": "Die ganze Erde wird als ein einziger Punkt mit einer Temperatur T betrachtet. In jedem kleinen Zeitschritt wird verglichen: Energie herein (Sonne plus CO₂-Antrieb) minus Energie hinaus (Wärmestrahlung, die mit T⁴ wächst). Ein Überschuss erwärmt die obere Meeresschicht ein wenig. Weil die Abstrahlung mit der Temperatur steigt, pendelt sich ein neues Gleichgewicht ein.",
+      "en": "The whole Earth is treated as a single point with one temperature T. In every small time step the model compares energy coming in (sunlight plus the CO₂ forcing) with energy going out (heat radiation, which grows with T⁴). A surplus warms the upper layer of the ocean a little. Because the outgoing radiation increases with temperature, a new balance is reached."
+    },
+    "quantities": [
+      {
+        "name": "Einstrahlung",
+        "meaning": {
+          "de": "aufgenommene Sonnenstrahlung, gemittelt über die ganze Erdoberfläche",
+          "en": "absorbed sunlight, averaged over Earth's whole surface"
+        },
+        "unit": {
+          "de": "W/m²",
+          "en": "W/m²"
+        }
+      },
+      {
+        "name": "Solarkonstante",
+        "meaning": {
+          "de": "Strahlungsleistung der Sonne pro Quadratmeter am Ort der Erde",
+          "en": "power of sunlight per square metre at Earth's distance"
+        },
+        "unit": {
+          "de": "W/m²",
+          "en": "W/m²"
+        }
+      },
+      {
+        "name": "Albedo",
+        "meaning": {
+          "de": "Anteil des Sonnenlichts, der zurück ins All reflektiert wird",
+          "en": "fraction of sunlight reflected back into space"
+        },
+        "unit": {
+          "de": "",
+          "en": ""
+        }
+      },
+      {
+        "name": "Antrieb",
+        "meaning": {
+          "de": "zusätzlicher Strahlungsantrieb durch mehr CO₂",
+          "en": "additional radiative forcing from extra CO₂"
+        },
+        "unit": {
+          "de": "W/m²",
+          "en": "W/m²"
+        }
+      },
+      {
+        "name": "Kohlendioxid",
+        "meaning": {
+          "de": "CO₂-Konzentration in der Luft",
+          "en": "CO₂ concentration in the air"
+        },
+        "unit": {
+          "de": "ppm",
+          "en": "ppm"
+        }
+      },
+      {
+        "name": "Bezugswert",
+        "meaning": {
+          "de": "vorindustrielle CO₂-Konzentration",
+          "en": "pre-industrial CO₂ concentration"
+        },
+        "unit": {
+          "de": "ppm",
+          "en": "ppm"
+        }
+      },
+      {
+        "name": "Abstrahlung",
+        "meaning": {
+          "de": "Wärmestrahlung, die die Erde ins All abgibt",
+          "en": "heat radiation emitted by Earth into space"
+        },
+        "unit": {
+          "de": "W/m²",
+          "en": "W/m²"
+        }
+      },
+      {
+        "name": "Emission",
+        "meaning": {
+          "de": "effektiver Emissionsgrad: berücksichtigt pauschal den natürlichen Treibhauseffekt",
+          "en": "effective emissivity: a catch-all for the natural greenhouse effect"
+        },
+        "unit": {
+          "de": "",
+          "en": ""
+        }
+      },
+      {
+        "name": "Sigma",
+        "meaning": {
+          "de": "Stefan-Boltzmann-Konstante",
+          "en": "Stefan–Boltzmann constant"
+        },
+        "unit": {
+          "de": "W/(m²·K⁴)",
+          "en": "W/(m²·K⁴)"
+        }
+      },
+      {
+        "name": "T",
+        "meaning": {
+          "de": "mittlere Oberflächentemperatur",
+          "en": "average surface temperature"
+        },
+        "unit": {
+          "de": "K",
+          "en": "K"
+        }
+      },
+      {
+        "name": "Bilanz",
+        "meaning": {
+          "de": "Energieüberschuss (positiv) oder -mangel (negativ)",
+          "en": "energy surplus (positive) or deficit (negative)"
+        },
+        "unit": {
+          "de": "W/m²",
+          "en": "W/m²"
+        }
+      },
+      {
+        "name": "Waermekapazitaet",
+        "meaning": {
+          "de": "Energie, die nötig ist, um 1 m² Erdoberfläche (samt oberer Meeresschicht) um 1 K zu erwärmen",
+          "en": "energy needed to warm 1 m² of Earth's surface (including the upper ocean) by 1 K"
+        },
+        "unit": {
+          "de": "J/(m²·K)",
+          "en": "J/(m²·K)"
+        }
+      },
+      {
+        "name": "Sekunden",
+        "meaning": {
+          "de": "Sekunden pro Jahr (rechnet W in J pro Jahr um)",
+          "en": "seconds per year (converts W into J per year)"
+        },
+        "unit": {
+          "de": "s/Jahr",
+          "en": "s/year"
+        }
+      },
+      {
+        "name": "dt",
+        "meaning": {
+          "de": "Länge eines Zeitschritts",
+          "en": "length of one time step"
+        },
+        "unit": {
+          "de": "Jahre",
+          "en": "years"
+        }
+      },
+      {
+        "name": "Celsius",
+        "meaning": {
+          "de": "mittlere Temperatur in Grad Celsius",
+          "en": "average temperature in degrees Celsius"
+        },
+        "unit": {
+          "de": "°C",
+          "en": "°C"
+        }
+      },
+      {
+        "name": "Zeit",
+        "meaning": {
+          "de": "Jahre seit der CO₂-Verdopplung",
+          "en": "years since CO₂ doubled"
+        },
+        "unit": {
+          "de": "Jahre",
+          "en": "years"
+        }
+      }
+    ],
+    "lines": [
+      {
+        "code": "Einstrahlung := Solarkonstante * (1 - Albedo) / 4",
+        "explanation": {
+          "de": "Von 1361 W/m² wird knapp 30 % reflektiert. Geteilt durch 4, weil die Erde nur eine Kreisscheibe Licht auffängt, aber eine viermal so große Kugeloberfläche hat: etwa 240 W/m².",
+          "en": "Just under 30 % of the 1361 W/m² is reflected. It is divided by 4 because Earth catches sunlight on a disc but has a sphere's surface, four times as large: about 240 W/m²."
+        }
+      },
+      {
+        "code": "Antrieb := 5,35 * ln(Kohlendioxid / Bezugswert)",
+        "explanation": {
+          "de": "Zusätzlicher Antrieb durch CO₂: Er wächst mit dem Logarithmus der Konzentration. Bei Verdopplung sind das 5,35 · ln 2 ≈ 3,7 W/m².",
+          "en": "Extra forcing from CO₂: it grows with the logarithm of the concentration. Doubling gives 5.35 · ln 2 ≈ 3.7 W/m²."
+        }
+      },
+      {
+        "code": "Abstrahlung := Emission * Sigma * sqr(sqr(T))",
+        "explanation": {
+          "de": "Stefan-Boltzmann-Gesetz: Die Abstrahlung wächst mit der vierten Potenz der Temperatur (sqr(sqr(T)) = T⁴).",
+          "en": "Stefan–Boltzmann law: the emitted radiation grows with the fourth power of temperature (sqr(sqr(T)) = T⁴)."
+        }
+      },
+      {
+        "code": "Bilanz := Einstrahlung + Antrieb - Abstrahlung",
+        "explanation": {
+          "de": "Was hereinkommt minus was hinausgeht.",
+          "en": "What comes in minus what goes out."
+        }
+      },
+      {
+        "code": "T := T + Bilanz / Waermekapazitaet * Sekunden * dt",
+        "explanation": {
+          "de": "Der Überschuss in J pro Jahr, geteilt durch die Wärmekapazität, ergibt die Temperaturänderung pro Jahr; mal dt für einen Schritt von 0,1 Jahren.",
+          "en": "The surplus in J per year divided by the heat capacity gives the temperature change per year; times dt for a step of 0.1 years."
+        }
+      },
+      {
+        "code": "Celsius := T - 273,15",
+        "explanation": {
+          "de": "Umrechnung von Kelvin in Grad Celsius.",
+          "en": "Conversion from kelvin to degrees Celsius."
+        }
+      },
+      {
+        "code": "Zeit := Zeit + dt",
+        "explanation": {
+          "de": "Die Uhr läuft 0,1 Jahre weiter.",
+          "en": "The clock moves on by 0.1 years."
+        }
+      }
+    ],
+    "observe": {
+      "de": "Die Temperatur steigt zuerst schnell und nähert sich dann einem neuen Gleichgewicht von knapp 16,0 °C – das sind nur etwa 1,1 K mehr als vorher. Nach rund 2 Jahren ist schon knapp zwei Drittel der Erwärmung erreicht, nach 10 Jahren praktisch alles. Der Anfangsüberschuss beträgt etwa 3,75 W/m².",
+      "en": "The temperature rises quickly at first and then approaches a new equilibrium of just under 16.0 °C – only about 1.1 K more than before. After about 2 years almost two thirds of the warming has happened, and after 10 years practically all of it. The initial energy surplus is about 3.75 W/m²."
+    },
+    "tasks": [
+      {
+        "text": {
+          "de": "Setze Kohlendioxid auf 420 ppm (etwa der heutige Wert). Wie groß ist die Erwärmung im Modell? Vergleiche mit der bisher beobachteten Erwärmung von gut 1 K.",
+          "en": "Set Kohlendioxid to 420 ppm (roughly today's value). How much warming does the model give? Compare with the roughly 1 K or more observed so far."
+        },
+        "hint": {
+          "de": "Das Modell liefert nur etwa 0,65 K. Die Differenz deutet auf Rückkopplungen hin, die im Modell fehlen.",
+          "en": "The model gives only about 0.65 K. The difference points to feedbacks that are missing from the model."
+        }
+      },
+      {
+        "text": {
+          "de": "Verzehnfache die Wärmekapazität (tieferes Meer, das mit erwärmt wird). Sag vorher, ob sich die Endtemperatur oder nur die Geschwindigkeit ändert.",
+          "en": "Multiply the heat capacity by ten (a deeper layer of ocean that warms too). Predict whether the final temperature changes or only the speed of warming."
+        },
+        "hint": {
+          "de": "Die Endtemperatur hängt nur von der Strahlungsbilanz ab. Mehr Wärmekapazität macht die Erwärmung nur langsamer – du brauchst mehr Schritte, um das Ende zu sehen.",
+          "en": "The final temperature depends only on the radiation balance. More heat capacity just makes the warming slower – you need more steps to see the end."
+        }
+      },
+      {
+        "text": {
+          "de": "Baue eine Eis-Albedo-Rückkopplung ein: Die Albedo soll mit steigender Temperatur leicht sinken, z. B. Albedo := 0,294 - 0,005*(T - 288). Wie stark verändert das die Erwärmung?",
+          "en": "Add an ice–albedo feedback: albedo should fall slightly as temperature rises, e.g. Albedo := 0.294 - 0.005*(T - 288). How much does this change the warming?"
+        },
+        "hint": {
+          "de": "Die neue Zeile muss vor der Einstrahlung stehen. Wärmer heißt weniger Eis, weniger Reflexion, mehr aufgenommene Sonnenenergie – die Erwärmung verstärkt sich selbst.",
+          "en": "The new line must come before the incoming-radiation line. Warmer means less ice, less reflection and more absorbed sunlight – the warming reinforces itself."
+        }
+      }
+    ],
+    "limits": {
+      "de": "Das Modell kennt keine Rückkopplungen durch Wasserdampf, Eis oder Wolken, die die Erwärmung in Wirklichkeit etwa zwei- bis dreimal so groß machen. Auch die langsame Erwärmung der Tiefsee fehlt, deshalb geht es im Modell viel schneller als in der Realität. Es ist ein Denkmodell, keine Klimaprognose.",
+      "en": "The model has no feedbacks from water vapour, ice or clouds, which in reality make the warming about two to three times larger. It also leaves out the slow warming of the deep ocean, so everything happens much faster than in reality. It is a thinking tool, not a climate forecast."
+    },
+    "glossary": [
+      {
+        "term": {
+          "de": "Strahlungsantrieb",
+          "en": "radiative forcing"
+        },
+        "definition": {
+          "de": "Die Änderung der Energiebilanz der Erde (in W/m²), z. B. durch mehr Treibhausgase.",
+          "en": "The change in Earth's energy balance (in W/m²), for example caused by more greenhouse gases."
+        }
+      },
+      {
+        "term": {
+          "de": "Albedo",
+          "en": "albedo"
+        },
+        "definition": {
+          "de": "Rückstrahlvermögen: der Anteil des Lichts, den eine Oberfläche reflektiert. Schnee hat eine hohe, Ozean eine niedrige Albedo.",
+          "en": "Reflectivity: the fraction of light a surface reflects. Snow has a high albedo, the ocean a low one."
+        }
+      },
+      {
+        "term": {
+          "de": "Rückkopplung",
+          "en": "feedback"
+        },
+        "definition": {
+          "de": "Ein Vorgang, bei dem eine Änderung sich selbst verstärkt oder abschwächt.",
+          "en": "A process in which a change strengthens or weakens itself."
+        }
+      }
+    ]
+  },
+  {
+    "id": "population-germany",
+    "teaser": {
+      "de": "Wie viele Menschen würden 2050 in Deutschland leben, wenn niemand zu- oder wegziehen würde?",
+      "en": "How many people would live in Germany in 2050 if nobody moved in or out?"
+    },
+    "phenomenon": {
+      "de": "In Deutschland sterben seit Jahrzehnten mehr Menschen, als Kinder geboren werden. 2024 kamen etwa 677 000 Babys zur Welt, aber gut eine Million Menschen starben. Dass die Einwohnerzahl trotzdem nicht sinkt, liegt an der Zuwanderung. Was würde ohne sie passieren?",
+      "en": "For decades more people have died in Germany than babies have been born. In 2024 about 677,000 babies were born, but slightly more than a million people died. The only reason the population is not shrinking is immigration. What would happen without it?"
+    },
+    "idea": {
+      "de": "In jedem Zeitschritt (ein Jahr) werden Kinder geboren und Menschen sterben. Beide Zahlen sind proportional zur Bevölkerung: Auf 1000 Einwohner kommen etwa 8 Geburten und 12 Sterbefälle. Die Bevölkerung wächst um die Geburten und sinkt um die Sterbefälle. Weil mehr sterben als geboren werden, schrumpft sie jedes Jahr um etwa 0,4 %.",
+      "en": "In each time step (one year) babies are born and people die. Both numbers are proportional to the population: for every 1,000 inhabitants there are about 8 births and 12 deaths. The population increases by the births and decreases by the deaths. Because more people die than are born, it shrinks by about 0.4 % every year."
+    },
+    "quantities": [
+      {
+        "name": "Geburten",
+        "meaning": {
+          "de": "Zahl der Geburten in diesem Jahr",
+          "en": "number of births this year"
+        },
+        "unit": {
+          "de": "Millionen Personen pro Jahr",
+          "en": "million people per year"
+        }
+      },
+      {
+        "name": "FGeburten",
+        "meaning": {
+          "de": "Geburtenrate: Geburten pro Einwohner und Jahr",
+          "en": "birth rate: births per inhabitant per year"
+        },
+        "unit": {
+          "de": "1/Jahr",
+          "en": "1/year"
+        }
+      },
+      {
+        "name": "Bevoelkerung",
+        "meaning": {
+          "de": "Einwohnerzahl Deutschlands",
+          "en": "population of Germany"
+        },
+        "unit": {
+          "de": "Millionen Personen",
+          "en": "million people"
+        }
+      },
+      {
+        "name": "Sterbefaelle",
+        "meaning": {
+          "de": "Zahl der Sterbefälle in diesem Jahr",
+          "en": "number of deaths this year"
+        },
+        "unit": {
+          "de": "Millionen Personen pro Jahr",
+          "en": "million people per year"
+        }
+      },
+      {
+        "name": "FSterbefaelle",
+        "meaning": {
+          "de": "Sterberate: Sterbefälle pro Einwohner und Jahr",
+          "en": "death rate: deaths per inhabitant per year"
+        },
+        "unit": {
+          "de": "1/Jahr",
+          "en": "1/year"
+        }
+      },
+      {
+        "name": "Zeit",
+        "meaning": {
+          "de": "Kalenderjahr",
+          "en": "calendar year"
+        },
+        "unit": {
+          "de": "Jahre",
+          "en": "years"
+        }
+      }
+    ],
+    "lines": [
+      {
+        "code": "Geburten := FGeburten*Bevoelkerung",
+        "explanation": {
+          "de": "Geburten sind proportional zur Bevölkerung: 0,0081 · 83,6 Mio. ≈ 0,68 Mio. im ersten Jahr.",
+          "en": "Births are proportional to the population: 0.0081 · 83.6 million ≈ 0.68 million in the first year."
+        }
+      },
+      {
+        "code": "Sterbefaelle := FSterbefaelle*Bevoelkerung",
+        "explanation": {
+          "de": "Sterbefälle ebenso: 0,01205 · 83,6 Mio. ≈ 1,01 Mio.",
+          "en": "Deaths likewise: 0.01205 · 83.6 million ≈ 1.01 million."
+        }
+      },
+      {
+        "code": "Bevoelkerung := Bevoelkerung + Geburten",
+        "explanation": {
+          "de": "Die Neugeborenen kommen zur Bevölkerung dazu.",
+          "en": "The newborns are added to the population."
+        }
+      },
+      {
+        "code": "Bevoelkerung := Bevoelkerung - Sterbefaelle",
+        "explanation": {
+          "de": "Die Verstorbenen werden abgezogen.",
+          "en": "The deaths are subtracted."
+        }
+      },
+      {
+        "code": "Zeit := Zeit + 1",
+        "explanation": {
+          "de": "Ein Jahr ist vorbei.",
+          "en": "One year has passed."
+        }
+      }
+    ],
+    "observe": {
+      "de": "Die Kurve fällt gleichmäßig und leicht gebogen ab – eine exponentielle Abnahme, die wegen der kleinen Rate fast wie eine Gerade aussieht. Im Jahr 2050 hätte Deutschland nach dem Modell nur noch etwa 75,4 Millionen Einwohner, 2074 rund 68,6 Millionen. Pro Jahr gehen anfangs etwa 330 000 Menschen verloren, später etwas weniger, weil die Bevölkerung kleiner wird.",
+      "en": "The curve falls steadily with a slight bend – an exponential decline that looks almost like a straight line because the rate is so small. According to the model Germany would have only about 75.4 million inhabitants in 2050 and about 68.6 million in 2074. At first about 330,000 people are lost each year, later slightly fewer because the population is smaller."
+    },
+    "tasks": [
+      {
+        "text": {
+          "de": "Setze FGeburten auf denselben Wert wie FSterbefaelle. Sag vorher, wie die Kurve aussieht.",
+          "en": "Set FGeburten to the same value as FSterbefaelle. Predict what the curve will look like."
+        },
+        "hint": {
+          "de": "Wenn genauso viele geboren werden wie sterben, bleibt die Bevölkerung konstant bei 83,6 Millionen.",
+          "en": "If as many people are born as die, the population stays constant at 83.6 million."
+        }
+      },
+      {
+        "text": {
+          "de": "Wie viele Jahre würde es dauern, bis die Bevölkerung auf die Hälfte geschrumpft ist? Schätze zuerst mit der Rate von 0,4 % pro Jahr und prüfe dann mit mehr Schritten.",
+          "en": "How many years would it take for the population to shrink to half? Estimate first using the rate of 0.4 % per year, then check with more steps."
+        },
+        "hint": {
+          "de": "Faustregel: Halbierungszeit ≈ 70 / (Prozent pro Jahr). Mit 0,4 % sind das rund 170 Jahre.",
+          "en": "Rule of thumb: halving time ≈ 70 / (percentage per year). At 0.4 % that is about 170 years."
+        }
+      },
+      {
+        "text": {
+          "de": "Ergänze eine Zuwanderung von 0,42 Millionen Menschen pro Jahr (Bevoelkerung := Bevoelkerung + Zuwanderung). Wächst oder schrumpft die Bevölkerung jetzt? Gibt es einen Wert, dem sie sich nähert?",
+          "en": "Add net immigration of 0.42 million people per year (Bevoelkerung := Bevoelkerung + Zuwanderung). Does the population now grow or shrink? Is there a value it approaches?"
+        },
+        "hint": {
+          "de": "Die Bevölkerung bleibt gleich, wenn Zuwanderung = Sterbefälle − Geburten ist. Löse 0,42 = (0,01205 − 0,0081) · Bevoelkerung nach der Bevölkerung auf.",
+          "en": "The population stays the same when immigration = deaths − births. Solve 0.42 = (0.01205 − 0.0081) · Bevoelkerung for the population."
+        }
+      }
+    ],
+    "limits": {
+      "de": "Das Modell behandelt alle Menschen gleich, obwohl Geburten von der Zahl junger Erwachsener und Sterbefälle vom Anteil älterer Menschen abhängen. Weil die geburtenstarken Jahrgänge älter werden, ändern sich beide Raten in Wirklichkeit von Jahr zu Jahr. Wanderungen, die in Deutschland eine große Rolle spielen, fehlen ganz.",
+      "en": "The model treats everyone the same, although births depend on the number of young adults and deaths on the share of older people. As the large baby-boom generations age, both rates actually change from year to year. Migration, which plays a big role in Germany, is left out entirely."
+    },
+    "glossary": [
+      {
+        "term": {
+          "de": "Geburtenrate",
+          "en": "birth rate"
+        },
+        "definition": {
+          "de": "Zahl der Geburten pro Jahr, bezogen auf die Einwohnerzahl.",
+          "en": "The number of births per year relative to the size of the population."
+        }
+      },
+      {
+        "term": {
+          "de": "Altersstruktur",
+          "en": "age structure"
+        },
+        "definition": {
+          "de": "Wie sich die Bevölkerung auf die verschiedenen Altersgruppen verteilt.",
+          "en": "How the population is spread across the different age groups."
+        }
+      }
+    ]
+  }
+]

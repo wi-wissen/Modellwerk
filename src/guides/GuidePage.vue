@@ -67,7 +67,7 @@
           <section>
             <h2 class="mb-3 text-2xl font-bold">{{ $t('guides.program') }}</h2>
             <ol class="flex flex-col gap-3">
-              <li v-for="(l, i) in lines" :key="i" class="grid gap-1 rounded-xl border border-line bg-sheet p-3 sm:grid-cols-[minmax(0,16rem)_minmax(0,1fr)] sm:gap-4">
+              <li v-for="(l, i) in lines" :key="i" class="flex flex-col gap-1 rounded-xl border border-line bg-sheet p-3">
                 <code class="overflow-x-auto font-mono text-[0.95rem] font-semibold whitespace-pre">{{ l.code }}</code>
                 <span v-if="l.explanation" class="text-muted">{{ l.explanation }}</span>
               </li>
