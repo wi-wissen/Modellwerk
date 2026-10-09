@@ -1,5 +1,5 @@
 <template>
-  <div class="flex min-h-screen flex-col">
+  <div class="site-page flex min-h-screen flex-col">
     <SiteHeader root="../../" current="examples" />
 
     <main v-if="!example" class="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6">

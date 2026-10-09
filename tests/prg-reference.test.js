@@ -22,3 +22,17 @@ describe.skipIf(!dir)('bit-identical results for reference PRG files', () => {
     }
   }
 })
+
+describe.skipIf(!dir)('graph settings stored in reference PRG files', () => {
+  it('reads the x axis and the shown curves', () => {
+    const plots = files.flatMap((file) => readPrg(new Uint8Array(readFileSync(join(dir, file)))).map((s) => s.plot))
+    expect(plots.every((p) => p && p.x)).toBe(true)
+    expect(plots.filter((p) => p.y.length).length).toBeGreaterThan(plots.length / 2)
+  })
+  it('keeps the phase diagram of the predator-prey file', () => {
+    const file = files.find((f) => /^raeuber\.prg$/i.test(f))
+    if (!file) return
+    const [first] = readPrg(new Uint8Array(readFileSync(join(dir, file))))
+    expect(first.plot).toEqual({ x: 'FUECHSE', y: ['HASEN'] })
+  })
+})

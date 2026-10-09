@@ -19,6 +19,8 @@ const OWN = [
     start: { HOEHE: 8, ENDHOEHE: 250, FWACHSTUM: 0.0009, ZEIT: 0 },
     steps: 70,
     plot: { x: 'ZEIT', y: ['HOEHE', 'WACHSTUM'] },
+    subject: { de: 'Biologie / Mathematik', en: 'Biology / Mathematics' },
+    level: { de: 'Klasse 7–10', en: 'Grades 7–10' },
   },
 ]
 

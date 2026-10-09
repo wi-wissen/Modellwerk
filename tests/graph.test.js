@@ -5,6 +5,7 @@ import { simulate } from '../src/engine/simulate.js'
 import { parseProgram } from '../src/engine/language.js'
 import {
   autoLayout, calculationOrder, canLink, graphToProgram, parseFormula, programToGraph, validateGraph,
+  freePosition, nodesOverlap,
 } from '../src/engine/graph.js'
 
 const node = (id, kind, name, formula = '') => ({ id, kind, name, x: 0, y: 0, formula })
@@ -290,5 +291,20 @@ describe('autoLayout', () => {
     expect(at('s').x).toBeLessThan(at('k').x)
     expect(at('a').x).toBeLessThan(at('h').x) // Ansteckungen feeds the left states
     expect(sir().nodes[0].x).toBe(0) // the input is not changed
+  })
+})
+
+describe('freePosition', () => {
+  const graph = { nodes: [{ id: 'n1', kind: 'state', name: 'A', x: 200, y: 200, formula: '' }], links: [] }
+  it('keeps a free spot', () => {
+    expect(freePosition(graph, 'n2', 'state', 500, 200)).toEqual({ x: 500, y: 200 })
+  })
+  it('moves a node off another one, to the nearest free spot', () => {
+    const p = freePosition(graph, 'n2', 'constant', 210, 200)
+    expect(nodesOverlap({ kind: 'constant', ...p }, graph.nodes[0])).toBe(false)
+    expect(Math.hypot(p.x - 210, p.y - 200)).toBeLessThan(90)
+  })
+  it('ignores the node itself', () => {
+    expect(freePosition(graph, 'n1', 'state', 205, 200)).toEqual({ x: 205, y: 200 })
   })
 })

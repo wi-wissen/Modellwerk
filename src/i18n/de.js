@@ -1,5 +1,13 @@
 export default {
   app: {
+    guideLink: 'Anleitung mit Erklärung und Aufgaben zu diesem Beispiel',
+    history: 'Verlauf',
+    undo: 'Rückgängig',
+    redo: 'Wiederholen',
+    undoHint: 'Letzte Änderung am Modell zurücknehmen (Strg+Z)',
+    redoHint: 'Zurückgenommene Änderung wiederherstellen (Strg+Y)',
+    undone: 'Änderung zurückgenommen.',
+    redone: 'Änderung wiederhergestellt.',
     tagline: 'Modellbildung & Simulation',
     skip: 'Zum Inhalt springen',
     examples: 'Beispiele',
@@ -213,6 +221,7 @@ export default {
     help: "Bühne anklicken, dann: Leertaste abspielen oder anhalten, ← → ein Schritt (mit Umschalt 10), Pos1/Ende an den Anfang oder das Ende."
   },
   graph: {
+    toolLabel: 'Werkzeug',
     wide: 'Breite Ansicht',
     narrow: 'Neben dem Ergebnis',
     extended: 'Erweiterte Syntax',

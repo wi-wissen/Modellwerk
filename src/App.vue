@@ -20,6 +20,10 @@
           </label>
           <button type="button" class="btn" @click="saveProject"><Save :size="18" aria-hidden="true" /> {{ $t('app.save') }}</button>
           <button type="button" class="btn" @click="$refs.examples.show()"><BookOpen :size="18" aria-hidden="true" /> {{ $t('app.examples') }}</button>
+          <span class="flex gap-1" role="group" :aria-label="$t('app.history')">
+            <button type="button" class="btn btn-quiet" :disabled="!history.past.length" :title="$t('app.undoHint')" @click="undo"><Undo2 :size="18" aria-hidden="true" /> {{ $t('app.undo') }}</button>
+            <button type="button" class="btn btn-quiet" :disabled="!history.future.length" :title="$t('app.redoHint')" @click="redo"><Redo2 :size="18" aria-hidden="true" /> {{ $t('app.redo') }}</button>
+          </span>
         </nav>
 
         <div class="ml-auto flex items-center gap-1" role="group" :aria-label="$t('app.display')">
@@ -45,6 +49,11 @@
         </label>
         <h1 v-else class="text-2xl font-extrabold tracking-tight sm:text-3xl">{{ texts.title }}</h1>
         <p class="mt-1 text-muted">{{ texts.description }}</p>
+        <p v-if="guideHref" class="mt-2">
+          <a :href="guideHref" class="inline-flex items-center gap-1.5 font-semibold text-accent-strong underline underline-offset-2">
+            <GraduationCap :size="18" aria-hidden="true" /> {{ $t('app.guideLink') }}
+          </a>
+        </p>
         <p v-if="openError" class="mt-2 flex items-start gap-2 rounded-lg bg-bad-soft px-3 py-2 text-[0.95rem]" role="alert">
           <TriangleAlert :size="18" aria-hidden="true" class="mt-0.5 flex-none text-bad" /> {{ $t('app.openFailed', { message: openError }) }}
         </p>
@@ -116,7 +125,7 @@
 </template>
 
 <script>
-import { AArrowDown, AArrowUp, BookOpen, FilePlus, FolderOpen, History, Languages, Monitor, Moon, Save, Sun, TriangleAlert, X } from 'lucide-vue-next'
+import { AArrowDown, AArrowUp, BookOpen, FilePlus, FolderOpen, History, Languages, GraduationCap, Monitor, Moon, Redo2, Save, Sun, TriangleAlert, Undo2, X } from 'lucide-vue-next'
 import ModelPanel from './components/ModelPanel.vue'
 import ModelDiagram from './components/ModelDiagram.vue'
 import ResultPanel from './components/ResultPanel.vue'
@@ -134,7 +143,7 @@ import { graphToProgram, programToGraph } from './engine/graph.js'
 import { seriesColor, seriesDash } from './chartStyle.js'
 import { PROJECT_EXTENSION, cleanSimulation, parseProject, projectToText, toProject } from './engine/project.js'
 import { EXAMPLES } from './examples.js'
-import { exampleText } from './guides/data.js'
+import { exampleText, findGuide } from './guides/data.js'
 import { LOCALES, i18n, numberLocale, setLocale } from './i18n/index.js'
 import { download, fileBase } from './site/download.js'
 import { THEMES, applyTheme, loadTheme } from './site/theme.js'
@@ -182,7 +191,7 @@ function defaultPlot(source, options) {
 export default {
   name: 'App',
   components: {
-    AArrowDown, AArrowUp, BookOpen, FilePlus, FolderOpen, History, Languages, Monitor, Moon, Save, Sun, TriangleAlert, X,
+    AArrowDown, AArrowUp, BookOpen, FilePlus, FolderOpen, History, Languages, GraduationCap, Monitor, Moon, Redo2, Save, Sun, TriangleAlert, Undo2, X,
     ModelPanel, ModelDiagram, ResultPanel, SimulationBar, CompareDialog, ExamplesDialog, AppFooter, ReportView, ResultAnimation,
   },
   data() {
@@ -215,6 +224,7 @@ export default {
       announcement: '',
       report: null,
       wideModel: false,
+      history: { past: [], future: [], lastKeys: '', lastAt: 0 },
     }
   },
   computed: {
@@ -237,6 +247,11 @@ export default {
     },
     source() { return this.sources[this.project.active] },
     analysis() { return this.analyses[this.project.active] },
+    // the student guide of the open example (website only; the desktop app has no guides)
+    guideHref() {
+      const id = this.project.example
+      return this.homeHref && id && findGuide(id) ? siteLink('../', `examples/${id}/`) : null
+    },
     conversion() {
       return this.sim.origin === 'sentences' ? { ok: false, line: null } : programToSentences(this.source, { macros: this.sim.macros })
     },
@@ -299,9 +314,11 @@ export default {
   },
   mounted() {
     window.addEventListener('hashchange', this.onHash)
+    window.addEventListener('keydown', this.onKey)
   },
   beforeUnmount() {
     window.removeEventListener('hashchange', this.onHash)
+    window.removeEventListener('keydown', this.onKey)
   },
   methods: {
     // a changed app/#<example-id> link loads that example without a reload
@@ -315,10 +332,58 @@ export default {
       this.$nextTick(() => { this.announcement = text })
     },
     patchSim(changes) {
+      this.remember(Object.keys(changes).sort().join())
       Object.assign(this.sim, changes)
+    },
+    // ---- undo / redo ---------------------------------------------------------------
+    snapshot() {
+      return JSON.stringify({ simulations: this.project.simulations, active: this.project.active })
+    },
+    // records the state before a change; quick changes of the same fields (typing,
+    // dragging a node) are merged into one step
+    remember(keys = '') {
+      const h = this.history
+      const now = Date.now()
+      const merge = keys && keys === h.lastKeys && now - h.lastAt < 1200
+      h.lastKeys = keys
+      h.lastAt = now
+      if (merge) return
+      h.past.push(this.snapshot())
+      if (h.past.length > 100) h.past.shift()
+      h.future = []
+    },
+    restore(text) {
+      const state = JSON.parse(text)
+      this.project.simulations = state.simulations
+      this.project.active = Math.min(state.active, state.simulations.length - 1)
+      this.repeatChunk = this.sim.steps
+      this.history.lastKeys = ''
+      this.loadCount++
+    },
+    undo() {
+      if (!this.history.past.length) return
+      this.history.future.push(this.snapshot())
+      this.restore(this.history.past.pop())
+      this.announce(this.$t('app.undone'))
+    },
+    redo() {
+      if (!this.history.future.length) return
+      this.history.past.push(this.snapshot())
+      this.restore(this.history.future.pop())
+      this.announce(this.$t('app.redone'))
+    },
+    // Ctrl+Z / Ctrl+Y outside text fields (text fields keep their own undo)
+    onKey(ev) {
+      if (!(ev.ctrlKey || ev.metaKey) || ev.altKey) return
+      const t = ev.target
+      if (t.closest?.('input, textarea, select, [contenteditable="true"]')) return
+      const key = ev.key.toLowerCase()
+      if (key === 'z' && !ev.shiftKey) { ev.preventDefault(); this.undo() }
+      else if (key === 'y' || (key === 'z' && ev.shiftKey)) { ev.preventDefault(); this.redo() }
     },
     // ---- loading and saving --------------------------------------------------
     startProject(project, view, tab) {
+      this.history = { past: [], future: [], lastKeys: '', lastAt: 0 }
       this.project = project
       this.view = view
       this.modelTab = tab
@@ -344,8 +409,11 @@ export default {
         start: Object.fromEntries(s.variables.map((v) => [v.name, v.start])),
       }))
       const first = simulations[0]
+      // use the graph settings stored in the file when it names curves; otherwise choose
+      const stored = sims[0].plot
+      const plot = stored?.y.length ? stored : defaultPlot(first.source, { caseSensitive: first.caseSensitive })
       this.startProject({ title: file.replace(/\.prg$/i, ''), file, example: null, simulations, active: 0 },
-        viewFor(defaultPlot(first.source, { caseSensitive: first.caseSensitive })), 'program')
+        viewFor(plot), 'program')
       this.announce(this.$t('app.modelOpened', { title: this.texts.title }))
     },
     newModel(kind = 'sentences') {
@@ -398,6 +466,7 @@ export default {
       this.announce(this.$t('sim.selected', { name: this.simNames[i] }))
     },
     copySim() {
+      this.remember()
       const copy = JSON.parse(JSON.stringify(this.sim))
       copy.name = this.$t('sim.copyName', { name: this.simNames[this.project.active] })
       this.project.simulations.splice(this.project.active + 1, 0, copy)
@@ -407,6 +476,7 @@ export default {
     },
     removeSim() {
       if (this.project.simulations.length < 2) return
+      this.remember()
       const name = this.simNames[this.project.active]
       this.project.simulations.splice(this.project.active, 1)
       this.project.active = Math.min(this.project.active, this.project.simulations.length - 1)
@@ -414,6 +484,7 @@ export default {
     },
     // the legacy "Weiterrechnen": the run is deterministic, so continuing equals more steps
     continueRun() {
+      this.remember()
       this.sim.steps = Math.min(MAX_STEPS, this.sim.steps + this.continueBy)
       this.announce(this.$t('app.continued', { n: this.sim.steps }))
     },

@@ -1,5 +1,5 @@
 <template>
-  <div class="flex min-h-screen flex-col">
+  <div class="site-page flex min-h-screen flex-col">
     <SiteHeader root="../" current="examples" />
     <main class="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-4 pb-16 pt-6 sm:px-6">
       <div class="max-w-[62ch]">
@@ -17,8 +17,8 @@
             </svg>
             <span class="text-sm text-muted">{{ ex.teaser }}</span>
             <span class="mt-auto flex flex-wrap gap-2 pt-2 text-xs text-muted">
-              <span v-if="ex.subject" class="chip role-time">{{ ex.subject }}</span>
-              <span v-if="ex.level" class="chip role-time">{{ ex.level }}</span>
+              <span v-if="ex.subject" class="chip role-time">{{ local(ex.subject) }}</span>
+              <span v-if="ex.level" class="chip role-time">{{ local(ex.level) }}</span>
             </span>
           </a>
         </li>
@@ -55,6 +55,6 @@ export default {
   watch: {
     '$i18n.locale': { immediate: true, handler() { document.title = `${this.$t('guides.overviewTitle')} · Modellwerk` } },
   },
-  methods: { siteLink, exampleText, seriesColor, seriesDash },
+  methods: { siteLink, exampleText, local, seriesColor, seriesDash },
 }
 </script>

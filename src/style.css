@@ -14,6 +14,8 @@
   --paper: #f5f7f4;          /* page ground, slightly green like graph paper */
   --sheet: #ffffff;          /* work surfaces */
   --sunken: #eef1f2;
+  --site: #ffffff;           /* ground of the website pages (reading) */
+  --lift: 0 1px 2px rgb(24 34 44 / 0.05), 0 10px 28px -14px rgb(24 34 44 / 0.22); /* boxes on the site */
   --ink: #18222c;
   --muted: #4f5b66;          /* AA on paper and sheet */
   --line: #cfd6db;
@@ -40,7 +42,7 @@
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --paper: #11161b; --sheet: #182028; --sunken: #0f141a; --ink: #e8edf1; --muted: #a5b1bc;
+    --paper: #11161b; --sheet: #182028; --sunken: #0f141a; --site: #11161b; --lift: none; --ink: #e8edf1; --muted: #a5b1bc;
     --line: #2e3a45; --grid: #24303a;
     --accent: #8fb0ff; --accent-ink: #0b1220; --accent-soft: #1f2d4d; --accent-strong: #c4d4ff;
     --rate: #ffb27a; --rate-soft: #3a2616; --const: #c9a6f5; --const-soft: #2c2140;
@@ -50,7 +52,7 @@
   }
 }
 :root[data-theme="dark"] {
-  --paper: #11161b; --sheet: #182028; --sunken: #0f141a; --ink: #e8edf1; --muted: #a5b1bc;
+  --paper: #11161b; --sheet: #182028; --sunken: #0f141a; --site: #11161b; --lift: none; --ink: #e8edf1; --muted: #a5b1bc;
   --line: #2e3a45; --grid: #24303a;
   --accent: #8fb0ff; --accent-ink: #0b1220; --accent-soft: #1f2d4d; --accent-strong: #c4d4ff;
   --rate: #ffb27a; --rate-soft: #3a2616; --const: #c9a6f5; --const-soft: #2c2140;
@@ -156,6 +158,9 @@
   input[type="checkbox"] { accent-color: var(--accent); }
 
   .panel { background: var(--sheet); border: 1px solid var(--line); border-radius: 0.9rem; }
+  /* website pages: white reading ground, boxes lifted by border and a soft shadow */
+  .site-page { background: var(--site); }
+  .site-page .panel { box-shadow: var(--lift); }
   /* the editor clips its textarea, so the focus ring goes on the whole editor */
   .editor:focus-within { outline: 3px solid var(--accent); outline-offset: 2px; border-color: var(--accent); }
   .editor textarea:focus-visible { outline: none; }
@@ -163,6 +168,7 @@
   /* Roles */
   .role-state { --role: var(--accent); --role-soft: var(--accent-soft); --role-strong: var(--accent-strong); }
   .role-rate { --role: var(--rate); --role-soft: var(--rate-soft); --role-strong: var(--rate); }
+  .role-aux { --role: var(--s3); --role-soft: color-mix(in srgb, var(--s3) 14%, var(--sheet)); --role-strong: color-mix(in srgb, var(--s3) 70%, var(--ink)); }
   .role-constant { --role: var(--const); --role-soft: var(--const-soft); --role-strong: var(--const); }
   .role-time { --role: var(--time); --role-soft: var(--time-soft); --role-strong: var(--time); }
   .chip {

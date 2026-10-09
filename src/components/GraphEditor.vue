@@ -1,7 +1,22 @@
 <template>
   <section class="graph-editor @container flex flex-col gap-3" :aria-label="$t('graph.title')">
     <!-- Tools -->
-    <div role="toolbar" :aria-label="$t('graph.toolbar')" class="flex flex-wrap items-center gap-1.5">
+    <!-- narrow editors (phones): one labelled choice instead of four rows of buttons -->
+    <div class="flex flex-wrap items-end gap-2 @xl:hidden">
+      <label class="flex flex-col gap-1">
+        <span class="text-sm font-semibold">{{ $t('graph.toolLabel') }}</span>
+        <select :id="`${uid}-tool`" class="field !w-auto" :value="tool" @change="setTool($event.target.value)">
+          <option v-for="t in tools" :key="t.id" :value="t.id">{{ $t(`graph.tools.${t.id}`) }}</option>
+        </select>
+      </label>
+      <span v-if="tool === 'flow'" class="seg" role="group" :aria-label="$t('graph.flowSign')">
+        <button v-for="s in ['+', '-']" :key="s" type="button" :class="{ 'is-selected': flowSign === s }"
+                :aria-pressed="flowSign === s ? 'true' : 'false'" @click="flowSign = s">
+          {{ $t(s === '+' ? 'graph.inflowShort' : 'graph.outflowShort') }}
+        </button>
+      </span>
+    </div>
+    <div role="toolbar" :aria-label="$t('graph.toolbar')" class="hidden flex-wrap items-center gap-1.5 @xl:flex">
       <button v-for="t in tools" :key="t.id" type="button" class="btn" :class="{ 'is-selected': tool === t.id }"
               :aria-pressed="tool === t.id ? 'true' : 'false'" @click="setTool(t.id)">
         <component :is="t.icon" :size="18" aria-hidden="true" /> {{ $t(`graph.tools.${t.id}`) }}
@@ -257,7 +272,7 @@
 import {
   ArrowRightLeft, Circle, CircleAlert, Hexagon, Info, MousePointer2, MoveRight, Pencil, Pill, Plus, Spline, Square, Trash2,
 } from 'lucide-vue-next'
-import { LAYOUT, NODE_SHAPE, canLink, cloneGraph, nextId, validateGraph } from '../engine/graph.js'
+import { LAYOUT, NODE_SHAPE, canLink, cloneGraph, freePosition, nextId, validateGraph } from '../engine/graph.js'
 
 let instances = 0
 const IDENT = /^[A-Za-zÄÖÜäöüß_][A-Za-z0-9ÄÖÜäöüß_]*$/
@@ -435,7 +450,8 @@ export default {
       let id
       this.commit((g) => {
         id = nextId(g, 'n')
-        g.nodes.push({ id, kind, name, x: Math.round(x), y: Math.round(y), formula: '' })
+        const spot = freePosition(g, id, kind, Math.round(x), Math.round(y))
+        g.nodes.push({ id, kind, name, x: spot.x, y: spot.y, formula: '' })
       })
       this.selectedId = id
       this.selectedLinkId = null
@@ -655,21 +671,34 @@ export default {
       const dy = p.y - d.py
       if (!d.moved && Math.hypot(dx, dy) < 4) return
       d.moved = true
-      this.moveTo(d.id, d.x + dx, d.y + dy)
+      d.to = [d.x + dx, d.y + dy]
+      // at most one update per frame while dragging
+      if (d.frame) return
+      d.frame = requestAnimationFrame(() => {
+        d.frame = 0
+        if (this.drag === d) this.moveTo(d.id, ...d.to, { free: false })
+      })
     },
     onPointerUp() {
-      if (this.drag?.moved) this.say('graph.moved', { name: this.nameOf(this.drag.id) })
+      const d = this.drag
       this.drag = null
+      if (!d?.moved) return
+      if (d.frame) cancelAnimationFrame(d.frame)
+      // on drop, nodes never stay on top of each other
+      this.moveTo(d.id, ...d.to)
+      this.say('graph.moved', { name: this.nameOf(d.id) })
     },
-    moveTo(id, x, y) {
+    moveTo(id, x, y, { free = true } = {}) {
       const n = this.byId.get(id)
       const s = this.shape(n)
       x = Math.round(Math.max(s.rx + 4, x))
       y = Math.round(Math.max(s.ry + 4, y))
+      if (free) ({ x, y } = freePosition(this.modelValue, id, n.kind, x, y))
       this.commit((g) => {
         const m = g.nodes.find((k) => k.id === id)
         if (m) { m.x = x; m.y = y }
       })
+      return { x, y }
     },
 
     // ----- keyboard on nodes -----
@@ -679,8 +708,8 @@ export default {
       if (moves[e.key]) {
         e.preventDefault()
         const [dx, dy] = moves[e.key]
-        this.moveTo(n.id, n.x + dx, n.y + dy)
-        this.say('graph.movedTo', { name: this.nameOf(n.id), x: Math.round(n.x + dx), y: Math.round(n.y + dy) })
+        const to = this.moveTo(n.id, n.x + dx, n.y + dy)
+        this.say('graph.movedTo', { name: this.nameOf(n.id), x: to.x, y: to.y })
       } else if (e.key === 'Delete' || e.key === 'Backspace') {
         e.preventDefault()
         this.deleteNode(n.id)
@@ -780,7 +809,6 @@ export default {
 </script>
 
 <style scoped>
-.role-aux { --role: var(--s3); --role-soft: color-mix(in srgb, var(--s3) 14%, var(--sheet)); --role-strong: color-mix(in srgb, var(--s3) 70%, var(--ink)); }
 .canvas-wrap { max-height: 72vh; }
 .canvas { user-select: none; -webkit-user-select: none; }
 .canvas.is-placing .bg { cursor: copy; }

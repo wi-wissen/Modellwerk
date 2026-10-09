@@ -47,6 +47,42 @@ export const NODE_SHAPE = {
   aux: { rx: 52, ry: 16 },
 }
 
+/** True when the boxes of two nodes (plus a margin) overlap. */
+export function nodesOverlap(a, b, margin = 12) {
+  const sa = NODE_SHAPE[a.kind] ?? NODE_SHAPE.state
+  const sb = NODE_SHAPE[b.kind] ?? NODE_SHAPE.state
+  return Math.abs(a.x - b.x) < sa.rx + sb.rx + margin && Math.abs(a.y - b.y) < sa.ry + sb.ry + margin
+}
+
+/**
+ * Nearest position to (x, y) on a 10-unit grid where a node of `kind` does not
+ * overlap any other node of the graph (the node `id` itself is ignored).
+ */
+export function freePosition(graph, id, kind, x, y) {
+  const others = graph.nodes.filter((n) => n.id !== id)
+  const s = NODE_SHAPE[kind] ?? NODE_SHAPE.state
+  const fits = (px, py) => px >= s.rx + 4 && py >= s.ry + 4 && !others.some((o) => nodesOverlap({ kind, x: px, y: py }, o))
+  if (fits(x, y)) return { x, y }
+  for (let r = 10; r <= 2000; r += 10) {
+    let best = null
+    for (let dx = -r; dx <= r; dx += 10) {
+      for (const dy of Math.abs(dx) === r ? range(-r, r) : [-r, r]) {
+        const px = x + dx
+        const py = y + dy
+        if (fits(px, py) && (!best || Math.hypot(dx, dy) < best.d)) best = { x: px, y: py, d: Math.hypot(dx, dy) }
+      }
+    }
+    if (best) return { x: best.x, y: best.y }
+  }
+  return { x, y }
+}
+
+function range(from, to) {
+  const out = []
+  for (let v = from; v <= to; v += 10) out.push(v)
+  return out
+}
+
 const IDENT = /^[A-Za-zÄÖÜäöüß_][A-Za-z0-9ÄÖÜäöüß_]*$/
 const KEYWORDS = new Set(['IF', 'THEN', 'WHILE', 'DO'])
 const DEFAULTS = { simplified: true, timeName: 'Zeit', dtName: 'DeltaT', extended: false }

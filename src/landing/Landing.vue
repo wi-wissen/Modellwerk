@@ -1,5 +1,5 @@
 <template>
-  <div class="flex min-h-screen flex-col">
+  <div class="site-page flex min-h-screen flex-col">
     <SiteHeader root="./" />
 
     <main class="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-16 px-4 pb-16 pt-8 sm:px-6 sm:pt-14">

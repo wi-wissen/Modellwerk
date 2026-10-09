@@ -14,19 +14,12 @@
       <div class="flex flex-col gap-2">
         <h2 class="font-bold">{{ $t('footer.privacyTitle') }}</h2>
         <p class="text-muted">{{ $t('footer.privacyText') }}</p>
-        <label class="mt-1 inline-flex items-center gap-2">
-          <span class="font-semibold">{{ $t('app.language') }}</span>
-          <select id="footer-locale" class="field !w-auto" :value="$i18n.locale" @change="setLocale($event.target.value)">
-            <option v-for="(l, code) in locales" :key="code" :value="code" :lang="code">{{ l.name }}</option>
-          </select>
-        </label>
       </div>
     </div>
   </footer>
 </template>
 
 <script>
-import { LOCALES, setLocale } from '../i18n/index.js'
 import logoUrl from '../assets/logo.svg'
 import pkg from '../../package.json' with { type: 'json' }
 
@@ -34,8 +27,7 @@ export default {
   name: 'AppFooter',
   emits: ['compare'],
   data() {
-    return { logoUrl, version: pkg.version, locales: LOCALES }
+    return { logoUrl, version: pkg.version }
   },
-  methods: { setLocale },
 }
 </script>

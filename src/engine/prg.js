@@ -10,7 +10,8 @@
 //     u32 length + name of the owning simulation (empty in files with a single
 //       simulation, set in files with several simulations)
 //     u8 flag (1 = initial value set, 0 = calculated before first use)
-//     f64 initial value, 2 option bytes (display flags),
+//     f64 initial value, 2 option bytes (1st: shown as a curve in the graph,
+//       2nd: probably shown in the table),
 //     u32 count N, N × f64 result values after each pass (N = 0 for variables
 //       whose results were not stored, e.g. constants),
 //     31 bytes of display options (curve style, colour …),
@@ -38,6 +39,7 @@ function reader(bytes) {
     len: bytes.length,
     u32: (p) => view.getUint32(p, true),
     f64: (p) => view.getFloat64(p, true),
+    u8: (p) => view.getUint8(p),
     str: (p, n) => decoder.decode(bytes.subarray(p, p + n)),
     hasControl: (p, n) => bytes.subarray(p, p + n).some((c) => c < 9),
   }
@@ -66,16 +68,16 @@ function variableAt(r, p) {
   if (next > r.len) return null
   const values = new Float64Array(n)
   for (let i = 0; i < n; i++) values[i] = r.f64(q + 15 + 8 * i)
-  return { record: { name: name.text, start: r.f64(q + 1), values }, owner: owner.text, next }
+  return { record: { name: name.text, start: r.f64(q + 1), values, plotted: r.u8(q + 9) === 1 }, owner: owner.text, next }
 }
 
-// Number of steps stored after the variable block (behind the two axis names).
-function stepsAt(r, p) {
+// Axis names and number of steps stored after the variable block.
+function axesAt(r, p) {
   const x = textAt(r, p, 64)
   const y = x && textAt(r, x.next, 64)
   if (!y || y.next + 4 > r.len) return null
   if (![x.text, y.text].every((t) => t === '' || NAME.test(t))) return null
-  return r.u32(y.next)
+  return { x: x.text, steps: r.u32(y.next) }
 }
 
 function programBefore(r, varOffset) {
@@ -130,13 +132,16 @@ export function readPrg(bytes) {
         const program = programBefore(r, p)
         if (program) {
           const stored = Math.max(...variables.map((v) => v.values.length))
-          const steps = stepsAt(r, q)
+          const axes = axesAt(r, q)
+          const x = variables.find((v) => v.name === axes?.x)?.name ?? null
           simulations.push({
             name: program.name || [...owners][0],
             source: program.lines.join('\n'),
-            steps: stored || steps || 0,
+            steps: stored || axes?.steps || 0,
             hasResults: stored > 0,
             variables,
+            // graph settings saved with the file: x-axis variable and the curves shown
+            plot: x ? { x, y: variables.filter((v) => v.plotted && v.name !== x).map((v) => v.name) } : null,
           })
           p = q
           continue

@@ -1,5 +1,13 @@
 export default {
   app: {
+    guideLink: 'Guide with explanation and tasks for this example',
+    history: 'History',
+    undo: 'Undo',
+    redo: 'Redo',
+    undoHint: 'Undo the last change to the model (Ctrl+Z)',
+    redoHint: 'Redo the change you undid (Ctrl+Y)',
+    undone: 'Change undone.',
+    redone: 'Change redone.',
     tagline: 'Modelling & simulation',
     skip: 'Skip to content',
     examples: 'Examples',
@@ -213,6 +221,7 @@ export default {
     help: "Click the stage, then: Space plays or pauses, ← → one step (with Shift 10), Home/End go to the start or the end."
   },
   graph: {
+    toolLabel: 'Tool',
     wide: 'Wide view',
     narrow: 'Next to the result',
     extended: 'Extended syntax',
