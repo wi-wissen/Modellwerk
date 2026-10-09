@@ -25,12 +25,18 @@ export function analyse(source, options = {}) {
     for (const k of ['left', 'right', 'arg', 'expr']) refs(n[k], out)
     return out
   }
-  for (const s of program.statements) {
-    if (s.kind !== 'assign') continue
+  // assignments in order, including those inside IF/WHILE bodies
+  const assignments = []
+  const collect = (list) => list.forEach((s) => (s.kind === 'assign' ? assignments.push(s) : collect(s.body)))
+  collect(program.statements)
+  for (const s of assignments) {
     const used = refs(s.expr)
     if (used.has(s.name)) {
-      const others = [...used].filter((u) => u !== s.name)
-      const isTime = (others.length === 0 || TIME_NAME.test(s.name)) && others.every((o) => TIME_STEP.test(o))
+      // time: T := T + 1 or T := T + dt (a counter is treated as time as well)
+      const e = s.expr
+      const isTime = e.kind === 'bin' && e.op === '+' && e.left.kind === 'var' && e.left.name === s.name &&
+        ((e.right.kind === 'num' && (e.right.value === 1 || TIME_NAME.test(s.name))) ||
+          (e.right.kind === 'var' && (TIME_STEP.test(e.right.name) || TIME_NAME.test(s.name))))
       roles.set(s.name, isTime ? 'time' : 'state')
       if (!isTime) {
         // read the summands of N := N + a - b … as inflows and outflows

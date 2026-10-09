@@ -141,13 +141,14 @@ export default {
     title: 'Programm für einen Zeitschritt',
     intro: 'Diese Zeilen werden in jedem Schritt von oben nach unten ausgeführt. „:=“ heißt „bekommt den Wert“. Kommentare beginnen mit „//“.',
     functions: 'Welche Funktionen gibt es?',
-    ifThen: 'Anweisung nur, wenn die Bedingung gilt',
-    whileDo: 'Anweisung wiederholen, solange die Bedingung gilt',
+    ifThen: 'alle Anweisungen im Rest der Zeile nur, wenn die Bedingung gilt',
+    whileDo: 'Rest der Zeile wiederholen, solange die Bedingung gilt',
+    power: 'Potenz, z. B. r^2 oder r^1,5',
   },
   functions: {
     SQR: 'Quadrat', SQRT: 'Wurzel', EXP: 'e hoch x', LN: 'natürlicher Logarithmus', SIN: 'Sinus (Bogenmaß)',
     COS: 'Kosinus (Bogenmaß)', ARCTAN: 'Arkustangens', ABS: 'Betrag', INT: 'ganzzahliger Teil', FRAC: 'Nachkommateil',
-    RANDOM: 'Zufallszahl zwischen 0 und 1',
+    RANDOM: 'random(0): Zufallszahl zwischen 0 und 1, random(x): ganze Zufallszahl von 0 bis x−1',
   },
   diagram: {
     enlarge: 'Vergrößern',

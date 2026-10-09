@@ -141,13 +141,14 @@ export default {
     title: 'Program for one time step',
     intro: 'These lines run from top to bottom in every step. “:=” means “gets the value”. Comments start with “//”.',
     functions: 'Which functions are there?',
-    ifThen: 'run the statement only if the condition holds',
-    whileDo: 'repeat the statement while the condition holds',
+    ifThen: 'run the rest of the line only if the condition holds',
+    whileDo: 'repeat the rest of the line while the condition holds',
+    power: 'power, e.g. r^2 or r^1.5',
   },
   functions: {
     SQR: 'square', SQRT: 'square root', EXP: 'e to the power of x', LN: 'natural logarithm', SIN: 'sine (radians)',
     COS: 'cosine (radians)', ARCTAN: 'arctangent', ABS: 'absolute value', INT: 'integer part', FRAC: 'fractional part',
-    RANDOM: 'random number between 0 and 1',
+    RANDOM: 'random(0): random number between 0 and 1, random(x): random whole number from 0 to x−1',
   },
   diagram: {
     enlarge: 'Enlarge',

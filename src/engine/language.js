@@ -4,9 +4,12 @@
 //   assignment `name := expression`, + - * /, parentheses, unary minus,
 //   decimal comma and point, `//` comments, several statements per line with `;`,
 //   functions SQR SQRT EXP. Every operation rounds to an IEEE-754 double.
-// Known from the legacy executable, semantics not yet verified:
-//   IF … THEN, WHILE … DO, comparisons, SIN COS ARCTAN LN FRAC INT ABS RANDOM.
-import { exactExp } from './exactmath.js'
+// From the legacy program's documentation, not yet verified bit for bit:
+//   `=` as assignment, `:` as separator, `^` (also with fractional exponents),
+//   IF … THEN and WHILE … DO applying to the rest of the line, comparisons,
+//   SIN COS ARCTAN LN FRAC INT ABS, RANDOM(x).
+// Assumed: `^` binds tighter than unary minus and is right-associative (-2^2 = -4).
+import { exactExp, exactLn } from './exactmath.js'
 
 // Default (English) error texts; the UI translates by `code`.
 export const ERROR_TEXTS = {
@@ -44,14 +47,14 @@ export const FUNCTIONS = {
   SQR: { arity: 1, fn: (x) => x * x },
   SQRT: { arity: 1, fn: Math.sqrt },
   EXP: { arity: 1, fn: exactExp },
-  LN: { arity: 1, fn: Math.log },
+  LN: { arity: 1, fn: exactLn },
   SIN: { arity: 1, fn: Math.sin },
   COS: { arity: 1, fn: Math.cos },
   ARCTAN: { arity: 1, fn: Math.atan },
   ABS: { arity: 1, fn: Math.abs },
   INT: { arity: 1, fn: Math.trunc },
   FRAC: { arity: 1, fn: (x) => x - Math.trunc(x) },
-  RANDOM: { arity: 0, fn: null },
+  RANDOM: { arity: 1, fn: null }, // random(0): [0;1), random(x>0): integer 0 … x-1
 }
 
 const KEYWORDS = new Set(['IF', 'THEN', 'WHILE', 'DO'])
@@ -102,7 +105,12 @@ function tokenizeLine(text, line) {
       i += 2
       continue
     }
-    if ('+-*/()<>=;'.includes(c)) {
+    if (c === ':') {
+      tokens.push({ type: 'op', value: ';', line, col }) // `:` separates statements like `;`
+      i++
+      continue
+    }
+    if ('+-*/^()<>=;'.includes(c)) {
       tokens.push({ type: 'op', value: c, line, col })
       i++
       continue
@@ -142,22 +150,33 @@ class Parser {
     }
     return out
   }
+  // IF and WHILE apply to all statements on the rest of the line
+  restOfLine() {
+    const body = []
+    while (this.peek()) {
+      if (this.is('op', ';')) { this.take(); continue }
+      body.push(this.statement())
+      if (this.peek() && !this.is('op', ';')) this.fail('operatorExpected')
+    }
+    return body
+  }
   statement() {
     if (this.is('kw', 'IF')) {
       this.take()
       const cond = this.comparison()
       this.expect('kw', 'THEN', 'thenExpected')
-      return { kind: 'if', cond, body: this.statement(), line: this.line }
+      return { kind: 'if', cond, body: this.restOfLine(), line: this.line }
     }
     if (this.is('kw', 'WHILE')) {
       this.take()
       const cond = this.comparison()
       this.expect('kw', 'DO', 'doExpected')
-      return { kind: 'while', cond, body: this.statement(), line: this.line }
+      return { kind: 'while', cond, body: this.restOfLine(), line: this.line }
     }
     const target = this.expect('id', undefined, 'variableExpected')
     if (FUNCTIONS[target.value]) this.fail('assignToFunction', { name: target.raw })
-    this.expect('op', ':=', 'assignExpected')
+    if (this.is('op', '=')) this.take() // `=` is an alternative assignment operator
+    else this.expect('op', ':=', 'assignExpected')
     return { kind: 'assign', name: target.value, raw: target.raw, expr: this.expr(), line: this.line }
   }
   comparison() {
@@ -186,7 +205,13 @@ class Parser {
   unary() {
     if (this.is('op', '-')) { this.take(); return { kind: 'neg', arg: this.unary() } }
     if (this.is('op', '+')) { this.take(); return this.unary() }
-    return this.atom()
+    return this.power()
+  }
+  power() {
+    const base = this.atom()
+    if (!this.is('op', '^')) return base
+    this.take()
+    return { kind: 'bin', op: '^', left: base, right: this.unary() }
   }
   atom() {
     const k = this.peek()
@@ -202,7 +227,6 @@ class Parser {
       this.take()
       const f = FUNCTIONS[k.value]
       if (f) {
-        if (f.arity === 0) return { kind: 'call', name: k.value, arg: null }
         this.expect('op', '(', 'openParenExpected')
         const arg = this.expr()
         this.expect('op', ')', 'closeParenExpected')
@@ -240,7 +264,8 @@ export function parseProgram(source, { caseSensitive = false } = {}) {
       if (!variables.has(n.name)) variables.set(n.name, n.raw)
       assigned.add(n.name)
     }
-    for (const key of ['expr', 'left', 'right', 'arg', 'cond', 'body']) visit(n[key])
+    for (const key of ['expr', 'left', 'right', 'arg', 'cond']) visit(n[key])
+    if (n.body) n.body.forEach(visit)
   }
   statements.forEach(visit)
   return { statements, errors, variables, assigned }

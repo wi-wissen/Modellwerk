@@ -44,6 +44,7 @@
           <dt class="font-mono font-semibold text-ink">{{ name.toLowerCase() }}{{ f.arity ? '(x)' : '' }}</dt>
           <dd>{{ $t(`functions.${name}`) }}</dd>
         </template>
+        <dt class="font-mono font-semibold text-ink">x ^ y</dt><dd>{{ $t('program.power') }}</dd>
         <dt class="font-mono font-semibold text-ink">if … then …</dt><dd>{{ $t('program.ifThen') }}</dd>
         <dt class="font-mono font-semibold text-ink">while … do …</dt><dd>{{ $t('program.whileDo') }}</dd>
       </dl>

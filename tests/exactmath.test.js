@@ -18,3 +18,16 @@ describe('exactExp', () => {
     expect(exactExp(NaN)).toBeNaN()
   })
 })
+
+import { exactLn, exactPow } from '../src/engine/exactmath.js'
+// Reference: make-math-reference.py (Python decimal, 60 digits)
+const mathRef = JSON.parse(readFileSync(new URL('./fixtures/math-reference.json', import.meta.url)))
+
+describe('exactLn and exactPow', () => {
+  it('ln is correctly rounded for all reference values', () => {
+    expect(mathRef.ln.filter(([x, y]) => !Object.is(exactLn(x), y))).toEqual([])
+  })
+  it('pow is correctly rounded for all reference values', () => {
+    expect(mathRef.pow.filter(([x, y, z]) => !Object.is(exactPow(x, y), z))).toEqual([])
+  })
+})

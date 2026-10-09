@@ -1,4 +1,5 @@
 import { FUNCTIONS, ModelError, parseProgram } from './language.js'
+import { exactPow } from './exactmath.js'
 
 export const MAX_STEPS = 8191 // limit of the legacy program
 const MAX_WHILE = 100000
@@ -31,14 +32,18 @@ export function simulate(source, startValues, steps, options = {}) {
       case 'num': return n.value
       case 'var': return env.get(n.name)
       case 'neg': return -ev(n.arg)
-      case 'call':
-        return n.name === 'RANDOM' ? random() : FUNCTIONS[n.name].fn(ev(n.arg))
+      case 'call': {
+        const x = ev(n.arg)
+        if (n.name !== 'RANDOM') return FUNCTIONS[n.name].fn(x)
+        return x > 0 ? Math.floor(random() * Math.trunc(x)) : random()
+      }
       case 'bin': {
         const a = ev(n.left)
         const b = ev(n.right)
         if (n.op === '+') return a + b
         if (n.op === '-') return a - b
         if (n.op === '*') return a * b
+        if (n.op === '^') return exactPow(a, b)
         return a / b
       }
     }
@@ -57,12 +62,12 @@ export function simulate(source, startValues, steps, options = {}) {
   }
   const exec = (s) => {
     if (s.kind === 'assign') env.set(s.name, ev(s.expr))
-    else if (s.kind === 'if') { if (test(s.cond)) exec(s.body) }
+    else if (s.kind === 'if') { if (test(s.cond)) s.body.forEach(exec) }
     else {
       let guard = 0
       while (test(s.cond)) {
         if (++guard > MAX_WHILE) throw new ModelError('endlessLoop', {}, s.line)
-        exec(s.body)
+        s.body.forEach(exec)
       }
     }
   }

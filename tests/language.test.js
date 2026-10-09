@@ -93,3 +93,42 @@ describe('flow detection', () => {
     ])
   })
 })
+
+describe('language details from the legacy documentation', () => {
+  it('applies IF to the whole rest of the line', () => {
+    const r = simulate('IF x < 0 THEN a := 1; b := 2\nx := x + 1', { X: 0 }, 1)
+    expect(r.series.A[1]).toBe(0)
+    expect(r.series.B[1]).toBe(0)
+  })
+
+  it('accepts = as assignment and : as separator', () => {
+    const r = simulate('a = 2 : b := a*3', {}, 1)
+    expect(r.series.B[1]).toBe(6)
+  })
+
+  it('treats = inside a condition as comparison', () => {
+    const r = simulate('IF n = 2 THEN hit := 1\nn := n + 1', {}, 4)
+    expect(r.series.HIT[3]).toBe(1)
+  })
+
+  it('supports ^ with integer and fractional exponents', () => {
+    const r = simulate('a := 2^10; b := 2^0,5; c := -2^2; d := 2^-1', {}, 1)
+    expect(r.series.A[1]).toBe(1024)
+    expect(r.series.B[1]).toBe(Math.SQRT2)
+    expect(r.series.C[1]).toBe(-4)
+    expect(r.series.D[1]).toBe(0.5)
+  })
+
+  it('implements random(x) for whole numbers and random(0) for fractions', () => {
+    const r = simulate('w := random(6); f := random(0)', {}, 200, { seed: 42 })
+    const w = [...r.series.W].slice(1)
+    expect(w.every((v) => Number.isInteger(v) && v >= 0 && v < 6)).toBe(true)
+    expect(new Set(w).size).toBe(6)
+    expect([...r.series.F].slice(1).every((v) => v >= 0 && v < 1)).toBe(true)
+  })
+
+  it('finds assignments inside IF for the model roles', () => {
+    const { roles } = analyse('IF h < 0 THEN v := -v*e; h := 0\nv := v - g*dt\nh := h + v*dt\nt := t + dt')
+    expect(Object.fromEntries(roles)).toEqual({ V: 'state', H: 'state', E: 'constant', G: 'constant', DT: 'constant', T: 'time' })
+  })
+})
