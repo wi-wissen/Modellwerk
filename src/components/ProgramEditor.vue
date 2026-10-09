@@ -72,6 +72,11 @@ export default {
     errorLines() { return new Set(this.errors.map((e) => e.line)) },
   },
   methods: {
+    /** Currently selected text in the editor. */
+    selection() {
+      const area = this.$refs.area
+      return { start: area.selectionStart, end: area.selectionEnd, text: this.modelValue.slice(area.selectionStart, area.selectionEnd) }
+    },
     goto(line) {
       const area = this.$refs.area
       const lines = this.modelValue.split('\n')

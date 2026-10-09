@@ -30,6 +30,8 @@ export const ERROR_TEXTS = {
   stepsRange: 'Number of steps must be between 0 and {max}.',
   endlessLoop: 'Probably an endless loop.',
   invalidOperation: 'Invalid floating point operation.',
+  macroRecursive: 'Macro "{name}" calls itself.',
+  macroInvalid: 'Macro "{name}" contains an error.',
 }
 
 export function formatText(template, params = {}) {
@@ -124,10 +126,11 @@ function tokenizeLine(text, line) {
 }
 
 class Parser {
-  constructor(tokens, line) {
+  constructor(tokens, line, macros = null) {
     this.t = tokens
     this.i = 0
     this.line = line
+    this.macros = macros // { has(name), expand(name) } or null
   }
   peek() { return this.t[this.i] }
   is(type, value) {
@@ -175,6 +178,12 @@ class Parser {
       const cond = this.comparison()
       this.expect('kw', 'DO', 'doExpected')
       return { kind: 'while', cond, body: this.restOfLine(), line: this.line }
+    }
+    // a macro is called by its name alone, like a statement
+    const next = this.t[this.i + 1]
+    if (this.is('id') && this.macros?.has(this.peek().value) && (!next || (next.type === 'op' && next.value === ';'))) {
+      const name = this.take().value
+      return { kind: 'macro', name, body: this.macros.expand(name, this.line), line: this.line }
     }
     const target = this.expect('id', undefined, 'variableExpected')
     if (FUNCTIONS[target.value]) this.fail('assignToFunction', { name: target.raw })
@@ -245,8 +254,7 @@ class Parser {
   }
 }
 
-/** Parses program text; returns statements, errors and all variables that occur. */
-export function parseProgram(source, { caseSensitive = false } = {}) {
+function parseLines(source, caseSensitive, macros) {
   const statements = []
   const errors = []
   source.split('\n').forEach((text, idx) => {
@@ -255,12 +263,49 @@ export function parseProgram(source, { caseSensitive = false } = {}) {
       if (caseSensitive) {
         for (const t of tokens) if (t.type === 'id' && !FUNCTIONS[t.value]) t.value = t.raw
       }
-      if (tokens.length) statements.push(...new Parser(tokens, idx + 1).statements())
+      if (tokens.length) statements.push(...new Parser(tokens, idx + 1, macros).statements())
     } catch (e) {
       if (e instanceof ModelError) errors.push(e)
       else throw e
     }
   })
+  return { statements, errors }
+}
+
+/** Macro table: named blocks of statements, expanded where they are called. */
+function macroTable(macros, caseSensitive) {
+  const byName = new Map(macros.map((m) => [caseSensitive ? m.name : m.name.toUpperCase(), m]))
+  const parsed = new Map()
+  const active = []
+  const table = {
+    has: (name) => byName.has(name),
+    expand(name, line) {
+      if (active.includes(name)) throw new ModelError('macroRecursive', { name: byName.get(name).name }, line)
+      if (!parsed.has(name)) {
+        active.push(name)
+        try {
+          const result = parseLines(byName.get(name).body, caseSensitive, table)
+          const recursion = result.errors.find((e) => e.code === 'macroRecursive')
+          if (recursion) throw new ModelError('macroRecursive', recursion.params, line)
+          if (result.errors.length) throw new ModelError('macroInvalid', { name: byName.get(name).name }, line)
+          parsed.set(name, result.statements)
+        } finally {
+          active.pop()
+        }
+      }
+      return parsed.get(name)
+    },
+  }
+  return table
+}
+
+/**
+ * Parses program text; returns statements, errors and all variables that occur.
+ * `macros` is a list of { name, body }; a line consisting of a macro name runs its body.
+ */
+export function parseProgram(source, { caseSensitive = false, macros = [] } = {}) {
+  const table = macros.length ? macroTable(macros, caseSensitive) : null
+  const { statements, errors } = parseLines(source, caseSensitive, table)
   const variables = new Map()
   const assigned = new Set()
   const visit = (n) => {

@@ -23,8 +23,16 @@
         <text :x="m.l + pw / 2" :y="h - 6" text-anchor="middle" font-size="13" font-weight="700" fill="var(--ink)">{{ xLabel }}</text>
 
         <g fill="none" stroke-linejoin="round" stroke-linecap="round" :clip-path="`url(#${clipId})`">
-          <polyline v-for="(s, i) in lines" :key="s.name" :points="s.points" :stroke="s.color" stroke-width="2.5"
-                    :stroke-dasharray="dash(i)" />
+          <template v-if="mode !== 'points'">
+            <polyline v-for="o in overlayLines" :key="o.key" :points="o.points" :stroke="o.color" stroke-width="2" :stroke-dasharray="o.dash" opacity="0.85" />
+            <polyline v-for="(s, i) in lines" :key="s.name" :points="s.points" :stroke="s.color" stroke-width="2.5"
+                      :stroke-dasharray="dash(i)" />
+          </template>
+          <template v-if="mode !== 'line'">
+            <g v-for="(s, i) in [...overlayLines, ...lines]" :key="'p' + (s.key ?? s.name)" :fill="s.color" stroke="none" :opacity="s.key ? 0.7 : 1">
+              <circle v-for="(pt, k) in s.markers" :key="k" :cx="pt[0]" :cy="pt[1]" :r="s.key ? 2.4 : 3" />
+            </g>
+          </template>
         </g>
 
         <g v-if="cursor !== null">
@@ -77,6 +85,10 @@ export default {
     ys: { type: Array, required: true },
     // { auto: true } or { auto: false, xMin, xMax, yMin, yMax }; missing limits stay automatic
     range: { type: Object, default: () => ({ auto: true }) },
+    // curves of other simulations: [{ key, label, xs, data, colorIndex, dashIndex }]
+    overlays: { type: Array, default: () => [] },
+    // 'line' | 'points' | 'both'
+    mode: { type: String, default: 'line' },
   },
   data() {
     return { w: 640, h: 380, cursor: null, ro: null }
@@ -93,10 +105,10 @@ export default {
     xLabel() { return this.result.display.get(this.x) ?? this.x },
     clipId() { return `plot-clip-${this.$.uid}` },
     xDomain() {
-      return this.manual(this.domain([this.xs]), 'xMin', 'xMax')
+      return this.manual(this.domain([this.xs, ...this.overlays.map((o) => o.xs)]), 'xMin', 'xMax')
     },
     yDomain() {
-      const [lo, hi] = this.domain(this.ys.map((n) => this.result.series[n]).filter(Boolean))
+      const [lo, hi] = this.domain([...this.ys.map((n) => this.result.series[n]).filter(Boolean), ...this.overlays.map((o) => o.data)])
       const step = niceStep(lo, hi, 6)
       return this.manual([Math.floor(lo / step + 1e-9) * step, Math.ceil(hi / step - 1e-9) * step], 'yMin', 'yMax')
     },
@@ -112,7 +124,18 @@ export default {
           const py = this.sy(data[k])
           if (Number.isFinite(px) && Number.isFinite(py)) points += `${px.toFixed(1)},${py.toFixed(1)} `
         }
-        return { name, label: this.result.display.get(name) ?? name, data, points, color: seriesColor(i) }
+        return { name, label: this.result.display.get(name) ?? name, data, points, markers: this.markers(this.xs, data), color: seriesColor(i) }
+      })
+    },
+    overlayLines() {
+      return this.overlays.map((o) => {
+        let points = ''
+        for (let k = 0; k < o.data.length; k++) {
+          const px = this.sx(o.xs[k])
+          const py = this.sy(o.data[k])
+          if (Number.isFinite(px) && Number.isFinite(py)) points += `${px.toFixed(1)},${py.toFixed(1)} `
+        }
+        return { ...o, points, markers: this.markers(o.xs, o.data), color: seriesColor(o.colorIndex), dash: seriesDash(o.dashIndex + 1) || '6 4' }
       })
     },
     summary() {
@@ -137,6 +160,18 @@ export default {
   },
   beforeUnmount() { this.ro?.disconnect() },
   methods: {
+    // at most ~300 point markers per curve
+    markers(xs, data) {
+      if (this.mode === 'line') return []
+      const every = Math.max(1, Math.ceil(data.length / 300))
+      const out = []
+      for (let k = 0; k < data.length; k += every) {
+        const px = this.sx(xs[k])
+        const py = this.sy(data[k])
+        if (Number.isFinite(px) && Number.isFinite(py)) out.push([px, py])
+      }
+      return out
+    },
     manual([lo, hi], minKey, maxKey) {
       if (this.range.auto) return [lo, hi]
       const a = Number.isFinite(this.range[minKey]) ? this.range[minKey] : lo

@@ -75,6 +75,7 @@ export function simulate(source, startValues, steps, options = {}) {
       }
     }
     else if (s.kind === 'if') { if (test(s.cond)) s.body.forEach(exec) }
+    else if (s.kind === 'macro') s.body.forEach(exec)
     else {
       let guard = 0
       while (test(s.cond)) {

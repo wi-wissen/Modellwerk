@@ -129,10 +129,10 @@ function serialize(n) {
  * regenerate a program with exactly the same statements in the same order.
  * Returns { ok: true, sentences, simplified, timeName, dtName } or
  * { ok: false, line, reason } naming the first line that fits no sentence pattern;
- * reason is 'error' | 'time' | 'condition' | 'pattern' | 'order'.
+ * reason is 'error' | 'time' | 'condition' | 'macro' | 'pattern' | 'order'.
  */
-export function programToSentences(source) {
-  const program = parseProgram(source)
+export function programToSentences(source, { macros = [] } = {}) {
+  const program = parseProgram(source, { macros })
   if (program.errors.length || !program.statements.length) return { ok: false, line: program.errors[0]?.line ?? null, reason: 'error' }
   const stmts = program.statements
   const last = stmts[stmts.length - 1]
@@ -149,6 +149,7 @@ export function programToSentences(source) {
 
   const sentences = []
   for (const s of stmts.slice(0, -1)) {
+    if (s.kind === 'macro') return { ok: false, line: s.line, reason: 'macro' }
     if (s.kind !== 'assign') return { ok: false, line: s.line, reason: 'condition' }
     const e = s.expr
     const subject = s.raw

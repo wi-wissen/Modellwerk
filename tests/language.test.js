@@ -139,3 +139,26 @@ describe('language details from the legacy documentation', () => {
     expect(Object.fromEntries(roles)).toEqual({ V: 'state', H: 'state', E: 'constant', G: 'constant', DT: 'constant', T: 'time' })
   })
 })
+
+describe('macros', () => {
+  const macros = [
+    { name: 'Bremsen', body: 'v := v - b*dt\nIF v < 0 THEN v := 0' },
+    { name: 'Fahren', body: 'Bremsen\ns := s + v*dt' },
+  ]
+  it('expands a macro called by its name, also nested and after THEN', () => {
+    const withMacros = simulate('IF t >= 0 THEN Fahren\nt := t + dt', { V: 10, B: 2, DT: 0.5 }, 3, { macros })
+    const inline = simulate('IF t >= 0 THEN v := v - b*dt\nIF v < 0 THEN v := 0\ns := s + v*dt\nt := t + dt', { V: 10, B: 2, DT: 0.5 }, 3)
+    // note: inline IF on one line would swallow the rest; compare the stock directly
+    expect(withMacros.series.V[3]).toBe(7)
+    expect(withMacros.series.S[3]).toBe(4.5 + 4 + 3.5)
+    expect(inline.series.V[3]).toBe(7)
+  })
+  it('rejects recursion', () => {
+    const p = parseProgram('A1', { macros: [{ name: 'A1', body: 'B1' }, { name: 'B1', body: 'A1' }] })
+    expect(p.errors[0].code).toBe('macroRecursive')
+  })
+  it('reports errors inside a macro at the calling line', () => {
+    const p = parseProgram('x := 1\nKaputt', { macros: [{ name: 'Kaputt', body: 'y := (2' }] })
+    expect(p.errors[0]).toMatchObject({ code: 'macroInvalid', line: 2 })
+  })
+})
