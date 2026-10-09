@@ -30,12 +30,18 @@ Derived from a comparison with the public documentation of the legacy program.
 - German/English, light/dark, text size, keyboard and screen reader support
 - Desktop/mobile shell and release pipeline
 
+## Also done
+
+- Undo/redo for all model changes; diagram nodes never overlap; compact tool
+  choice on phones
+- Animation: a scene for every example (gauges, ropes, springs, growing
+  pictures), manual range
+- PRG files: stored x axis and shown curves are used
+- Report with the influence diagram; website works offline and is installable
+
 ## Next
 
-- Undo/redo in the diagram editor; prevent overlapping nodes
-- Manual range inputs in the animation settings (the logic supports them)
-- Use more PRG metadata (x-axis variable, curve colours) when opening files
-- Compact diagram toolbar on phones
+- Read curve colours from PRG files (their encoding is not understood yet)
 
 ## Later
 
