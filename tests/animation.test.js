@@ -4,8 +4,8 @@ import { analyse, sentencesToProgram } from '../src/engine/model.js'
 import { simulate } from '../src/engine/simulate.js'
 import { SPRITES } from '../src/assets/sprites/index.js'
 import {
-  SPRITE_HEADINGS, advance, computeLayout, dataExtent, defaultAnimation, findTimeName, frameAt, makeObject,
-  newObjectId, niceTicks, normalizeAnimation, stepsPerSecond, suggestSprite, tracePoints, usedVariables, validateAnimation,
+  SPRITE_HEADINGS, advance, computeLayout, dataExtent, defaultAnimation, findTimeName, frameAt, gaugeScale, makeObject,
+  newObjectId, niceTicks, normalizeAnimation, separateLabels, springPoints, stepsPerSecond, suggestSprite, tracePoints, usedVariables, validateAnimation,
 } from '../src/engine/animation.js'
 
 const programOf = (ex) => (ex.mode === 'sentences' ? sentencesToProgram(ex.sentences, { simplified: ex.simplified ?? true }) : ex.source)
@@ -196,21 +196,170 @@ describe('defaultAnimation for the example models', () => {
     const { result, roles } = run('lynx-and-hare')
     const a = defaultAnimation(result, roles)
     expect(a.objects.map((o) => [o.sprite, o.x, o.y])).toEqual([['rabbit', 'ZEIT', 'HASEN'], ['lynx', 'ZEIT', 'LUCHSE']])
-    const cooling = defaultAnimation(run('newtons-law-of-cooling').result, run('newtons-law-of-cooling').roles)
-    expect(cooling.objects[0]).toMatchObject({ x: 'ZEIT', y: 'TEMPERATUR', sprite: 'thermometer' })
     const plain = defaultAnimation(fake({ ZEIT: [0, 1], N: [1, 2] }))
     expect(plain.objects[0]).toMatchObject({ x: 'ZEIT', y: 'N', sprite: 'ball-small' })
     expect(defaultAnimation(fake({ K: [1, 1] })).objects).toEqual([])
   })
 
-  it('every example gets a valid preset that renders', () => {
+  it('every example gets a valid preset that renders and shows something changing', () => {
+    expect(EXAMPLES).toHaveLength(20)
     for (const ex of EXAMPLES) {
       const { result, roles } = run(ex.id)
       const a = defaultAnimation(result, roles, { context: ex.id })
+      expect(a.objects.length, ex.id).toBeGreaterThan(0)
       expect(validateAnimation(result, a, { sprites: SPRITES.map((s) => s.id) }), ex.id).toEqual([])
-      const f = frameAt(result, a, Math.floor(result.steps / 2), VIEW)
-      for (const o of f.objects) expect(Number.isFinite(o.x) && Number.isFinite(o.y), ex.id).toBe(true)
+      const changing = usedVariables(a).filter((n) => result.series[n].some((v) => v !== result.series[n][0]))
+      expect(changing.length, ex.id).toBeGreaterThan(0)
+      // no plain ball where the model is about something else
+      if (!['bouncing-ball'].includes(ex.id)) expect(a.objects.map((o) => o.sprite), ex.id).not.toContain('ball')
+      expect(a.objects.map((o) => o.sprite), ex.id).not.toContain('ball-small')
+      for (const step of [0, Math.floor(result.steps / 2), result.steps]) {
+        const f = frameAt(result, a, step, VIEW)
+        for (const o of f.objects) {
+          expect(Number.isFinite(o.x) && Number.isFinite(o.y) && Number.isFinite(o.size), ex.id).toBe(true)
+          if (o.gauge) expect(o.gauge.level).toBeGreaterThanOrEqual(o.gauge.top - 0.1)
+          if (o.gauge) expect(o.gauge.level).toBeLessThanOrEqual(o.gauge.bottom + 0.1)
+        }
+      }
     }
+  })
+
+  it('scenes: vessel, thermometer, columns, stem, rope and spring', () => {
+    const scene = (id) => {
+      const { result, roles } = run(id)
+      return defaultAnimation(result, roles, { context: id }).objects.map((o) => ({ sprite: o.sprite, fill: o.fill, y: o.y, x: o.x, scaleBy: o.scaleBy, rope: o.rope?.style ?? null, mount: o.rope?.mount ?? null }))
+    }
+    expect(scene('bathtub')).toMatchObject([{ fill: 'vessel', y: 'HOEHE', sprite: 'duck' }])
+    expect(scene('sunflower')).toMatchObject([{ sprite: 'sunflower', y: 'HOEHE', rope: 'stem' }])
+    expect(scene('bungee-jump')).toMatchObject([{ sprite: 'person', y: 'STRECKE', rope: 'rope', mount: true }])
+    expect(scene('damped-spring-pendulum')).toMatchObject([{ sprite: 'mass-block', x: 'S', rope: 'spring', mount: true }])
+    expect(scene('newtons-law-of-cooling')).toMatchObject([{ fill: 'thermometer', y: 'TEMPERATUR', sprite: 'cup' }])
+    expect(scene('thermostat')).toMatchObject([{ fill: 'thermometer', y: 'TEMPERATUR', sprite: 'house' }, { sprite: 'flame', scaleBy: 'HEIZUNG', y: null }])
+    expect(scene('earth-energy-balance')).toMatchObject([{ fill: 'thermometer', y: 'CELSIUS', sprite: 'earth' }])
+    expect(scene('ice-cube')).toMatchObject([{ fill: 'vessel', y: 'GETRAENK', sprite: 'ice-cube', scaleBy: 'EIS' }, { fill: 'thermometer', y: 'TEMPERATUR', sprite: 'thermometer' }])
+    expect(scene('camera-flash')).toMatchObject([{ fill: 'bar', y: 'LADUNG', sprite: 'capacitor' }])
+    expect(scene('caffeine')).toMatchObject([{ fill: 'bar', y: 'MAGEN', sprite: 'cup' }, { fill: 'bar', y: 'KOERPER', sprite: 'person' }])
+    expect(scene('classroom-co2')).toMatchObject([{ fill: 'bar', y: 'KONZENTRATION', sprite: 'co2' }])
+    expect(scene('radioactive-decay')).toMatchObject([{ fill: 'bar', y: 'BARIUM', sprite: 'nucleus' }])
+    expect(scene('population-germany')).toMatchObject([{ fill: 'bar', y: 'BEVOELKERUNG', sprite: 'person' }])
+    expect(scene('sir-epidemic').map((o) => [o.fill, o.y, o.sprite])).toEqual([['bar', 'GESUNDE', 'person'], ['bar', 'KRANKE', 'virus'], ['bar', 'GENESENE', 'person-recovered']])
+    // columns of one scene share their scale
+    const { result, roles } = run('sir-epidemic')
+    const sir = defaultAnimation(result, roles, { context: 'sir-epidemic' })
+    expect(new Set(sir.objects.map((o) => `${o.min}..${o.max}`)).size).toBe(1)
+    expect(sir.objects[0]).toMatchObject({ min: 0, max: 1000 })
+  })
+})
+
+describe('gauges', () => {
+  const r = fake({ T: [0, 1, 2, 3], A: [0, 5, 10, 20], C: [20, 15, 10, 5], H: [1, 1, 0, 0] })
+
+  it('the level runs from the bottom (min) to the top (max) and is clamped', () => {
+    const cfg = { objects: [{ id: 'g', sprite: 'drop', y: 'A', fill: 'bar', min: 0, max: 10 }] }
+    const L = computeLayout(r, cfg, VIEW)
+    const at = (i) => frameAt(r, cfg, i, L).objects[0]
+    close(at(0).gauge.level, at(0).gauge.bottom)
+    close(at(2).gauge.level, at(2).gauge.top)
+    close(at(1).gauge.level, (at(0).gauge.bottom + at(0).gauge.top) / 2)
+    close(at(3).gauge.level, at(3).gauge.top) // 20 > max
+    expect(at(2).gauge.ticks.map((t) => t.v)).toContain(10)
+    // the sprite sits on the column
+    close(at(1).y + at(1).size / 2, at(1).gauge.level)
+    expect(L.usesX || L.usesY).toBe(false)
+  })
+
+  it('automatic scales: amounts from 0, temperatures around the data', () => {
+    expect(gaugeScale(r, { fill: 'bar', y: 'A' })).toEqual([0, 25])
+    const [lo, hi] = gaugeScale(r, { fill: 'thermometer', y: 'C' })
+    expect(lo).toBeLessThan(5); expect(lo).toBeGreaterThan(-5); expect(hi).toBeGreaterThan(20); expect(hi).toBeLessThan(30)
+    expect(gaugeScale(r, { fill: 'bar', y: 'A', min: 5, max: 50 })).toEqual([5, 50])
+    expect(gaugeScale(r, { fill: 'bar', y: 'A', min: 50, max: 5 })).toEqual([0, 25]) // invalid → automatic
+  })
+
+  it('gauges stand side by side; a thermometer has its picture next to it, not on it', () => {
+    const cfg = { objects: [{ id: 'a', sprite: 'cup', y: 'C', fill: 'thermometer', size: 40 }, { id: 'b', sprite: 'drop', y: 'A', fill: 'vessel' }, { id: 'c', sprite: 'flame', scaleBy: 'H' }] }
+    const L = computeLayout(r, cfg, { width: 800, height: 400 })
+    const f = frameAt(r, cfg, 0, L).objects
+    expect(f[0].gauge.cx).toBeLessThan(f[1].gauge.cx)
+    expect(f[1].gauge.cx).toBeLessThan(f[2].x)
+    expect(f[0].x).toBeLessThan(f[0].gauge.x) // the cup left of the tube
+    close(f[0].y + f[0].size / 2, L.groundY) // on the ground
+    expect(f[0].showSprite).toBe(true)
+    const plain = frameAt(r, { objects: [{ sprite: 'thermometer', y: 'C', fill: 'thermometer' }] }, 0, VIEW).objects[0]
+    expect(plain.showSprite).toBe(false)
+    // a vessel is not much taller than wide
+    expect(f[1].gauge.bottom - f[1].gauge.top).toBeLessThanOrEqual(f[1].gauge.width * 1.3 + 0.1)
+  })
+
+  it('scaleBy: the area follows the value; zero hides the sprite', () => {
+    const cfg = { objects: [{ id: 'f', sprite: 'ice-cube', size: 40, scaleBy: 'A' }] }
+    const L = computeLayout(r, cfg, VIEW)
+    expect(frameAt(r, cfg, 3, L).objects[0].size).toBe(40)
+    close(frameAt(r, cfg, 1, L).objects[0].size, 40 * Math.sqrt(5 / 20), 1e-9)
+    const zero = frameAt(r, cfg, 0, L).objects[0]
+    expect(zero.size).toBe(0); expect(zero.showSprite).toBe(false)
+    // the label stays where the full-size sprite would have it
+    const withLabel = { objects: [{ id: 'f', sprite: 'ice-cube', size: 40, scaleBy: 'A', label: 'Eis' }] }
+    const L2 = computeLayout(r, withLabel, VIEW)
+    expect(frameAt(r, withLabel, 1, L2).objects[0].labelY).toBe(frameAt(r, withLabel, 3, L2).objects[0].labelY)
+  })
+})
+
+describe('labels', () => {
+  it('labels close together are moved apart and never overlap', () => {
+    const r = fake({ T: [0, 1], A: [10, 10], B: [10.2, 10.2], C: [10.1, 10.1] })
+    const cfg = { objects: ['A', 'B', 'C'].map((n) => ({ sprite: 'rabbit', x: 'T', y: n, size: 30, label: 'Label ' + n })), background: 'grid' }
+    const f = frameAt(r, cfg, 1, VIEW).objects
+    for (let i = 0; i < f.length; i++) {
+      for (let j = i + 1; j < f.length; j++) {
+        const apart = Math.abs(f[i].labelY - f[j].labelY) >= 15 || Math.abs(f[i].labelX - f[j].labelX) > 60
+        expect(apart, `${i}/${j}`).toBe(true)
+      }
+    }
+    // labels far apart stay where they are
+    const far = fake({ T: [0, 1], A: [0, 0], B: [100, 100] })
+    const g = frameAt(far, { objects: [{ sprite: 'ball', x: 0, y: 'A', label: 'a' }, { sprite: 'ball', x: 1, y: 'B', label: 'b' }] }, 0, VIEW).objects
+    close(g[0].labelY, g[0].y - 16 - 6); close(g[1].labelY, Math.max(12, g[1].y - 16 - 6))
+  })
+
+  it('a shrunk picture hides its label, a gauge keeps it', () => {
+    const r = fake({ T: [0, 1], H: [0, 1], A: [1, 2] })
+    const cfg = { objects: [{ sprite: 'thermometer', y: 'A', fill: 'thermometer', label: 'Temp' }, { sprite: 'flame', scaleBy: 'H', label: 'Heizung' }] }
+    const off = frameAt(r, cfg, 0, VIEW).objects
+    expect(off.map((o) => o.showLabel)).toEqual([true, false])
+    expect(frameAt(r, cfg, 1, VIEW).objects.map((o) => o.showLabel)).toEqual([true, true])
+  })
+})
+
+describe('ropes', () => {
+  const r = fake({ T: [0, 1, 2], S: [0, 10, 20], X: [1, 2, 3] })
+
+  it('a rope runs from the anchor to the edge of the sprite; a bridge marks an anchor above', () => {
+    const cfg = { objects: [{ sprite: 'person', y: 'S', size: 40, rope: { x: null, y: 0, style: 'rope', mount: true } }], flipY: true }
+    const L = computeLayout(r, cfg, VIEW)
+    const o = frameAt(r, cfg, 2, L).objects[0]
+    expect(o.rope).toMatchObject({ x1: o.x, y1: L.toPxY(0), x2: o.x, style: 'rope', mount: 'bridge' })
+    close(o.rope.y2, o.y - 40 * 0.42)
+    expect(L.margin.t).toBeGreaterThanOrEqual(30) // room for the railing
+    expect(frameAt(r, cfg, 0, L).objects[0].rope.y2).toBe(frameAt(r, cfg, 0, L).objects[0].rope.y1) // no rope yet
+  })
+
+  it('a spring to a wall at the side; the anchor is inside the range', () => {
+    const cfg = { objects: [{ sprite: 'mass-block', x: 'X', rope: { x: -2, style: 'spring', mount: true } }] }
+    const L = computeLayout(r, cfg, VIEW)
+    expect(L.xRange[0]).toBeLessThanOrEqual(-2)
+    const o = frameAt(r, cfg, 1, L).objects[0]
+    expect(o.rope).toMatchObject({ mount: 'wall', style: 'spring', y1: o.y })
+    expect(o.rope.points.split(' ')).toHaveLength(24)
+    expect(springPoints(0, 0, 100, 0, 4).split(' ')).toHaveLength(12)
+    expect(springPoints(0, 0, 0.2, 0)).toBe('0,0 0.2,0')
+  })
+
+  it('normalises ropes and fills', () => {
+    const o = normalizeAnimation({ objects: [{ sprite: 'person', y: 'S', rope: true, fill: 'nonsense' }] }).objects[0]
+    expect(o.rope).toEqual({ x: null, y: 0, style: 'rope', mount: false })
+    expect(o.fill).toBe(null)
+    expect(makeObject({ rope: { y: 2, style: 'zigzag' } }).rope.style).toBe('rope')
   })
 })
 
@@ -225,11 +374,14 @@ describe('suggestSprite', () => {
     expect(suggestSprite('Sonnenblume')).toBe('sunflower')
     expect(suggestSprite('Temperatur')).toBe('thermometer')
     expect(suggestSprite('Q', '', 'star')).toBe('star')
+    expect(suggestSprite('Konzentration', 'classroom-co2')).toBe('co2')
+    expect(suggestSprite('N', 'radioactive-decay')).toBe('nucleus')
+    expect(suggestSprite('Hoehe', 'Badewanne')).toBe('duck')
   })
 
   it('only suggests existing sprites; headings only for rotating sprites', () => {
     const ids = new Set(SPRITES.map((s) => s.id))
-    for (const w of ['Ball', 'Rakete', 'Satellit', 'Erde', 'Mond', 'Pendel', 'Auto', 'Luchs', 'Virus', 'Kaffee', 'Ladung', 'Haus', 'CO2']) {
+    for (const w of ['Ball', 'Rakete', 'Satellit', 'Erde', 'Mond', 'Pendel', 'Auto', 'Luchs', 'Virus', 'Kaffee', 'Ladung', 'Haus', 'CO2', 'Badeente', 'Heizung', 'Barium', 'Koerper']) {
       expect(ids.has(suggestSprite(w)), w).toBe(true)
     }
     for (const id of Object.keys(SPRITE_HEADINGS)) expect(SPRITES.find((s) => s.id === id)?.rotates, id).toBe(true)
@@ -249,6 +401,11 @@ describe('validation and helpers', () => {
       { code: 'badRange', field: 'x' },
     ])
     expect(validateAnimation(r, { objects: [{ sprite: 'ball', x: 0, y: 'X' }] })).toEqual([])
+    expect(validateAnimation(r, { objects: [{ id: 'g', sprite: 'drop', fill: 'vessel', min: 3, max: 1, scaleBy: 'Q' }] })).toEqual([
+      { code: 'unknownVariable', object: 'g', field: 'scaleBy', name: 'Q' },
+      { code: 'noValue', object: 'g', field: 'y' },
+      { code: 'badRange', object: 'g', field: 'y' },
+    ])
   })
 
   it('normalize fills defaults without mutating, ids are unique and stable', () => {
@@ -275,6 +432,14 @@ describe('validation and helpers', () => {
   it('time name and used variables', () => {
     expect(findTimeName(fake({ DT: [1], ZEIT: [0] }))).toBe('ZEIT')
     expect(findTimeName(fake({ A: [1] }))).toBe(null)
-    expect(usedVariables({ objects: [{ x: 'X', y: 'X', angle: 'W' }, { x: 0, y: 'Y' }] })).toEqual(['X', 'W', 'Y'])
+    expect(usedVariables({ objects: [{ x: 'X', y: 'X', angle: 'W' }, { x: 0, y: 'Y', scaleBy: 'Z' }] })).toEqual(['X', 'W', 'Y', 'Z'])
+  })
+})
+
+describe('separateLabels stacking order', () => {
+  it('gives the upper object the upper label when labels stack', () => {
+    const obj = (id, y) => ({ id, x: 100, y, size: 24, showSprite: true, showLabel: true, label: id, labelX: 100, labelY: y - 16 })
+    const [upper, lower] = separateLabels([obj('Upper', 100), obj('Lower', 118)])
+    expect(upper.labelY).toBeLessThan(lower.labelY)
   })
 })

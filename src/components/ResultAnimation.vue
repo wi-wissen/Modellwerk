@@ -50,16 +50,63 @@
           <circle :cx="o.rod.x1" :cy="o.rod.y1" r="3" fill="var(--ink)" />
         </g>
 
+        <!-- ropes, stems and springs, with a bridge or a wall at the anchor -->
+        <g v-for="o in frame.objects.filter((o) => o.rope)" :key="'rope' + o.id">
+          <g v-if="o.rope.mount === 'bridge'" data-part="bridge">
+            <rect :x="bridgeLeft" :y="o.rope.y1 - 9" :width="Math.max(0, w - bridgeLeft)" height="9" fill="var(--sunken)" stroke="var(--muted)" stroke-width="1.5" />
+            <path :d="bridgeTruss(o.rope.y1)" fill="none" stroke="var(--muted)" stroke-width="1" />
+            <line :x1="bridgeLeft" :x2="w" :y1="o.rope.y1 - 22" :y2="o.rope.y1 - 22" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" />
+            <line v-for="px in railPosts" :key="px" :x1="px" :x2="px" :y1="o.rope.y1 - 22" :y2="o.rope.y1 - 9" stroke="var(--muted)" stroke-width="1.5" />
+          </g>
+          <g v-else-if="o.rope.mount === 'wall'" data-part="wall">
+            <rect :x="o.rope.x1 - (o.rope.x1 <= o.rope.x2 ? 10 : 0)" :y="o.rope.y1 - 34" width="10" :height="Math.max(0, Math.min(68, frame.groundY - o.rope.y1 + 34))"
+                  fill="var(--sunken)" stroke="var(--muted)" stroke-width="1.5" />
+          </g>
+          <circle v-else-if="o.rope.mount === 'point'" :cx="o.rope.x1" :cy="o.rope.y1" r="4" fill="var(--ink)" />
+          <template v-if="o.rope.style === 'stem'">
+            <line :x1="o.rope.x1" :y1="o.rope.y1" :x2="o.rope.x2" :y2="o.rope.y2" stroke="#1f2933" stroke-width="7" stroke-linecap="round" />
+            <line :x1="o.rope.x1" :y1="o.rope.y1" :x2="o.rope.x2" :y2="o.rope.y2" stroke="#5cb85c" stroke-width="3.5" stroke-linecap="round" />
+            <path v-for="(leaf, li) in stemLeaves(o.rope)" :key="li" :d="leaf" fill="#5cb85c" stroke="#1f2933" stroke-width="1.5" stroke-linejoin="round" />
+          </template>
+          <polyline v-else-if="o.rope.style === 'spring'" :points="o.rope.points" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round" />
+          <line v-else :x1="o.rope.x1" :y1="o.rope.y1" :x2="o.rope.x2" :y2="o.rope.y2" stroke="#a0642c" stroke-width="2.5" stroke-linecap="round" />
+        </g>
+
+        <!-- gauges: vessel, thermometer, column -->
+        <g v-for="(o, gi) in frame.objects.filter((o) => o.gauge)" :key="'g' + o.id" :data-gauge="o.gauge.style">
+          <template v-if="o.gauge.style === 'vessel'">
+            <rect :x="o.gauge.x + 2" :y="o.gauge.level" :width="o.gauge.width - 4" :height="Math.max(0, o.gauge.bottom - o.gauge.level - 2)" rx="4" fill="#3e9de0" fill-opacity="0.75" />
+            <line v-if="o.gauge.level < o.gauge.bottom - 3" :x1="o.gauge.x + 3" :x2="o.gauge.x + o.gauge.width - 3" :y1="o.gauge.level" :y2="o.gauge.level" stroke="#bfe3fb" stroke-width="2" />
+            <path :d="vesselPath(o.gauge)" fill="none" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" />
+          </template>
+          <template v-else-if="o.gauge.style === 'thermometer'">
+            <rect :x="o.gauge.x" :y="o.gauge.top - o.gauge.width / 2" :width="o.gauge.width" :height="o.gauge.bulb.cy - o.gauge.top + o.gauge.width / 2" :rx="o.gauge.width / 2"
+                  fill="var(--sheet)" stroke="var(--ink)" stroke-width="2" />
+            <circle :cx="o.gauge.bulb.cx" :cy="o.gauge.bulb.cy" :r="o.gauge.bulb.r" fill="#e8574a" stroke="var(--ink)" stroke-width="2" />
+            <rect :x="o.gauge.x + o.gauge.width * 0.25" :y="o.gauge.level" :width="o.gauge.width * 0.5" :height="Math.max(0, o.gauge.bulb.cy - o.gauge.level)" fill="#e8574a" />
+          </template>
+          <template v-else>
+            <rect :x="o.gauge.x" :y="o.gauge.top" :width="o.gauge.width" :height="o.gauge.bottom - o.gauge.top" rx="3" fill="var(--sunken)" stroke="var(--line)" />
+            <rect :x="o.gauge.x" :y="o.gauge.level" :width="o.gauge.width" :height="Math.max(0, o.gauge.bottom - o.gauge.level)" rx="3" :fill="gaugeColor(gi)" stroke="var(--ink)" stroke-width="1.5" />
+          </template>
+          <g font-size="11" fill="var(--muted)" class="tabular">
+            <g v-for="t in o.gauge.ticks" :key="'gk' + t.v">
+              <line :x1="o.gauge.x + o.gauge.width + 2" :x2="o.gauge.x + o.gauge.width + 6" :y1="t.px" :y2="t.px" stroke="var(--muted)" />
+              <text :x="o.gauge.x + o.gauge.width + 9" :y="t.px + 4">{{ gaugeTickLabel(o.gauge)(t.v) }}</text>
+            </g>
+          </g>
+        </g>
+
         <!-- sprites -->
-        <g v-for="o in frame.objects.filter((o) => o.visible)" :key="'o' + o.id"
+        <g v-for="o in frame.objects.filter((o) => o.visible && o.showSprite)" :key="'o' + o.id"
            :transform="`translate(${o.x} ${o.y}) rotate(${o.rotation})${o.mirror ? ' scale(-1 1)' : ''}`">
           <image :href="spriteSrc(o.sprite)" :data-sprite="o.sprite" :x="-o.size / 2" :y="-o.size / 2" :width="o.size" :height="o.size" />
         </g>
 
         <!-- labels -->
         <g font-size="12" font-weight="700" fill="var(--ink)" stroke="var(--sheet)" stroke-width="4" paint-order="stroke" stroke-linejoin="round" text-anchor="middle">
-          <text v-for="o in frame.objects.filter((o) => o.visible && o.label)" :key="'l' + o.id"
-                :x="o.x" :y="Math.max(12, o.y - o.size / 2 - 6)">{{ o.label }}</text>
+          <text v-for="o in frame.objects.filter((o) => o.showLabel)" :key="'l' + o.id"
+                :x="o.labelX" :y="o.labelY">{{ o.label }}</text>
         </g>
 
         <text v-if="!frame.objects.length" :x="w / 2" :y="h / 2" text-anchor="middle" font-size="14" fill="var(--muted)">{{ $t('animation.empty') }}</text>
@@ -140,8 +187,32 @@
           </div>
 
           <div class="grid gap-3 sm:grid-cols-3">
-            <label v-for="f in ['x', 'y', 'angle']" :key="f" class="flex flex-col gap-1 text-sm">
-              <span class="font-semibold">{{ $t('animation.fields.' + f) }}</span>
+            <label class="flex flex-col gap-1 text-sm">
+              <span class="font-semibold">{{ $t('animation.display') }}</span>
+              <select class="field" :value="o.fill ?? ''" @change="setFill(oi, $event.target.value)">
+                <option value="">{{ $t('animation.fills.none') }}</option>
+                <option v-for="f in fillStyles" :key="f" :value="f">{{ $t('animation.fills.' + f) }}</option>
+              </select>
+            </label>
+            <label class="flex flex-col gap-1 text-sm">
+              <span class="font-semibold">{{ $t('animation.fields.scaleBy') }}</span>
+              <select class="field" :value="o.scaleBy ?? ''" @change="update((a) => { a.objects[oi].scaleBy = $event.target.value || null })">
+                <option value="">{{ $t('animation.none') }}</option>
+                <option v-for="n in variableOptions" :key="n.name" :value="n.name">{{ n.label }}</option>
+              </select>
+            </label>
+            <label v-if="!o.fill && !(o.arm > 0 && o.angle)" class="flex flex-col gap-1 text-sm">
+              <span class="font-semibold">{{ $t('animation.rope') }}</span>
+              <select class="field" :value="o.rope?.style ?? ''" @change="setRope(oi, $event.target.value)">
+                <option value="">{{ $t('animation.none') }}</option>
+                <option v-for="r in ropeStyles" :key="r" :value="r">{{ $t('animation.ropes.' + r) }}</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="grid gap-3 sm:grid-cols-3">
+            <label v-for="f in (o.fill ? ['y'] : ['x', 'y', 'angle'])" :key="f" class="flex flex-col gap-1 text-sm">
+              <span class="font-semibold">{{ $t(o.fill ? 'animation.fields.value' : 'animation.fields.' + f) }}</span>
               <select class="field" :value="selectValue(o[f])" @change="setField(oi, f, $event.target.value)">
                 <option value="">{{ $t('animation.none') }}</option>
                 <option v-if="typeof o[f] === 'number'" :value="'#' + o[f]">{{ $t('animation.fixed', { value: fmt(o[f]) }) }}</option>
@@ -150,8 +221,19 @@
             </label>
           </div>
 
+          <div v-if="o.fill" class="flex flex-wrap items-end gap-3">
+            <label v-for="k in ['min', 'max']" :key="k" class="flex w-28 flex-col gap-1 text-sm">
+              <span class="font-semibold">{{ $t('animation.scale.' + k) }}</span>
+              <input class="field tabular font-mono" inputmode="decimal" autocomplete="off"
+                     :value="numberDraft(`${o.id}.${k}`, o[k])" :placeholder="$t('app.auto')"
+                     :aria-invalid="String(!!badInput[`${o.id}.${k}`])" :aria-describedby="badInput[`${o.id}.${k}`] ? `${uid}-bad-${o.id}-${k}` : null"
+                     @change="setNumber(`${o.id}.${k}`, $event.target.value, (a, v) => { a.objects[oi][k] = v })" />
+              <span v-if="badInput[`${o.id}.${k}`]" :id="`${uid}-bad-${o.id}-${k}`" class="text-bad">{{ $t('animation.invalidNumber') }}</span>
+            </label>
+          </div>
+
           <div class="flex flex-wrap items-end gap-3">
-            <label v-if="o.angle" class="flex flex-col gap-1 text-sm">
+            <label v-if="o.angle && !o.fill" class="flex flex-col gap-1 text-sm">
               <span class="font-semibold">{{ $t('animation.angleUnit') }}</span>
               <select class="field !w-auto" :value="o.angleUnit" @change="update((a) => { a.objects[oi].angleUnit = $event.target.value })">
                 <option value="deg">{{ $t('animation.units.deg') }}</option>
@@ -174,15 +256,19 @@
           </div>
 
           <div class="flex flex-wrap items-center gap-2">
-            <label class="toggle">
+            <label v-if="!o.fill" class="toggle">
               <input type="checkbox" :checked="o.trace" @change="update((a) => { a.objects[oi].trace = $event.target.checked })" />
               {{ $t('animation.trace') }}
             </label>
-            <label v-if="o.angle && o.x == null && o.y == null" class="toggle">
+            <label v-if="o.angle && o.x == null && o.y == null && !o.fill" class="toggle">
               <input type="checkbox" :checked="o.arm > 0" @change="update((a) => { a.objects[oi].arm = $event.target.checked ? 0.8 : 0 })" />
               {{ $t('animation.pendulum') }}
             </label>
-            <label v-if="o.y" class="toggle">
+            <label v-if="o.rope && !o.fill" class="toggle">
+              <input type="checkbox" :checked="o.rope.mount" @change="update((a) => { a.objects[oi].rope.mount = $event.target.checked })" />
+              {{ $t('animation.mount') }}
+            </label>
+            <label v-if="o.y && !o.fill" class="toggle">
               <input type="checkbox" :checked="o.anchor === 'bottom'" @change="update((a) => { a.objects[oi].anchor = $event.target.checked ? 'bottom' : 'center' })" />
               {{ $t('animation.standsOnValue') }}
             </label>
@@ -209,6 +295,24 @@
               {{ $t('animation.flipY') }}
             </label>
           </div>
+          <div v-if="rangeKeys.length" class="flex flex-col gap-2">
+            <label class="toggle self-start">
+              <input type="checkbox" :checked="config.range.auto" @change="setRangeAuto($event.target.checked)" />
+              {{ $t('animation.rangeAuto') }}
+            </label>
+            <div v-if="!config.range.auto" class="flex flex-wrap items-start gap-3">
+              <label v-for="k in rangeKeys" :key="k" class="flex w-28 flex-col gap-1 text-sm">
+                <span class="font-semibold">{{ $t('app.' + k) }}</span>
+                <input class="field tabular font-mono" inputmode="decimal" autocomplete="off"
+                       :value="numberDraft('range.' + k, config.range[k])" :placeholder="$t('app.auto')"
+                       :aria-invalid="String(!!badInput['range.' + k] || badRangeAxes.includes(k[0]))"
+                       :aria-describedby="badInput['range.' + k] ? `${uid}-bad-range-${k}` : null"
+                       @change="setNumber('range.' + k, $event.target.value, (a, v) => { a.range[k] = v })" />
+                <span v-if="badInput['range.' + k]" :id="`${uid}-bad-range-${k}`" class="text-bad">{{ $t('animation.invalidNumber') }}</span>
+              </label>
+            </div>
+            <p v-for="axis in badRangeAxes" :key="axis" class="text-sm text-bad" role="alert">{{ problemText({ code: 'badRange', field: axis }) }}</p>
+          </div>
           <div class="flex flex-wrap items-center gap-2 text-sm" role="group" :aria-labelledby="uid + '-bg'">
             <span :id="uid + '-bg'" class="font-semibold">{{ $t('animation.background') }}</span>
             <div class="seg">
@@ -228,11 +332,11 @@
 <script>
 import { Pause, Play, Plus, RotateCcw, Settings2, SkipBack, StepBack, StepForward, Trash2 } from 'lucide-vue-next'
 import { SPRITES, findSprite } from '../assets/sprites/index.js'
-import { formatNumber } from '../engine/model.js'
+import { formatNumber, parseNumber } from '../engine/model.js'
 import { numberLocale } from '../i18n/index.js'
 import { seriesColor, seriesDash } from '../chartStyle.js'
 import {
-  BACKGROUNDS, LOOP_MODES, SPEEDS, advance, cloneAnimation, computeLayout, defaultAnimation, findTimeName,
+  BACKGROUNDS, FILL_STYLES, LOOP_MODES, ROPE_STYLES, SPEEDS, advance, cloneAnimation, computeLayout, defaultAnimation, findTimeName,
   frameAt, makeObject, normalizeAnimation, stepsPerSecond, suggestSprite, tracePoints, usedVariables, validateAnimation,
 } from '../engine/animation.js'
 
@@ -258,6 +362,9 @@ export default {
       reducedMotion: false, settingsOpen: false, liveText: '', lastLive: 0,
       raf: 0, lastTs: 0, ro: null, io: null, motionQuery: null, liveTimer: 0, dataUris: {},
       speeds: SPEEDS, loopModes: LOOP_MODES, backgrounds: BACKGROUNDS, sprites: SPRITES,
+      fillStyles: FILL_STYLES, ropeStyles: ROPE_STYLES,
+      // number inputs: text that is not a number stays in the field and is marked
+      drafts: {}, badInput: {},
     }
   },
   computed: {
@@ -282,18 +389,18 @@ export default {
       }))
     },
     // one format per axis: plain integers (years!), or a shared power of ten for large/small values
-    tickLabels() {
-      const make = (ticks) => {
-        const max = Math.max(0, ...ticks.map((t) => Math.abs(t.v)))
-        if (max >= 1e5 || (max > 0 && max < 1e-3)) {
-          const e = Math.floor(Math.log10(max))
-          const sup = String(e).replace(/-/g, '⁻').replace(/\d/g, (d) => '⁰¹²³⁴⁵⁶⁷⁸⁹'[d])
-          return (v) => (v === 0 ? '0' : `${this.fmt(v / 10 ** e, 3).replace('-', '−')}·10${sup}`)
-        }
-        if (ticks.every((t) => Number.isInteger(t.v)) && max < 1e5) return (v) => String(v).replace('-', '−')
-        return (v) => this.fmt(v).replace('-', '−')
-      }
-      return { x: make(this.frame.ticks.x), y: make(this.frame.ticks.y) }
+    tickLabels() { return { x: this.tickFormat(this.frame.ticks.x), y: this.tickFormat(this.frame.ticks.y) } },
+    // the manual range only matters for axes that objects move along
+    rangeKeys() {
+      return [...(this.layout.usesX ? ['xMin', 'xMax'] : []), ...(this.layout.usesY ? ['yMin', 'yMax'] : [])]
+    },
+    badRangeAxes() { return this.problems.filter((p) => p.code === 'badRange' && !p.object).map((p) => p.field) },
+    // a bridge leaves the height scale at the left readable
+    bridgeLeft() { return this.frame.ticks.y.length ? Math.max(0, this.area.l - 2) : 0 },
+    railPosts() {
+      const out = []
+      for (let x = this.bridgeLeft + 8; x < this.w; x += 28) out.push(x)
+      return out
     },
     timeName() { return findTimeName(this.result, this.roles) },
     readout() {
@@ -309,8 +416,11 @@ export default {
     problems() { return validateAnimation(this.result, this.config, { sprites: SPRITES.map((s) => s.id) }) },
     summary() {
       const objects = this.config.objects.map((o) => {
-        const vars = ['x', 'y', 'angle'].filter((f) => typeof o[f] === 'string').map((f) => this.label(o[f]))
-        return vars.length ? this.$t('animation.summaryObject', { name: this.spriteName(o.sprite), vars: vars.join(', ') }) : this.spriteName(o.sprite)
+        const fields = o.fill ? ['y', 'scaleBy'] : ['x', 'y', 'angle', 'scaleBy']
+        const vars = fields.filter((f) => typeof o[f] === 'string').map((f) => this.label(o[f]))
+        const name = o.fill ? this.$t('animation.fills.' + o.fill) : this.spriteName(o.sprite)
+        if (!vars.length) return name
+        return this.$t(o.fill ? 'animation.summaryGauge' : 'animation.summaryObject', { name, vars: vars.join(', ') })
       })
       return this.$t('animation.summary', { steps: this.steps, objects: objects.join('; ') || this.$t('animation.empty') })
     },
@@ -395,7 +505,106 @@ export default {
     removeObject(oi) { this.update((a) => { a.objects.splice(oi, 1) }) },
     reset() { this.$emit('update:modelValue', cloneAnimation(this.preset)) },
     problemText(p) {
-      return this.$t(`animation.problems.${p.code}`, { name: p.name ? this.label(p.name) : '', field: p.field ? this.$t('animation.fields.' + p.field) : '' })
+      const gauge = p.object && this.config.objects.find((o) => o.id === p.object)?.fill
+      const field = p.field ? this.$t(gauge && p.field === 'y' ? 'animation.fields.value' : 'animation.fields.' + p.field) : ''
+      return this.$t(`animation.problems.${p.code}`, { name: p.name ? this.label(p.name) : '', field })
+    },
+
+    // ---- number inputs (decimal comma or point; empty = automatic) ----
+    numberText(v) {
+      if (!Number.isFinite(v)) return ''
+      const t = String(Number(v.toPrecision(6)))
+      return numberLocale().startsWith('de') ? t.replace('.', ',') : t
+    },
+    numberDraft(key, value) { return key in this.drafts ? this.drafts[key] : this.numberText(value) },
+    setNumber(key, raw, apply) {
+      const text = String(raw).trim()
+      const v = text === '' ? null : parseNumber(text)
+      if (text !== '' && v === null) {
+        this.drafts = { ...this.drafts, [key]: raw }
+        this.badInput = { ...this.badInput, [key]: true }
+        return
+      }
+      const { [key]: _d, ...drafts } = this.drafts
+      const { [key]: _b, ...bad } = this.badInput
+      this.drafts = drafts
+      this.badInput = bad
+      this.update((a) => apply(a, v))
+    },
+    setRangeAuto(on) {
+      const L = this.layout
+      const current = { xMin: L.xRange[0], xMax: L.xRange[1], yMin: L.yRange[0], yMax: L.yRange[1] }
+      this.update((a) => {
+        a.range.auto = on
+        // start the manual range from what is shown now
+        if (!on) for (const k of this.rangeKeys) if (!Number.isFinite(a.range[k])) a.range[k] = Number(current[k].toPrecision(4))
+      })
+      this.drafts = {}
+      this.badInput = {}
+    },
+
+    // ---- gauges and ropes ----
+    setFill(oi, value) {
+      this.update((a) => {
+        const o = a.objects[oi]
+        o.fill = value || null
+        if (!o.fill) return
+        if (typeof o.y !== 'string') {
+          const varying = (n) => this.result.series[n]?.some((v) => v !== this.result.series[n][0])
+          const candidates = this.names.filter((n) => n !== this.timeName && varying(n))
+          o.y = candidates.find((n) => this.roles?.get(n) === 'state') ?? candidates[0] ?? null
+        }
+        Object.assign(o, { x: null, angle: null, arm: 0, trace: false, rope: null, anchor: 'center' })
+      })
+    },
+    setRope(oi, style) {
+      const L = this.layout
+      this.update((a) => {
+        const o = a.objects[oi]
+        if (!style) { o.rope = null; return }
+        if (o.rope) { o.rope.style = style; return }
+        const round = (v) => Number(v.toPrecision(4))
+        const horizontal = typeof o.x === 'string' && typeof o.y !== 'string'
+        let rope
+        if (horizontal) rope = { x: round(L.xRange[0]), y: null }
+        else if (style === 'stem') rope = { x: null, y: L.yRange[0] <= 0 && L.yRange[1] >= 0 ? 0 : round(L.yRange[0]) }
+        else rope = { x: null, y: round(a.flipY ? L.yRange[0] : L.yRange[1]) }
+        o.rope = { ...rope, style, mount: style !== 'stem' }
+      })
+    },
+    gaugeColor(i) { return seriesColor(i) },
+    gaugeTickLabel(g) { return this.tickFormat(g.ticks) },
+    // one format per axis: plain integers (years!), or a shared power of ten for large/small values
+    tickFormat(ticks) {
+      const max = Math.max(0, ...ticks.map((t) => Math.abs(t.v)))
+      if (max >= 1e5 || (max > 0 && max < 1e-3)) {
+        const e = Math.floor(Math.log10(max))
+        const sup = String(e).replace(/-/g, '⁻').replace(/\d/g, (d) => '⁰¹²³⁴⁵⁶⁷⁸⁹'[d])
+        return (v) => (v === 0 ? '0' : `${this.fmt(v / 10 ** e, 3).replace('-', '−')}·10${sup}`)
+      }
+      if (ticks.every((t) => Number.isInteger(t.v)) && max < 1e5) return (v) => String(v).replace('-', '−')
+      return (v) => this.fmt(v).replace('-', '−')
+    },
+    vesselPath(g) {
+      const l = g.x
+      const r = g.x + g.width
+      const rad = Math.min(12, g.width / 4)
+      return `M${l - 5} ${g.top} H${l} V${g.bottom - rad} Q${l} ${g.bottom} ${l + rad} ${g.bottom} H${r - rad} Q${r} ${g.bottom} ${r} ${g.bottom - rad} V${g.top} H${r + 5}`
+    },
+    bridgeTruss(y) {
+      let d = ''
+      for (let x = this.bridgeLeft; x < this.w; x += 18) d += `M${x} ${y - 9}L${Math.min(this.w, x + 9)} ${y}L${Math.min(this.w, x + 18)} ${y - 9}`
+      return d
+    },
+    // two leaves on a stem that is long enough
+    stemLeaves(r) {
+      const len = Math.hypot(r.x2 - r.x1, r.y2 - r.y1)
+      if (len < 40) return []
+      return [[0.3, 1], [0.6, -1]].map(([f, s]) => {
+        const x = r.x1 + (r.x2 - r.x1) * f
+        const y = r.y1 + (r.y2 - r.y1) * f
+        return `M${x} ${y}c${s * 6} -10 ${s * 16} -11 ${s * 21} -7c${-s * 6} 7 ${-s * 15} 9 ${-s * 21} 7z`
+      })
     },
 
     // ---- playback ----

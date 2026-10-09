@@ -33,6 +33,11 @@ import battery from './battery.svg'
 import lightning from './lightning.svg'
 import arrow from './arrow.svg'
 import star from './star.svg'
+import duck from './duck.svg'
+import personRecovered from './person-recovered.svg'
+import flame from './flame.svg'
+import co2 from './co2.svg'
+import nucleus from './nucleus.svg'
 
 export const SPRITES = [
   { id: 'ball', src: ball, name: { de: 'Ball', en: 'Ball' }, size: 32, rotates: false, group: 'mechanics' },
@@ -54,13 +59,18 @@ export const SPRITES = [
   { id: 'sunflower', src: sunflower, name: { de: 'Sonnenblume', en: 'Sunflower' }, size: 48, rotates: false, group: 'biology' },
   { id: 'drop', src: drop, name: { de: 'Wassertropfen', en: 'Water drop' }, size: 28, rotates: false, group: 'heat' },
   { id: 'ice-cube', src: iceCube, name: { de: 'Eiswürfel', en: 'Ice cube' }, size: 36, rotates: false, group: 'heat' },
+  { id: 'flame', src: flame, name: { de: 'Flamme', en: 'Flame' }, size: 40, rotates: false, group: 'heat' },
   { id: 'cup', src: cup, name: { de: 'Tasse', en: 'Cup' }, size: 40, rotates: false, group: 'heat' },
   { id: 'thermometer', src: thermometer, name: { de: 'Thermometer', en: 'Thermometer' }, size: 48, rotates: false, group: 'heat' },
   { id: 'house', src: house, name: { de: 'Haus', en: 'House' }, size: 48, rotates: false, group: 'other' },
   { id: 'person', src: person, name: { de: 'Person', en: 'Person' }, size: 48, rotates: false, group: 'other' },
+  { id: 'person-recovered', src: personRecovered, name: { de: 'Genesene Person', en: 'Recovered person' }, size: 48, rotates: false, group: 'biology' },
+  { id: 'duck', src: duck, name: { de: 'Badeente', en: 'Rubber duck' }, size: 36, rotates: false, group: 'other' },
   { id: 'rabbit', src: rabbit, name: { de: 'Hase', en: 'Rabbit' }, size: 40, rotates: false, group: 'biology' },
   { id: 'lynx', src: lynx, name: { de: 'Luchs', en: 'Lynx' }, size: 44, rotates: false, group: 'biology' },
   { id: 'virus', src: virus, name: { de: 'Virus', en: 'Virus' }, size: 32, rotates: false, group: 'biology' },
+  { id: 'co2', src: co2, name: { de: 'CO₂-Molekül', en: 'CO₂ molecule' }, size: 40, rotates: false, group: 'heat' },
+  { id: 'nucleus', src: nucleus, name: { de: 'Atomkern', en: 'Atomic nucleus' }, size: 36, rotates: false, group: 'electricity' },
   { id: 'molecule', src: molecule, name: { de: 'Molekül', en: 'Molecule' }, size: 36, rotates: false, group: 'heat' },
   { id: 'capacitor', src: capacitor, name: { de: 'Kondensator', en: 'Capacitor' }, size: 44, rotates: false, group: 'electricity' },
   { id: 'battery', src: battery, name: { de: 'Batterie', en: 'Battery' }, size: 44, rotates: false, group: 'electricity' },

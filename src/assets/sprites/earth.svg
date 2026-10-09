@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="#1f2933" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
 <title>Earth</title>
-<circle cx="32" cy="32" r="24" fill="#3e8ed0"/>
-<path d="M17 18c4-3 9-3 11 0s-1 5 2 7 2 6-2 7-6 4-8 8c-2 3-5 2-6-1s-3-6-2-10 1-8 5-11zM38 12c4 0 9 3 11 7-2 2-5 1-7 3-3 2-1 6 2 7s6 3 6 7c0 5-4 10-8 12-2-3 0-6-1-9s-5-4-6-8 1-8 3-10-3-6 0-9z" fill="#5cb85c" stroke-width="1.5"/>
+<circle cx="32" cy="32" r="24" fill="#3e8ed0" vector-effect="non-scaling-stroke"/>
+<path d="M17 18c4-3 9-3 11 0s-1 5 2 7 2 6-2 7-6 4-8 8c-2 3-5 2-6-1s-3-6-2-10 1-8 5-11zM38 12c4 0 9 3 11 7-2 2-5 1-7 3-3 2-1 6 2 7s6 3 6 7c0 5-4 10-8 12-2-3 0-6-1-9s-5-4-6-8 1-8 3-10-3-6 0-9z" fill="#5cb85c" stroke-width="1.5" vector-effect="non-scaling-stroke"/>
 <g fill="#ffffff" fill-opacity="0.5" stroke="none"><ellipse cx="22" cy="20" rx="7" ry="4" transform="rotate(-35 22 20)"/></g>
 </svg>

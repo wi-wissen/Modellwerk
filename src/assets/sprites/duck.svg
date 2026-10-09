@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="#1f2933" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
+<title>Rubber duck</title>
+<path d="M8 38c0-6 6-9 14-9h14c6 0 11-3 16-9 4 7 4 15 0 21-4 7-12 11-23 11-13 0-21-6-21-14z" fill="#f5c84c"/>
+<circle cx="22" cy="20" r="11" fill="#f5c84c"/>
+<path d="M12 20c-4 0-7 1-9 3 3 2 6 3 10 2" fill="#f0903a"/>
+<circle cx="20" cy="17" r="2" fill="#1f2933" stroke="none"/>
+<path d="M30 37c4 4 11 4 15-1" stroke="#c99a1e" stroke-width="2.5"/>
+<g fill="#ffffff" fill-opacity="0.5" stroke="none"><ellipse cx="18" cy="13.5" rx="4" ry="2.2" transform="rotate(-25 18 13.5)"/><ellipse cx="16" cy="35" rx="5" ry="2.2" transform="rotate(-10 16 35)"/></g>
+</svg>
