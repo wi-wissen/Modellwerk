@@ -159,6 +159,15 @@ export default {
     tableNote: 'jede {n}. Zeile',
   },
   animation: {
+    rangeAuto: 'Bereich automatisch',
+    invalidNumber: 'Bitte eine Zahl eingeben, z. B. 2,5.',
+    display: 'Darstellung',
+    fills: { none: 'Bild bewegt sich', vessel: 'Gefäß mit Füllstand', thermometer: 'Thermometer', bar: 'Säule' },
+    scale: { min: 'Skala von', max: 'Skala bis' },
+    rope: 'Verbindung',
+    ropes: { rope: 'Seil', stem: 'Stängel', spring: 'Feder' },
+    mount: 'Befestigung zeigen',
+    summaryGauge: '{name} zeigt {vars}',
     title: "Animation",
     empty: "Noch kein Objekt – unter „Darstellung anpassen“ eines hinzufügen.",
     stepOf: "Schritt {n} von {total}",
@@ -180,7 +189,7 @@ export default {
     object: "Objekt {n}: {name}",
     sprite: "Bild",
     fields: {
-      x: "Waagerecht (x)",
+      value: 'Wert', scaleBy: 'Größe folgt', x: "Waagerecht (x)",
       y: "Senkrecht (y)",
       angle: "Winkel"
     },
@@ -210,6 +219,7 @@ export default {
       grid: "Gitter"
     },
     problems: {
+      noValue: '{field}: Für die Anzeige fehlt noch eine Größe.',
       noObjects: "Es gibt noch kein Objekt.",
       unknownVariable: "{field}: Die Größe „{name}“ gibt es in diesem Modell nicht.",
       unknownSprite: "Das Bild „{name}“ gibt es nicht; es wird ein Ball gezeigt.",

@@ -159,6 +159,15 @@ export default {
     tableNote: 'every {n}th row',
   },
   animation: {
+    rangeAuto: 'Automatic range',
+    invalidNumber: 'Please enter a number, e.g. 2.5.',
+    display: 'Display',
+    fills: { none: 'Moving picture', vessel: 'Vessel with fill level', thermometer: 'Thermometer', bar: 'Column' },
+    scale: { min: 'Scale from', max: 'Scale to' },
+    rope: 'Connection',
+    ropes: { rope: 'Rope', stem: 'Stem', spring: 'Spring' },
+    mount: 'Show mounting',
+    summaryGauge: '{name} showing {vars}',
     title: "Animation",
     empty: "No object yet – add one under “Customise view”.",
     stepOf: "Step {n} of {total}",
@@ -180,7 +189,7 @@ export default {
     object: "Object {n}: {name}",
     sprite: "Picture",
     fields: {
-      x: "Horizontal (x)",
+      value: 'Value', scaleBy: 'Size follows', x: "Horizontal (x)",
       y: "Vertical (y)",
       angle: "Angle"
     },
@@ -210,6 +219,7 @@ export default {
       grid: "Grid"
     },
     problems: {
+      noValue: '{field}: choose a quantity for the gauge.',
       noObjects: "There is no object yet.",
       unknownVariable: "{field}: this model has no quantity “{name}”.",
       unknownSprite: "There is no picture “{name}”; a ball is shown instead.",
