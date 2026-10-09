@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="#1f2933" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
+<title>House</title>
+<path d="M14 30h36v26H14z" fill="#f2d39a"/>
+<path d="M40 18v-8h6v14z" fill="#b5654a"/>
+<path d="M8 32L32 10l24 22z" fill="#e8574a"/>
+<path d="M27 56V42h10v14z" fill="#8a5a33"/>
+<rect x="18" y="36" width="7" height="7" fill="#bfe3f7" stroke-width="1.5"/>
+<rect x="40" y="36" width="7" height="7" fill="#bfe3f7" stroke-width="1.5"/>
+<g fill="#ffffff" fill-opacity="0.5" stroke="none"><path d="M16 28L31 14.5h3L19 28z"/></g>
+</svg>

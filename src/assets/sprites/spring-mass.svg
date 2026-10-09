@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="#1f2933" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
+<title>Hanging spring with mass</title>
+<rect x="16" y="3" width="32" height="6" rx="1.5" fill="#9aa5b1"/>
+<path d="M32 9v3l-10 3 20 4-20 4 20 4-20 4 20 4-10 3v4" fill="none" stroke-width="5"/>
+<path d="M32 9v3l-10 3 20 4-20 4 20 4-20 4 20 4-10 3v4" fill="none" stroke="#c9ced6" stroke-width="2"/>
+<rect x="21" y="42" width="22" height="18" rx="3" fill="#e8574a"/>
+<g fill="#ffffff" fill-opacity="0.5" stroke="none"><rect x="24.5" y="45" width="3" height="11" rx="1.5"/></g>
+</svg>

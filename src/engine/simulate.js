@@ -43,7 +43,12 @@ export function simulate(source, startValues, steps, options = {}) {
         if (n.op === '+') return a + b
         if (n.op === '-') return a - b
         if (n.op === '*') return a * b
-        if (n.op === '^') return exactPow(a, b)
+        if (n.op === '^') {
+          const p = exactPow(a, b)
+          // the legacy program stops with "invalid floating point operation"
+          if (Number.isNaN(p) && !Number.isNaN(a) && !Number.isNaN(b)) throw new ModelError('invalidOperation')
+          return p
+        }
         return a / b
       }
     }
@@ -61,7 +66,14 @@ export function simulate(source, startValues, steps, options = {}) {
     }
   }
   const exec = (s) => {
-    if (s.kind === 'assign') env.set(s.name, ev(s.expr))
+    if (s.kind === 'assign') {
+      try {
+        env.set(s.name, ev(s.expr))
+      } catch (e) {
+        if (e instanceof ModelError && e.line == null) e.line = s.line
+        throw e
+      }
+    }
     else if (s.kind === 'if') { if (test(s.cond)) s.body.forEach(exec) }
     else {
       let guard = 0

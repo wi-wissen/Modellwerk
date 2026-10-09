@@ -16,8 +16,9 @@ function detect() {
   } catch {
     // storage unavailable: fall back to the browser language
   }
-  const nav = (navigator.languages ?? [navigator.language ?? 'de']).map((l) => l.slice(0, 2))
-  return nav.find((l) => l in LOCALES) ?? 'de'
+  // German if the browser asks for German anywhere in its list, otherwise English
+  const wanted = navigator.languages?.length ? navigator.languages : [navigator.language ?? '']
+  return wanted.some((l) => l.toLowerCase().startsWith('de')) ? 'de' : 'en'
 }
 
 export const i18n = reactive({ locale: detect() })

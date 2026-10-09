@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="#1f2933" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
+<title>Ice cube</title>
+<path d="M32 8l22 10-22 10-22-10z" fill="#e3f5fc"/>
+<path d="M10 18l22 10v28L10 46z" fill="#a9dcf2"/>
+<path d="M54 18L32 28v28l22-10z" fill="#7cc4ea"/>
+<g fill="#ffffff" fill-opacity="0.5" stroke="none"><path d="M14 24l3 1.4v14L14 38zM36 34l3-1.4v8L36 42z"/></g>
+</svg>

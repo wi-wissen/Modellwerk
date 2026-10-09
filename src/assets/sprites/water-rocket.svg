@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="#1f2933" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
+<title>Water rocket</title>
+<path d="M24 38l-9 8v10l9-5zM40 38l9 8v10l-9-5z" fill="#5cb85c"/>
+<path d="M32 4c-5 3-8 8-8 13h16c0-5-3-10-8-13z" fill="#f29e38"/>
+<path d="M24 17h16v30c0 3-2 5-4.5 6v3h-7v-3C26 52 24 50 24 47z" fill="#e8f4fb"/>
+<path d="M24 36h16v11c0 3-2 5-4.5 6v3h-7v-3C26 52 24 50 24 47z" fill="#3e8ed0"/>
+<path d="M28 56h8v3h-8z" fill="#5b6b7b"/>
+<g fill="#ffffff" fill-opacity="0.5" stroke="none"><rect x="27" y="20" width="2.5" height="14" rx="1.2"/><rect x="27" y="39" width="2.5" height="8" rx="1.2"/></g>
+</svg>

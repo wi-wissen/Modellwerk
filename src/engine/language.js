@@ -8,8 +8,10 @@
 //   `=` as assignment, `:` as separator, `^` (also with fractional exponents),
 //   IF … THEN and WHILE … DO applying to the rest of the line, comparisons,
 //   SIN COS ARCTAN LN FRAC INT ABS, RANDOM(x).
-// Assumed: `^` binds tighter than unary minus and is right-associative (-2^2 = -4).
-import { exactExp, exactLn } from './exactmath.js'
+// Verified with the legacy program: unary minus binds tighter than `^`, and `^`
+// is left-associative (-2^2 = 4, 2^3^2 = 64); a negative base with a fractional
+// exponent is an invalid operation.
+import { exactAtan, exactExp, exactLn, x87Cos, x87Sin } from './exactmath.js'
 
 // Default (English) error texts; the UI translates by `code`.
 export const ERROR_TEXTS = {
@@ -27,6 +29,7 @@ export const ERROR_TEXTS = {
   unknownFunction: 'Unknown function "{name}".',
   stepsRange: 'Number of steps must be between 0 and {max}.',
   endlessLoop: 'Probably an endless loop.',
+  invalidOperation: 'Invalid floating point operation.',
 }
 
 export function formatText(template, params = {}) {
@@ -48,9 +51,9 @@ export const FUNCTIONS = {
   SQRT: { arity: 1, fn: Math.sqrt },
   EXP: { arity: 1, fn: exactExp },
   LN: { arity: 1, fn: exactLn },
-  SIN: { arity: 1, fn: Math.sin },
-  COS: { arity: 1, fn: Math.cos },
-  ARCTAN: { arity: 1, fn: Math.atan },
+  SIN: { arity: 1, fn: x87Sin },
+  COS: { arity: 1, fn: x87Cos },
+  ARCTAN: { arity: 1, fn: exactAtan },
   ABS: { arity: 1, fn: Math.abs },
   INT: { arity: 1, fn: Math.trunc },
   FRAC: { arity: 1, fn: (x) => x - Math.trunc(x) },
@@ -195,23 +198,26 @@ class Parser {
     return n
   }
   term() {
-    let n = this.unary()
+    let n = this.power()
     while (this.is('op', '*') || this.is('op', '/')) {
       const op = this.take().value
-      n = { kind: 'bin', op, left: n, right: this.unary() }
+      n = { kind: 'bin', op, left: n, right: this.power() }
+    }
+    return n
+  }
+  // `^` is left-associative and binds weaker than unary minus: -2^2 = (-2)^2
+  power() {
+    let n = this.unary()
+    while (this.is('op', '^')) {
+      this.take()
+      n = { kind: 'bin', op: '^', left: n, right: this.unary() }
     }
     return n
   }
   unary() {
     if (this.is('op', '-')) { this.take(); return { kind: 'neg', arg: this.unary() } }
     if (this.is('op', '+')) { this.take(); return this.unary() }
-    return this.power()
-  }
-  power() {
-    const base = this.atom()
-    if (!this.is('op', '^')) return base
-    this.take()
-    return { kind: 'bin', op: '^', left: base, right: this.unary() }
+    return this.atom()
   }
   atom() {
     const k = this.peek()

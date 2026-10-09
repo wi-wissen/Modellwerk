@@ -11,10 +11,10 @@ function sameBits(a, b) {
  * Recalculates a simulation read from a PRG file and compares every stored
  * value bit for bit (IEEE-754 double).
  */
-export function verifySimulation(sim) {
+export function verifySimulation(sim, options = {}) {
   const caseSensitive = sim.variables.some((v) => v.name !== v.name.toUpperCase())
   const start = Object.fromEntries(sim.variables.map((v) => [v.name, v.start]))
-  const result = simulate(sim.source, start, sim.steps, { caseSensitive })
+  const result = simulate(sim.source, start, sim.steps, { caseSensitive, seed: options.seed })
   let compared = 0
   let identical = 0
   let firstMismatch = null

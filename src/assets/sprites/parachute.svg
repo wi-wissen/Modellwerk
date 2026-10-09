@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="#1f2933" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
+<title>Parachute</title>
+<path d="M8 28C8 14 19 6 32 6s24 8 24 22c-3-2.5-6-2.5-8 0-2.5-2.5-5.5-2.5-8 0-2.5-2.5-5.5-2.5-8 0-2.5-2.5-5.5-2.5-8 0-2-2.5-5-2.5-8 0z" fill="#e8574a"/>
+<path d="M24 28C24 16 27 8 32 6c5 2 8 10 8 22-2.5-2.5-5.5-2.5-8 0-2.5-2.5-5.5-2.5-8 0z" fill="#f5c84c"/>
+<path d="M8 28l20 18M56 28L36 46M24 28l6 18M40 28l-6 18" fill="none" stroke="#9aa5b1" stroke-width="1.6"/>
+<rect x="27" y="44" width="10" height="10" rx="3" fill="#3e8ed0"/>
+<circle cx="32" cy="42" r="4" fill="#f2c7a0"/>
+<g fill="#ffffff" fill-opacity="0.5" stroke="none"><path d="M13 22c1-6 5-10 10-12-2 3-4 7-4.5 12z"/></g>
+</svg>

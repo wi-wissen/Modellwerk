@@ -76,13 +76,22 @@
 
           <div :id="`panel-${modelTab}`" role="tabpanel" :aria-labelledby="`tab-${modelTab}`" class="flex flex-col gap-4">
             <template v-if="modelTab === 'sentences'">
-              <div v-if="model.origin === 'program'" class="flex flex-col gap-3 rounded-xl border p-4"
-                   :class="conversion.ok ? 'border-accent bg-accent-soft' : 'border-line bg-sunken'">
-                <p v-if="!model.sentences.length" class="text-muted">{{ $t('app.writtenAsProgram') }}</p>
-                <p v-if="conversion.ok">{{ $t('sentences.convertible') }}</p>
-                <p v-else-if="conversion.line" class="text-muted">{{ $t('sentences.notConvertible', { line: conversion.line }) }}</p>
-                <div v-if="conversion.ok">
+              <div v-if="model.origin === 'program' && conversion.ok" class="flex flex-col gap-3 rounded-xl border border-accent bg-accent-soft p-4">
+                <p>{{ $t('sentences.convertible') }}</p>
+                <div>
                   <button type="button" class="btn btn-primary" @click="convertToSentences"><MessageSquareText :size="18" aria-hidden="true" /> {{ $t('sentences.convert') }}</button>
+                </div>
+              </div>
+              <div v-else-if="model.origin === 'program'" class="flex flex-col gap-3 rounded-xl border border-line bg-sunken p-4" role="note">
+                <p class="flex items-center gap-2 font-bold"><Info :size="18" aria-hidden="true" class="text-accent" /> {{ $t('sentences.onlyProgram') }}</p>
+                <p v-if="conversion.reason">{{ $t(`sentences.reasons.${conversion.reason}`) }}</p>
+                <figure v-if="conversion.line" class="flex flex-col gap-1">
+                  <figcaption class="text-sm font-semibold text-muted">{{ $t('app.lineN', { n: conversion.line }) }}</figcaption>
+                  <code class="block overflow-x-auto rounded-lg border border-line bg-sheet px-3 py-2 font-mono text-[0.95rem] whitespace-pre">{{ sourceLine(conversion.line) }}</code>
+                </figure>
+                <div class="flex flex-wrap gap-2">
+                  <button v-if="conversion.line" type="button" class="btn" @click="gotoProgramLine(conversion.line)"><Code :size="18" aria-hidden="true" /> {{ $t('sentences.showLine') }}</button>
+                  <button type="button" class="btn" @click="newModel"><FilePlus :size="18" aria-hidden="true" /> {{ $t('sentences.startNew') }}</button>
                 </div>
               </div>
               <SentenceEditor v-if="model.sentences.length || model.origin === 'sentences'"
@@ -94,7 +103,7 @@
               </div>
             </template>
             <ModelDiagram v-else-if="modelTab === 'diagram'" :analysis="analysis" @enlarge="$refs.diagram.showModal()" />
-            <ProgramEditor v-else :model-value="source" :errors="analysis.program.errors" @update:model-value="setSource" />
+            <ProgramEditor v-else ref="program" :model-value="source" :errors="analysis.program.errors" @update:model-value="setSource" />
           </div>
 
           <hr class="border-line" />
@@ -262,7 +271,7 @@
 </template>
 
 <script>
-import { AArrowDown, AArrowUp, ArrowRight, BookOpen, ChartLine, ClipboardCopy, Code, Download, FilePlus, FolderOpen, FastForward, History, ImageDown, Ruler, Save, Languages, MessageSquareText, Monitor, Moon, Sun, Table, TriangleAlert, Workflow, X } from 'lucide-vue-next'
+import { AArrowDown, AArrowUp, ArrowRight, BookOpen, ChartLine, ClipboardCopy, Code, Download, FilePlus, FolderOpen, FastForward, History, ImageDown, Info, Ruler, Save, Languages, MessageSquareText, Monitor, Moon, Sun, Table, TriangleAlert, Workflow, X } from 'lucide-vue-next'
 import SentenceEditor from './components/SentenceEditor.vue'
 import ProgramEditor from './components/ProgramEditor.vue'
 import ModelDiagram from './components/ModelDiagram.vue'
@@ -323,7 +332,7 @@ function modelFromProject(m, file = '') {
 export default {
   name: 'App',
   components: {
-    AArrowDown, AArrowUp, ArrowRight, BookOpen, ChartLine, ClipboardCopy, Code, Download, FilePlus, FolderOpen, FastForward, History, ImageDown, Ruler, Save, Languages, MessageSquareText, Monitor, Moon, Sun, Table, TriangleAlert, Workflow, X,
+    AArrowDown, AArrowUp, ArrowRight, BookOpen, ChartLine, ClipboardCopy, Code, Download, FilePlus, FolderOpen, FastForward, History, ImageDown, Info, Ruler, Save, Languages, MessageSquareText, Monitor, Moon, Sun, Table, TriangleAlert, Workflow, X,
     SentenceEditor, ProgramEditor, ModelDiagram, StartValues, ResultChart, ResultTable, CompareDialog,
   },
   data() {
@@ -597,6 +606,13 @@ export default {
       } catch {
         this.announcement = this.$t('app.copyFailed')
       }
+    },
+    sourceLine(n) {
+      return this.model.source.split('\n')[n - 1] ?? ''
+    },
+    gotoProgramLine(n) {
+      this.modelTab = 'program'
+      this.$nextTick(() => this.$refs.program?.goto(n))
     },
     convertToSentences() {
       const c = this.conversion

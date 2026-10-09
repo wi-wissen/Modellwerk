@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="#1f2933" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
+<title>Sun</title>
+<path d="M51 36.5L61 32L51 27.5ZM42.3 48.6L52.5 52.5L48.6 42.3ZM27.5 51L32 61L36.5 51ZM15.4 42.3L11.5 52.5L21.7 48.6ZM13 27.5L3 32L13 36.5ZM21.7 15.4L11.5 11.5L15.4 21.7ZM36.5 13L32 3L27.5 13ZM48.6 21.7L52.5 11.5L42.3 15.4Z" fill="#f29e38"/>
+<circle cx="32" cy="32" r="16" fill="#f5c84c"/>
+<g fill="#ffffff" fill-opacity="0.5" stroke="none"><ellipse cx="26" cy="25" rx="5" ry="3" transform="rotate(-35 26 25)"/></g>
+</svg>

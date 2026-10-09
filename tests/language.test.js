@@ -78,7 +78,7 @@ describe('program to sentences', () => {
 
   it('refuses programs that would not round-trip exactly', async () => {
     const { programToSentences } = await import('../src/engine/model.js')
-    expect(programToSentences('a := g - k*v\nv := v + a*dt\nt := t + dt')).toEqual({ ok: false, line: 1 })
+    expect(programToSentences('a := g - k*v\nv := v + a*dt\nt := t + dt')).toEqual({ ok: false, line: 1, reason: 'pattern' })
     // rate defined after the stock update: order would change, so no conversion
     expect(programToSentences('N := N + G\nG := FG*N\nT := T + 1').ok).toBe(false)
   })
@@ -111,12 +111,19 @@ describe('language details from the legacy documentation', () => {
     expect(r.series.HIT[3]).toBe(1)
   })
 
-  it('supports ^ with integer and fractional exponents', () => {
-    const r = simulate('a := 2^10; b := 2^0,5; c := -2^2; d := 2^-1', {}, 1)
+  it('supports ^ with the legacy precedence (verified with the legacy program)', () => {
+    const r = simulate('a := 2^10; b := 2^0,5; c := -2^2; d := 2^-1; e := 2^3^2; f := 2*3^2; g := (0-3)^3', {}, 1)
     expect(r.series.A[1]).toBe(1024)
     expect(r.series.B[1]).toBe(Math.SQRT2)
-    expect(r.series.C[1]).toBe(-4)
+    expect(r.series.C[1]).toBe(4)
     expect(r.series.D[1]).toBe(0.5)
+    expect(r.series.E[1]).toBe(64)
+    expect(r.series.F[1]).toBe(18)
+    expect(r.series.G[1]).toBe(-27)
+  })
+
+  it('stops on a negative base with a fractional exponent like the legacy program', () => {
+    expect(() => simulate('x := 1\ny := (0-2)^0,5', {}, 1)).toThrow(expect.objectContaining({ code: 'invalidOperation', line: 2 }))
   })
 
   it('implements random(x) for whole numbers and random(0) for fractions', () => {

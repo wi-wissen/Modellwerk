@@ -1,17 +1,30 @@
 // Reads simulations from PRG files (signature "MOEBIUS30").
 //
-// Layout of a simulation block (reverse engineered from reference files):
+// Layout of the simulation section (reverse engineered from reference files):
+//   u32 simulation count, then per simulation:
 //   u32 length + simulation name (cp1252)
-//   u32 line count, per line: u32 length + text   → program
+//   u32 line count, per line: u32 length + text   → program (may end in empty lines)
 //   u32 (unknown, so far always 0)
 //   u32 variable count, per variable:
 //     u32 length + name (upper case unless case sensitivity is on)
-//     5 option bytes, f64 initial value, 2 option bytes,
-//     u32 count N, N × f64 result values after each pass,
-//     53 bytes of display options
-// Everything else (worksheet, text, graphics) is skipped here.
+//     u32 length + name of the owning simulation (empty in files with a single
+//       simulation, set in files with several simulations)
+//     u8 flag (1 = initial value set, 0 = calculated before first use)
+//     f64 initial value, 2 option bytes (display flags),
+//     u32 count N, N × f64 result values after each pass (N = 0 for variables
+//       whose results were not stored, e.g. constants),
+//     31 bytes of display options (curve style, colour …),
+//     u32 length + picture used as plot marker (file name or embedded PNG data),
+//     18 bytes of display options
+//   u32 length + name of the x-axis variable, u32 length + name of a
+//   y-axis variable, u32 number of steps,
+//   followed by the graphical model (nodes, links) of variable length.
+// Everything else (worksheet, text, graphics) is skipped here: the simulations
+// are located by scanning for variable blocks and the program preceding them.
 
-const RECORD_TRAILER = 53
+const OPTIONS_BEFORE_PICTURE = 31
+const OPTIONS_AFTER_PICTURE = 18
+const MAX_VALUES = 20000
 const decoder = new TextDecoder('windows-1252')
 const NAME = /^[A-Za-zÄÖÜäöüß_][A-Za-z0-9ÄÖÜäöüß_]*$/
 
@@ -30,18 +43,39 @@ function reader(bytes) {
   }
 }
 
-function variableAt(r, p) {
+// Length-prefixed text without control characters, or null.
+function textAt(r, p, max) {
   if (p + 4 > r.len) return null
   const L = r.u32(p)
-  if (L < 1 || L > 64 || p + 4 + L + 19 > r.len) return null
-  const name = r.str(p + 4, L)
-  if (!NAME.test(name)) return null
-  const q = p + 4 + L
-  const n = r.u32(q + 15)
-  if (n > 20000 || q + 19 + 8 * n + RECORD_TRAILER > r.len) return null
+  if (L > max || p + 4 + L > r.len || r.hasControl(p + 4, L)) return null
+  return { text: r.str(p + 4, L), next: p + 4 + L }
+}
+
+function variableAt(r, p) {
+  const name = textAt(r, p, 64)
+  if (!name || !NAME.test(name.text)) return null
+  const owner = textAt(r, name.next, 255)
+  if (!owner) return null
+  const q = owner.next
+  if (q + 15 > r.len) return null
+  const n = r.u32(q + 11)
+  const options = q + 15 + 8 * n
+  if (n > MAX_VALUES || options + OPTIONS_BEFORE_PICTURE + 4 > r.len) return null
+  const picture = r.u32(options + OPTIONS_BEFORE_PICTURE)
+  const next = options + OPTIONS_BEFORE_PICTURE + 4 + picture + OPTIONS_AFTER_PICTURE
+  if (next > r.len) return null
   const values = new Float64Array(n)
-  for (let i = 0; i < n; i++) values[i] = r.f64(q + 19 + 8 * i)
-  return { record: { name, start: r.f64(q + 5), values }, next: q + 19 + 8 * n + RECORD_TRAILER }
+  for (let i = 0; i < n; i++) values[i] = r.f64(q + 15 + 8 * i)
+  return { record: { name: name.text, start: r.f64(q + 1), values }, owner: owner.text, next }
+}
+
+// Number of steps stored after the variable block (behind the two axis names).
+function stepsAt(r, p) {
+  const x = textAt(r, p, 64)
+  const y = x && textAt(r, x.next, 64)
+  if (!y || y.next + 4 > r.len) return null
+  if (![x.text, y.text].every((t) => t === '' || NAME.test(t))) return null
+  return r.u32(y.next)
 }
 
 function programBefore(r, varOffset) {
@@ -63,12 +97,17 @@ function programBefore(r, varOffset) {
     for (let L = 0; L <= 255 && L + 4 <= start; L++) {
       if (r.u32(start - 4 - L) === L && !r.hasControl(start - L, L)) { name = r.str(start - L, L); break }
     }
+    while (lines.length && lines[lines.length - 1].trim() === '') lines.pop()
     return { lines, name }
   }
   return null
 }
 
-/** Returns all detected simulations with program, initial values and stored results. */
+/**
+ * Returns all detected simulations with program, initial values and stored
+ * results. `hasResults` is false when the file stores no result values for a
+ * simulation (its variables then have empty `values`).
+ */
 export function readPrg(bytes) {
   if (!isPrgFile(bytes)) throw Object.assign(new Error('Unsupported PRG format (signature MOEBIUS30 missing).'), { code: 'unsupportedFormat' })
   const r = reader(bytes)
@@ -78,20 +117,25 @@ export function readPrg(bytes) {
     const count = r.u32(p)
     if (count >= 1 && count <= 200) {
       const variables = []
+      const owners = new Set()
       let q = p + 4
       for (let i = 0; i < count; i++) {
         const v = variableAt(r, q)
         if (!v) break
         variables.push(v.record)
+        owners.add(v.owner)
         q = v.next
       }
-      if (variables.length === count) {
+      if (variables.length === count && owners.size === 1) {
         const program = programBefore(r, p)
         if (program) {
+          const stored = Math.max(...variables.map((v) => v.values.length))
+          const steps = stepsAt(r, q)
           simulations.push({
-            name: program.name,
+            name: program.name || [...owners][0],
             source: program.lines.join('\n'),
-            steps: Math.max(...variables.map((v) => v.values.length)),
+            steps: stored || steps || 0,
+            hasResults: stored > 0,
             variables,
           })
           p = q

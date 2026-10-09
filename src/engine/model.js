@@ -128,11 +128,12 @@ function serialize(n) {
  * Turns a program back into sentences when that is lossless: the sentences must
  * regenerate a program with exactly the same statements in the same order.
  * Returns { ok: true, sentences, simplified, timeName, dtName } or
- * { ok: false, line } naming the first line that fits no sentence pattern.
+ * { ok: false, line, reason } naming the first line that fits no sentence pattern;
+ * reason is 'error' | 'time' | 'condition' | 'pattern' | 'order'.
  */
 export function programToSentences(source) {
   const program = parseProgram(source)
-  if (program.errors.length || !program.statements.length) return { ok: false, line: program.errors[0]?.line ?? null }
+  if (program.errors.length || !program.statements.length) return { ok: false, line: program.errors[0]?.line ?? null, reason: 'error' }
   const stmts = program.statements
   const last = stmts[stmts.length - 1]
   const raw = (name) => program.variables.get(name) ?? name
@@ -140,25 +141,25 @@ export function programToSentences(source) {
   // time line: T := T + 1 (simplified) or T := T + DT
   const timeOk = last.kind === 'assign' && last.expr.kind === 'bin' && last.expr.op === '+' &&
     last.expr.left.kind === 'var' && last.expr.left.name === last.name
-  if (!timeOk) return { ok: false, line: last.line }
+  if (!timeOk) return { ok: false, line: last.line, reason: 'time' }
   const stepNode = last.expr.right
   const simplified = stepNode.kind === 'num' && stepNode.value === 1
-  if (!simplified && stepNode.kind !== 'var') return { ok: false, line: last.line }
+  if (!simplified && stepNode.kind !== 'var') return { ok: false, line: last.line, reason: 'time' }
   const dtName = simplified ? 'DeltaT' : raw(stepNode.name)
 
   const sentences = []
   for (const s of stmts.slice(0, -1)) {
-    if (s.kind !== 'assign') return { ok: false, line: s.line }
+    if (s.kind !== 'assign') return { ok: false, line: s.line, reason: 'condition' }
     const e = s.expr
     const subject = s.raw
     const isSelf = e.kind === 'bin' && (e.op === '+' || e.op === '-') && e.left.kind === 'var' && e.left.name === s.name
     if (isSelf) {
       let rate = e.right
       if (!simplified) {
-        if (!(rate.kind === 'bin' && rate.op === '*' && rate.right.kind === 'var' && rate.right.name === stepNode.name)) return { ok: false, line: s.line }
+        if (!(rate.kind === 'bin' && rate.op === '*' && rate.right.kind === 'var' && rate.right.name === stepNode.name)) return { ok: false, line: s.line, reason: 'pattern' }
         rate = rate.left
       }
-      if (rate.kind !== 'var') return { ok: false, line: s.line }
+      if (rate.kind !== 'var') return { ok: false, line: s.line, reason: 'pattern' }
       sentences.push({ subject, predicate: e.op === '+' ? 'increase' : 'decrease', object: raw(rate.name) })
     } else if (e.kind === 'num') {
       sentences.push({ subject, predicate: 'constant', object: String(e.value).replace('.', ',') })
@@ -166,7 +167,7 @@ export function programToSentences(source) {
       const object = source.split('\n')[s.line - 1].split('//')[0].replace(/^[^*]*\*/, '').replace(/;\s*$/, '').trim()
       sentences.push({ subject, predicate: 'proportional', object })
     } else {
-      return { ok: false, line: s.line }
+      return { ok: false, line: s.line, reason: 'pattern' }
     }
   }
 
@@ -176,7 +177,7 @@ export function programToSentences(source) {
   const b = regenerated.statements.map(serialize).join(';')
   if (a !== b) {
     const i = stmts.findIndex((s, k) => serialize(s) !== serialize(regenerated.statements[k]))
-    return { ok: false, line: stmts[Math.max(0, i)].line }
+    return { ok: false, line: stmts[Math.max(0, i)].line, reason: 'order' }
   }
   return { ok: true, sentences, simplified, timeName: last.raw, dtName }
 }

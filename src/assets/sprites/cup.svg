@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="#1f2933" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
+<title>Cup</title>
+<path d="M24 14c-2-3 2-5 0-8M32 14c-2-3 2-5 0-8M40 14c-2-3 2-5 0-8" fill="none" stroke="#9aa5b1" stroke-width="2.5"/>
+<path d="M46 26c5 0 8 3 8 8s-3 8-8 8" fill="none" stroke-width="8"/>
+<path d="M46 26c5 0 8 3 8 8s-3 8-8 8" fill="none" stroke="#e8574a" stroke-width="4"/>
+<path d="M14 20h34v22c0 7-5 12-12 12h-10c-7 0-12-5-12-12z" fill="#e8574a"/>
+<ellipse cx="31" cy="20" rx="17" ry="3" fill="#8a5a33"/>
+<path d="M8 55h48c0 2-2 3-4 3H12c-2 0-4-1-4-3z" fill="#c9ced6"/>
+<g fill="#ffffff" fill-opacity="0.5" stroke="none"><rect x="18" y="26" width="3" height="16" rx="1.5"/></g>
+</svg>

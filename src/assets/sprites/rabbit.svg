@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="#1f2933" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
+<title>Rabbit</title>
+<path d="M38 22c-2-8-1-16 2-18 3 1 4 9 2 18zM43 22c1-8 4-14 7-14 2 2 0 10-4 16z" fill="#c8b29a"/>
+<path d="M40 19c-1-5-.5-10 .8-12 1 1.5 1.3 7 .5 12zM45 20c1-5 2.5-8 4-9.5.5 2-.5 6-3 10z" fill="#f2a7b0" stroke="none"/>
+<circle cx="12" cy="40" r="5" fill="#ffffff"/>
+<path d="M14 44c0-10 8-16 18-16 3 0 5 1 6 2 1-4 4-6 7-6 5 0 9 4 9 9 0 3-2 5-5 6l-3 1c1 3 1 6 0 8h4c2 0 3 2 2 3H18c-3 0-4-3-4-7z" fill="#c8b29a"/>
+<path d="M30 45c2 4 2 6 0 8" fill="none" stroke-width="1.5"/>
+<circle cx="47" cy="32" r="1.8" fill="#1f2933" stroke="none"/>
+<circle cx="54" cy="35.5" r="1.4" fill="#e88a95" stroke="none"/>
+<g fill="#ffffff" fill-opacity="0.5" stroke="none"><ellipse cx="25" cy="36" rx="5" ry="2.5" transform="rotate(-20 25 36)"/></g>
+</svg>

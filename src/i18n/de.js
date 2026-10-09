@@ -129,6 +129,16 @@ export default {
     version: 'Version {v} · Mockup',
   },
   sentences: {
+    onlyProgram: 'Dieses Modell gibt es nur als Programm.',
+    showLine: 'Zeile im Programm zeigen',
+    startNew: 'Neues Modell mit Sätzen beginnen',
+    reasons: {
+      error: 'Das Programm enthält noch einen Fehler. Behebe ihn zuerst im Programm.',
+      time: 'Die letzte Zeile muss die Zeit weiterzählen, z. B. „Zeit := Zeit + 1“ oder „t := t + dt“.',
+      condition: 'Diese Zeile enthält eine Bedingung (IF) oder Schleife (WHILE). So etwas lässt sich nur im Programm ausdrücken, nicht in Sätzen.',
+      pattern: 'Diese Zeile passt zu keinem Satz wie „… nimmt zu um …“ oder „… ist proportional zu …“. Sie rechnet etwas, das nur im Programm beschrieben werden kann.',
+      order: 'Die Zeilen stehen in einer anderen Reihenfolge, als Sätze sie erzeugen würden. Eine Umwandlung würde die Ergebnisse verändern.',
+    },
     convert: 'In Sätze umwandeln',
     convertible: 'Dieses Programm entspricht genau einem Modell aus Sätzen. Beim Umwandeln ändern sich die Ergebnisse nicht.',
     notConvertible: 'Zeile {line} passt in kein Satzmuster. Das Programm lässt sich deshalb nicht ohne Änderung in Sätze umwandeln.',
@@ -231,6 +241,7 @@ export default {
     mismatch: 'Abweichung bei {variable}, Schritt {step}',
   },
   errors: {
+    invalidOperation: 'Ungültige Rechenoperation, z. B. eine negative Zahl hoch einer Kommazahl.',
     unknownChar: 'Unbekanntes Zeichen „{char}“.',
     operatorExpected: 'Hier fehlt ein Rechenzeichen oder die Zeile ist zu Ende.',
     thenExpected: 'Nach der Bedingung fehlt THEN.',

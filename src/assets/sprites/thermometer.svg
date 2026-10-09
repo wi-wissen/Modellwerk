@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="#1f2933" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
+<title>Thermometer</title>
+<path d="M26 44V10a6 6 0 0 1 12 0v34a10 10 0 1 1-12 0z" fill="#f4f6f8"/>
+<path d="M29.5 46V24h5v22z" fill="#e8574a" stroke="none"/>
+<circle cx="32" cy="52" r="7" fill="#e8574a"/>
+<path d="M40 14h4M40 20h4M40 26h4M40 32h4M40 38h4" stroke="#9aa5b1" stroke-width="2"/>
+<g fill="#ffffff" fill-opacity="0.5" stroke="none"><circle cx="29.5" cy="49.5" r="2"/><rect x="28" y="8" width="2" height="14" rx="1"/></g>
+</svg>

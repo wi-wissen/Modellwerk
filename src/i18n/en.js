@@ -129,6 +129,16 @@ export default {
     version: 'Version {v} · Mock-up',
   },
   sentences: {
+    onlyProgram: 'This model only exists as a program.',
+    showLine: 'Show the line in the program',
+    startNew: 'Start a new model with sentences',
+    reasons: {
+      error: 'The program still contains an error. Fix it in the program first.',
+      time: 'The last line has to advance time, e.g. “Time := Time + 1” or “t := t + dt”.',
+      condition: 'This line contains a condition (IF) or a loop (WHILE). These can only be written in the program, not as sentences.',
+      pattern: 'This line matches no sentence such as “… increases by …” or “… is proportional to …”. It calculates something that can only be described in the program.',
+      order: 'The lines are in a different order than sentences would produce. Converting would change the results.',
+    },
     convert: 'Convert to sentences',
     convertible: 'This program matches a sentence-based model exactly. Converting it does not change the results.',
     notConvertible: 'Line {line} fits no sentence pattern, so the program cannot be converted to sentences without changing it.',
@@ -231,6 +241,7 @@ export default {
     mismatch: 'Differs at {variable}, step {step}',
   },
   errors: {
+    invalidOperation: 'Invalid calculation, e.g. a negative number raised to a fractional power.',
     unknownChar: 'Unknown character “{char}”.',
     operatorExpected: 'An operator is missing here, or the line should end.',
     thenExpected: 'THEN is missing after the condition.',

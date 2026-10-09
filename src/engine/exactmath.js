@@ -37,6 +37,39 @@ function ddMul(ah, al, bh, bl) {
   return twoSum(p, e)
 }
 
+/**
+ * Rounds h + l (a normalised double-double) the way the x87 FPU stores a
+ * transcendental result: first to extended precision (64-bit significand), then
+ * to double, both ties-to-even. Differs from plain rounding only when the
+ * extended value lands exactly halfway between two doubles.
+ */
+export function x87Round(h, l) {
+  if (l === 0 || !Number.isFinite(h) || h === 0) return h + l
+  const ulp = ulpOf(h, Math.sign(l) !== Math.sign(h))
+  const u = (l / ulp) * 2048 // l in units of the extended ulp (exact: power-of-two scaling)
+  let n = Math.round(u)
+  if (Math.abs(u - Math.trunc(u)) === 0.5) n = 2 * Math.round(u / 2) // ties-to-even
+  if (Math.abs(n) !== 1024) return h // extended value is not a midpoint: nearest double is h
+  // exactly halfway between h and its neighbour: ties-to-even on the double significand
+  return isEvenSignificand(h) ? h : h + Math.sign(l) * ulp
+}
+
+function ulpOf(x, towardZero) {
+  const a = Math.abs(x)
+  let e = Math.floor(Math.log2(a))
+  if (2 ** e > a) e--
+  if (2 ** (e + 1) <= a) e++
+  const ulp = 2 ** Math.max(e - 52, -1074)
+  // stepping below a power of two the spacing halves
+  return towardZero && a === 2 ** e ? ulp / 2 : ulp
+}
+
+function isEvenSignificand(x) {
+  const buf = new DataView(new ArrayBuffer(8))
+  buf.setFloat64(0, x)
+  return (buf.getUint8(7) & 1) === 0
+}
+
 /** Double-double divided by a small integer, keeping full precision. */
 function ddDivInt(ah, al, n) {
   const q = ah / n
@@ -84,7 +117,7 @@ function scale(h, l, k) {
   return h * f + l * f
 }
 
-/** exp(x), correctly rounded to an IEEE-754 double. */
+/** exp(x), correctly rounded (matches the legacy program; x87 double rounding does not). */
 export function exactExp(x) {
   if (Number.isNaN(x)) return NaN
   if (x > 709.782712893384) return Infinity
@@ -147,4 +180,85 @@ export function exactPow(x, y) {
   if (ph < -745.2) return 0
   const [h, l, k] = expParts(ph, pl)
   return scale(h, l, k)
+}
+
+// --- trigonometry as the x87 FPU computes it --------------------------------
+// FSIN/FCOS reduce the argument with a 66-bit approximation of pi and then
+// evaluate the reduced argument almost exactly; the legacy program stores the
+// result as a double. Verified against values the legacy program computed.
+// pi/2 with 66 significant bits, as an exact double-double:
+const X87_PIO2_HI = 1.5707963267948966
+const X87_PIO2_LO = 6.123031769111886e-17
+
+/** sin and cos of a small double-double argument (|r| ≤ ~0.8) by Taylor series. */
+function sinCosParts(rh, rl) {
+  const [r2h, r2l] = ddMul(rh, rl, rh, rl)
+  // sin: r - r^3/3! + r^5/5! …, cos: 1 - r^2/2! + r^4/4! …
+  let sh = rh, sl = rl, th = rh, tl = rl
+  for (let n = 2; n <= 40; n += 2) {
+    ;[th, tl] = ddMul(th, tl, r2h, r2l)
+    ;[th, tl] = ddDivInt(th, tl, n * (n + 1))
+    th = -th; tl = -tl
+    ;[sh, sl] = ddAdd(sh, sl, th, tl)
+    if (Math.abs(th) < 1e-40) break
+  }
+  let ch = 1, cl = 0
+  th = 1; tl = 0
+  for (let n = 1; n <= 40; n += 2) {
+    ;[th, tl] = ddMul(th, tl, r2h, r2l)
+    ;[th, tl] = ddDivInt(th, tl, n * (n + 1))
+    th = -th; tl = -tl
+    ;[ch, cl] = ddAdd(ch, cl, th, tl)
+    if (Math.abs(th) < 1e-40) break
+  }
+  return [sh, sl, ch, cl]
+}
+
+// true pi/2 as double-double
+const PIO2_HI = 1.5707963267948966
+const PIO2_LO = 6.123233995736766e-17
+
+/** Reduces x by multiples of pi/2 (given as hi + lo); returns quadrant and remainder. */
+function reduce(x, hi, lo) {
+  const k = Math.round(x / hi)
+  const [p1, p1e] = twoProd(k, hi)
+  let [rh, rl] = twoSum(x, -p1)
+  rl -= p1e
+  const [p2, p2e] = twoProd(k, lo)
+  ;[rh, rl] = ddAdd(rh, rl, -p2, -p2e)
+  return [((k % 4) + 4) % 4, rh, rl]
+}
+
+function x87Trig(x, cosine) {
+  if (!Number.isFinite(x)) return NaN
+  if (x === 0) return cosine ? 1 : x
+  const [q, rh, rl] = reduce(x, X87_PIO2_HI, X87_PIO2_LO)
+  const [sh, sl, ch, cl] = sinCosParts(rh, rl)
+  const quadrant = (q + (cosine ? 1 : 0)) % 4
+  if (quadrant === 0) return x87Round(sh, sl)
+  if (quadrant === 1) return x87Round(ch, cl)
+  if (quadrant === 2) return -x87Round(sh, sl)
+  return -x87Round(ch, cl)
+}
+
+export const x87Sin = (x) => x87Trig(x, false)
+export const x87Cos = (x) => x87Trig(x, true)
+
+/** arctan(x), correctly rounded (one Newton step in double-double on Math.atan). */
+export function exactAtan(x) {
+  if (Number.isNaN(x)) return NaN
+  if (x === 0) return x
+  if (!Number.isFinite(x)) return Math.sign(x) * X87_PIO2_HI
+  const y = Math.atan(x)
+  // atan(x) = y + atan((x·cos y − sin y) / (cos y + x·sin y)); the fraction is tiny
+  const [q, rh, rl] = reduce(y, PIO2_HI, PIO2_LO)
+  const [sh0, sl0, ch0, cl0] = sinCosParts(rh, rl)
+  let [sh, sl, ch, cl] = [sh0, sl0, ch0, cl0]
+  if (q === 1) [sh, sl, ch, cl] = [ch0, cl0, -sh0, -sl0]
+  if (q === 3) [sh, sl, ch, cl] = [-ch0, -cl0, sh0, sl0]
+  const [xch, xcl] = ddMul(x, 0, ch, cl)
+  const [nh, nl] = ddAdd(xch, xcl, -sh, -sl)
+  const t = (nh + nl) / (ch + x * sh)
+  const [h, l] = ddAdd(y, 0, t, 0)
+  return x87Round(h, l)
 }
