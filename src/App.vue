@@ -13,11 +13,13 @@
         </component>
 
         <nav class="order-3 flex basis-full flex-wrap items-center gap-2 lg:order-none lg:basis-auto lg:flex-1" :aria-label="$t('app.toolsNav')">
-          <button type="button" class="btn" @click="$refs.examples.showModal()"><BookOpen :size="18" aria-hidden="true" /> {{ $t('app.examples') }}</button>
+          <button type="button" class="btn" @click="newModel"><FilePlus :size="18" aria-hidden="true" /> {{ $t('app.new') }}</button>
           <label class="btn cursor-pointer has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-accent" :title="$t('app.openHint')">
             <FolderOpen :size="18" aria-hidden="true" /> {{ $t('app.open') }}
-            <input id="open-prg" type="file" accept=".prg,.PRG" class="sr-only" @change="openPrg($event)" />
+            <input id="open-file" type="file" accept=".json,.prg,.PRG" class="sr-only" @change="openFile($event)" />
           </label>
+          <button type="button" class="btn" @click="saveProject"><Save :size="18" aria-hidden="true" /> {{ $t('app.save') }}</button>
+          <button type="button" class="btn" @click="$refs.examples.showModal()"><BookOpen :size="18" aria-hidden="true" /> {{ $t('app.examples') }}</button>
         </nav>
 
         <div class="ml-auto flex items-center gap-1" role="group" :aria-label="$t('app.display')">
@@ -36,8 +38,17 @@
     <main id="main" class="mx-auto flex w-full max-w-[96rem] flex-1 flex-col gap-5 px-4 py-5 sm:px-6">
       <div class="min-w-0 max-w-[70ch]">
         <p class="eyebrow">{{ texts.topic }}</p>
-        <h1 class="text-2xl font-extrabold tracking-tight sm:text-3xl">{{ texts.title }}</h1>
+        <label v-if="model.imported?.kind === 'project'" class="block">
+          <span class="sr-only">{{ $t('app.modelTitle') }}</span>
+          <input id="model-title" v-model="model.imported.title" :placeholder="$t('app.untitled')" autocomplete="off"
+                 class="w-full rounded-lg border border-transparent bg-transparent px-1 -mx-1 text-2xl font-extrabold tracking-tight hover:border-line focus:border-accent sm:text-3xl" />
+        </label>
+        <h1 v-else class="text-2xl font-extrabold tracking-tight sm:text-3xl">{{ texts.title }}</h1>
         <p class="mt-1 text-muted">{{ texts.description }}</p>
+        <p v-if="restored" class="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted" role="status">
+          <History :size="16" aria-hidden="true" /> {{ $t('app.restored') }}
+          <button type="button" class="btn-link font-semibold" @click="restored = false; loadExample(examples[0])">{{ $t('app.startOver') }}</button>
+        </p>
         <details v-if="currentExample?.sources?.length" class="mt-2 text-sm">
           <summary class="cursor-pointer font-semibold text-muted">{{ $t('app.sources') }} ({{ currentExample.sources.length }})</summary>
           <ul class="mt-2 flex flex-col gap-1.5">
@@ -232,7 +243,7 @@
 </template>
 
 <script>
-import { AArrowDown, AArrowUp, ArrowRight, BookOpen, ChartLine, ClipboardCopy, Code, Download, FolderOpen, Languages, MessageSquareText, Monitor, Moon, Sun, Table, TriangleAlert, Workflow, X } from 'lucide-vue-next'
+import { AArrowDown, AArrowUp, ArrowRight, BookOpen, ChartLine, ClipboardCopy, Code, Download, FilePlus, FolderOpen, History, Save, Languages, MessageSquareText, Monitor, Moon, Sun, Table, TriangleAlert, Workflow, X } from 'lucide-vue-next'
 import SentenceEditor from './components/SentenceEditor.vue'
 import ProgramEditor from './components/ProgramEditor.vue'
 import ModelDiagram from './components/ModelDiagram.vue'
@@ -244,6 +255,7 @@ import { analyse, programToSentences, sentencesToProgram } from './engine/model.
 import { simulate } from './engine/simulate.js'
 import { readPrg } from './engine/prg.js'
 import { tableRows, toCsv, toTsv } from './engine/export.js'
+import { PROJECT_EXTENSION, parseProject, projectToText, toProject } from './engine/project.js'
 import { EXAMPLES } from './examples.js'
 import { LOCALES, i18n, setLocale } from './i18n/index.js'
 import { seriesColor, seriesDash, sparkPoints } from './chartStyle.js'
@@ -279,28 +291,44 @@ function modelFromExample(ex) {
   }
 }
 
+function modelFromProject(m, file = '') {
+  return {
+    ...modelFromExample({ id: null, mode: m.origin === 'sentences' ? 'sentences' : 'program', source: m.source, sentences: m.sentences, start: m.start, steps: m.steps, simplified: m.simplified }),
+    imported: m.title || file ? { title: m.title, file, kind: 'project' } : null,
+    caseSensitive: m.caseSensitive,
+    timeName: m.timeName,
+    dtName: m.dtName,
+  }
+}
+
 export default {
   name: 'App',
   components: {
-    AArrowDown, AArrowUp, ArrowRight, BookOpen, ChartLine, ClipboardCopy, Code, Download, FolderOpen, Languages, MessageSquareText, Monitor, Moon, Sun, Table, TriangleAlert, Workflow, X,
+    AArrowDown, AArrowUp, ArrowRight, BookOpen, ChartLine, ClipboardCopy, Code, Download, FilePlus, FolderOpen, History, Save, Languages, MessageSquareText, Monitor, Moon, Sun, Table, TriangleAlert, Workflow, X,
     SentenceEditor, ProgramEditor, ModelDiagram, StartValues, ResultChart, ResultTable, CompareDialog,
   },
   data() {
-    // deep link from the guide pages: app/#<example-id>
-    const first = EXAMPLES.find((e) => e.id === location.hash.slice(1)) ?? EXAMPLES[0]
+    // deep link from the guide pages: app/#<example-id>; otherwise restore the last session
+    const linked = EXAMPLES.find((e) => e.id === location.hash.slice(1))
+    const first = linked ?? EXAMPLES[0]
+    let saved = null
+    if (!linked) {
+      try { saved = parseProject(JSON.stringify(store('autosave'))) } catch { saved = null }
+    }
     return {
+      restored: Boolean(saved),
       logoUrl,
       version: pkg.version,
       // the standalone builds (desktop/mobile app, offline file) have no landing page
       homeHref: ['app', 'single'].includes(import.meta.env.MODE) ? null : siteLink('../'),
       locales: LOCALES,
       examples: EXAMPLES,
-      model: modelFromExample(first),
+      model: saved ? modelFromProject(saved.model) : modelFromExample(first),
       loadCount: 0,
-      modelTab: first.mode === 'sentences' ? 'sentences' : 'program',
-      resultTab: 'chart',
-      plotX: first.plot.x,
-      plotY: [...first.plot.y],
+      modelTab: saved ? (saved.model.origin === 'sentences' ? 'sentences' : 'program') : first.mode === 'sentences' ? 'sentences' : 'program',
+      resultTab: saved?.view.resultTab === 'table' ? 'table' : 'chart',
+      plotX: saved?.view.plotX ?? first.plot.x,
+      plotY: saved?.view.plotY ?? [...first.plot.y],
       theme: store('theme') ?? 'system',
       textScale: store('textScale') ?? 1,
       announcement: '',
@@ -319,10 +347,12 @@ export default {
     texts() {
       const m = this.model
       if (m.imported) {
+        const project = m.imported.kind === 'project'
         return {
-          title: m.imported.title || this.$t('app.importedTitle'),
-          topic: this.$t('app.importedFrom', { file: m.imported.file }),
-          description: m.imported.error ? this.$t('app.openFailed', { message: m.imported.error }) : this.$t('app.importedDescription'),
+          title: m.imported.title || (project ? this.$t('app.untitled') : this.$t('app.importedTitle')),
+          topic: m.imported.file ? this.$t('app.importedFrom', { file: m.imported.file }) : this.$t('app.ownModel'),
+          description: m.imported.error ? this.$t('app.openFailed', { message: m.imported.error })
+            : project ? this.$t('app.projectDescription') : this.$t('app.importedDescription'),
         }
       }
       const ex = EXAMPLES.find((e) => e.id === m.id)
@@ -330,6 +360,9 @@ export default {
     },
     currentExample() {
       return EXAMPLES.find((e) => e.id === this.model.id) ?? null
+    },
+    autosaveState() {
+      return [this.model, this.plotX, this.plotY, this.resultTab]
     },
     otherLocale() {
       const code = i18n.locale === 'de' ? 'en' : 'de'
@@ -364,6 +397,14 @@ export default {
     },
   },
   watch: {
+    // keep the current work in the browser so a reload does not lose it
+    autosaveState: {
+      deep: true,
+      handler() {
+        clearTimeout(this.autosaveTimer)
+        this.autosaveTimer = setTimeout(() => store('autosave', this.currentProject()), 600)
+      },
+    },
     variableList(list) {
       const names = new Set(list.map((v) => v.name))
       if (!names.has(this.plotX)) this.plotX = this.timeVar
@@ -401,6 +442,7 @@ export default {
       setLocale(this.otherLocale.code)
     },
     loadExample(ex) {
+      this.restored = false
       this.model = modelFromExample(ex)
       this.modelTab = ex.mode === 'sentences' ? 'sentences' : 'program'
       this.plotX = ex.plot.x
@@ -423,10 +465,49 @@ export default {
       this.loadCount++
       this.announcement = this.$t('app.modelOpened', { title: this.texts.title })
     },
-    async openPrg(ev) {
+    currentProject() {
+      return toProject({ ...this.model, title: this.texts.title }, { plotX: this.plotX, plotY: this.plotY, resultTab: this.resultTab })
+    },
+    newModel() {
+      this.model = modelFromProject({ title: '', origin: 'sentences', sentences: [{ subject: '', predicate: 'increase', object: '' }], source: '', start: {}, steps: 50, simplified: true, timeName: 'Zeit', dtName: 'DeltaT' })
+      this.model.imported = { title: '', file: '', kind: 'project' }
+      this.modelTab = 'sentences'
+      this.plotX = 'ZEIT'
+      this.plotY = []
+      this.restored = false
+      this.loadCount++
+      this.announcement = this.$t('app.newModel')
+    },
+    saveProject() {
+      const blob = new Blob([projectToText(this.currentProject())], { type: 'application/json' })
+      const link = document.createElement('a')
+      link.href = URL.createObjectURL(blob)
+      link.download = `${this.texts.title.replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '') || 'modell'}${PROJECT_EXTENSION}`
+      link.click()
+      setTimeout(() => URL.revokeObjectURL(link.href), 1000)
+      this.announcement = this.$t('app.saved')
+    },
+    async openFile(ev) {
       const file = ev.target.files[0]
       ev.target.value = ''
       if (!file) return
+      if (!/\.prg$/i.test(file.name)) {
+        try {
+          const project = parseProject(await file.text())
+          this.model = modelFromProject(project.model, file.name)
+          this.modelTab = project.model.origin === 'sentences' ? 'sentences' : 'program'
+          this.plotX = project.view.plotX ?? 'ZEIT'
+          this.plotY = project.view.plotY ?? []
+          this.restored = false
+          this.loadCount++
+          this.announcement = this.$t('app.modelOpened', { title: this.texts.title })
+        } catch (e) {
+          const message = e.code ? this.$t(`app.${e.code}`) : e.message
+          this.model = { ...this.model, imported: { title: file.name, file: file.name, error: message } }
+          this.announcement = this.$t('app.openFailed', { message })
+        }
+        return
+      }
       try {
         const sims = readPrg(new Uint8Array(await file.arrayBuffer()))
         if (!sims.length) throw new Error(this.$t('app.noModelInFile'))
