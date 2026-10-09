@@ -4,6 +4,33 @@ import { formatNumber } from './engine/model.js'
 export const SERIES_COLORS = ['var(--s1)', 'var(--s2)', 'var(--s3)', 'var(--s4)', 'var(--s5)', 'var(--s6)']
 export const SERIES_DASHES = ['', '8 5', '2 4', '12 4 2 4', '4 3', '16 6']
 export const seriesColor = (i) => SERIES_COLORS[i % SERIES_COLORS.length]
+
+// Dash patterns of the legacy line styles (Windows pen styles 0–5; 5 = no line)
+export const LINE_DASHES = ['', '8 5', '2 4', '10 4 2 4', '10 4 2 4 2 4', null]
+export const CURVE_MODES = ['line', 'points', 'both', 'bars']
+export const MARKERS = ['cross', 'circle', 'disc']
+
+/** A fixed colour, lightened in the dark theme (--fixed-lift) so dark blues stay readable. */
+export const fixedColor = (hex) => (hex ? `color-mix(in oklab, ${hex}, #fff var(--fixed-lift))` : 'var(--ink)')
+
+/**
+ * Effective look of curve number `i`: the automatic palette, or a stored style
+ * { mode, dash (0–5), width, color, marker, markerSize, markerColor } where a
+ * null colour means the legacy black (shown in the text colour).
+ */
+export function curveStyle(i, style, mode = 'line') {
+  if (!style) return { color: seriesColor(i), dash: seriesDash(i), width: 2.5, mode, marker: 'disc', markerSize: 3, markerColor: seriesColor(i) }
+  const color = fixedColor(style.color)
+  return {
+    color,
+    dash: style.dash >= 0 && style.dash < LINE_DASHES.length ? LINE_DASHES[style.dash] : '',
+    width: 1.5 + (style.width ?? 1),
+    mode: style.mode ?? mode,
+    marker: style.marker ?? 'disc',
+    markerSize: Math.max(2, (style.markerSize ?? 4) * 0.8),
+    markerColor: style.markerColor ? fixedColor(style.markerColor) : color,
+  }
+}
 export const seriesDash = (i) => SERIES_DASHES[i % SERIES_DASHES.length]
 
 /** Polyline points for a small preview of `data` inside a w×h box (own min/max). */

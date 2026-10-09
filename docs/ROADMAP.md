@@ -39,9 +39,9 @@ Derived from a comparison with the public documentation of the legacy program.
 - PRG files: stored x axis and shown curves are used
 - Report with the influence diagram; website works offline and is installable
 
-## Next
-
-- Read curve colours from PRG files (their encoding is not understood yet)
+- Curve styles: colour, line style, width, points or bars per curve, read from
+  PRG files (found by changing them in the legacy program and comparing the
+  saved files) and editable in the app
 
 ## Later
 

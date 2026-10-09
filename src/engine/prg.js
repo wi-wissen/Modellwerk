@@ -14,7 +14,13 @@
 //       2nd: probably shown in the table),
 //     u32 count N, N × f64 result values after each pass (N = 0 for variables
 //       whose results were not stored, e.g. constants),
-//     31 bytes of display options (curve style, colour …),
+//     31 bytes of display options (found by changing them in the legacy program
+//       and comparing the saved files): u8 type (0 line, 1 points, 2 points
+//       and line, 3 bars), u8 line style at 5 (Windows pen style: 0 solid,
+//       1 dashed, 2 dotted, 3 dash-dot, 4 dash-dot-dot, 5 invisible), u32 line
+//       width × 10 at 6, u32 line colour at 10, u32 point form at 14 (0 cross,
+//       1 circle, 2 disc), u32 point size at 18, u32 point colour at 22; colours
+//       are Windows COLORREF values (0x00BBGGRR),
 //     u32 length + picture used as plot marker (file name or embedded PNG data),
 //     18 bytes of display options
 //   u32 length + name of the x-axis variable, u32 length + name of a
@@ -68,7 +74,31 @@ function variableAt(r, p) {
   if (next > r.len) return null
   const values = new Float64Array(n)
   for (let i = 0; i < n; i++) values[i] = r.f64(q + 15 + 8 * i)
-  return { record: { name: name.text, start: r.f64(q + 1), values, plotted: r.u8(q + 9) === 1 }, owner: owner.text, next }
+  const record = { name: name.text, start: r.f64(q + 1), values, plotted: r.u8(q + 9) === 1, style: styleAt(r, options) }
+  return { record, owner: owner.text, next }
+}
+
+const TYPES = ['line', 'points', 'both', 'bars']
+const MARKERS = ['cross', 'circle', 'disc']
+
+// COLORREF 0x00BBGGRR → '#rrggbb'; null for black (the legacy default) and system colours
+function colorOf(ref) {
+  if (ref === 0 || ref > 0xffffff) return null
+  const hex = (v) => v.toString(16).padStart(2, '0')
+  return `#${hex(ref & 0xff)}${hex((ref >> 8) & 0xff)}${hex((ref >> 16) & 0xff)}`
+}
+
+function styleAt(r, o) {
+  const width = r.u32(o + 6) / 10
+  return {
+    mode: TYPES[r.u8(o)] ?? 'line',
+    dash: r.u8(o + 5) <= 5 ? r.u8(o + 5) : 0,
+    width: width > 0 && width <= 20 ? width : 1,
+    color: colorOf(r.u32(o + 10)),
+    marker: MARKERS[r.u32(o + 14)] ?? 'disc',
+    markerSize: Math.min(20, Math.max(1, r.u32(o + 18) || 4)),
+    markerColor: colorOf(r.u32(o + 22)),
+  }
 }
 
 // Axis names and number of steps stored after the variable block.
@@ -103,6 +133,11 @@ function programBefore(r, varOffset) {
     return { lines, name }
   }
   return null
+}
+
+// the legacy default: black solid line of width 1
+function isDefaultStyle(s) {
+  return s.mode === 'line' && s.dash === 0 && s.width === 1 && !s.color
 }
 
 /**
@@ -141,7 +176,14 @@ export function readPrg(bytes) {
             hasResults: stored > 0,
             variables,
             // graph settings saved with the file: x-axis variable and the curves shown
-            plot: x ? { x, y: variables.filter((v) => v.plotted && v.name !== x).map((v) => v.name) } : null,
+            plot: x ? {
+              x,
+              y: variables.filter((v) => v.plotted && v.name !== x).map((v) => v.name),
+              // only when the file sets any style: then all its curves keep their look
+              styles: variables.some((v) => v.plotted && !isDefaultStyle(v.style))
+                ? Object.fromEntries(variables.filter((v) => v.plotted).map((v) => [v.name, v.style]))
+                : {},
+            } : null,
           })
           p = q
           continue

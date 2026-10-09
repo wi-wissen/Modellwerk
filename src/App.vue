@@ -140,7 +140,7 @@ import { MAX_STEPS, simulate } from './engine/simulate.js'
 import { readPrg } from './engine/prg.js'
 import { tableRows } from './engine/export.js'
 import { graphToProgram, programToGraph } from './engine/graph.js'
-import { seriesColor, seriesDash } from './chartStyle.js'
+import { curveStyle } from './chartStyle.js'
 import { PROJECT_EXTENSION, cleanSimulation, parseProject, projectToText, toProject } from './engine/project.js'
 import { EXAMPLES } from './examples.js'
 import { exampleText, findGuide } from './guides/data.js'
@@ -168,7 +168,7 @@ function simulationFromExample(ex) {
 function viewFor(plot, saved = {}) {
   return {
     plotX: plot.x, plotY: [...plot.y], plotY3: null, plotZ: null, resultTab: 'chart',
-    axes: freshAxes(), overlay: true, curveMode: 'line', animation: null, ...saved,
+    axes: freshAxes(), overlay: true, curveMode: 'line', curveStyles: plot.styles ?? {}, animation: null, ...saved,
   }
 }
 
@@ -521,7 +521,10 @@ export default {
       const chart = document.querySelector('#panel-chart svg[role="img"], #panel-chart3d svg[role="img"]')
       const legend = run.result && document.querySelector('#panel-chart svg[role="img"]')
         ? this.view.plotY.filter((y) => y !== this.view.plotX)
-          .map((y, i) => ({ label: run.result.display.get(y) ?? y, color: seriesColor(i), dash: seriesDash(i) }))
+          .map((y) => {
+            const look = curveStyle(this.view.plotY.indexOf(y), this.view.curveStyles?.[y], this.view.curveMode)
+            return { label: run.result.display.get(y) ?? y, color: look.color, dash: look.dash }
+          })
         : []
       this.report = {
         title: this.texts.title,

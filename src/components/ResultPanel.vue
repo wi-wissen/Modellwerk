@@ -69,6 +69,47 @@
                       :class="{ 'is-selected': view.curveMode === m }" @click="set({ curveMode: m })">{{ $t(`app.curveModes.${m}`) }}</button>
             </div>
           </div>
+          <details v-if="shownY.length" class="rounded-lg border border-line bg-sheet" :open="hasStyles || null">
+            <summary class="cursor-pointer px-3 py-2 font-semibold">{{ $t('app.curveStyles') }}</summary>
+            <div class="flex flex-col gap-3 border-t border-line p-3">
+              <p class="max-w-[62ch] text-sm text-muted">{{ $t('app.curveStylesHint') }}</p>
+              <div v-for="name in shownY" :key="name" class="flex flex-wrap items-end gap-2 border-b border-line pb-3 last:border-0 last:pb-0">
+                <span class="min-w-24 self-center truncate font-mono font-semibold">{{ labelOf(name) }}</span>
+                <label class="flex flex-col gap-1 text-sm">
+                  <span class="font-semibold">{{ $t('app.color') }}</span>
+                  <input :id="`style-color-${name}`" type="color" class="h-10 w-14 cursor-pointer rounded-lg border border-line bg-sheet p-1"
+                         :value="styleOf(name).color ?? '#000000'" @input="setStyle(name, { color: $event.target.value })" />
+                </label>
+                <label class="flex flex-col gap-1 text-sm">
+                  <span class="font-semibold">{{ $t('app.curveLook') }}</span>
+                  <select :id="`style-mode-${name}`" class="field !w-auto" :value="styleOf(name).mode" @change="setStyle(name, { mode: $event.target.value })">
+                    <option v-for="m in curveModes" :key="m" :value="m">{{ $t(`app.curveModes.${m}`) }}</option>
+                  </select>
+                </label>
+                <label class="flex flex-col gap-1 text-sm">
+                  <span class="font-semibold">{{ $t('app.lineStyle') }}</span>
+                  <select :id="`style-dash-${name}`" class="field !w-auto" :value="styleOf(name).dash" @change="setStyle(name, { dash: Number($event.target.value) })">
+                    <option v-for="(_, d) in 6" :key="d" :value="d">{{ $t(`app.lineStyles.${d}`) }}</option>
+                  </select>
+                </label>
+                <label class="flex flex-col gap-1 text-sm">
+                  <span class="font-semibold">{{ $t('app.lineWidth') }}</span>
+                  <select :id="`style-width-${name}`" class="field !w-auto tabular" :value="styleOf(name).width" @change="setStyle(name, { width: Number($event.target.value) })">
+                    <option v-for="wd in 5" :key="wd" :value="wd">{{ wd }}</option>
+                  </select>
+                </label>
+                <label class="flex flex-col gap-1 text-sm">
+                  <span class="font-semibold">{{ $t('app.marker') }}</span>
+                  <select :id="`style-marker-${name}`" class="field !w-auto" :value="styleOf(name).marker" @change="setStyle(name, { marker: $event.target.value })">
+                    <option v-for="mk in markers" :key="mk" :value="mk">{{ $t(`app.markers.${mk}`) }}</option>
+                  </select>
+                </label>
+                <button v-if="view.curveStyles?.[name]" type="button" class="btn btn-quiet" @click="resetStyle(name)">
+                  <RotateCcw :size="16" aria-hidden="true" /> {{ $t('app.styleAuto') }}
+                </button>
+              </div>
+            </div>
+          </details>
         </div>
 
         <div v-if="tab !== 'chart3d'" class="flex flex-wrap items-center gap-2">
@@ -77,9 +118,9 @@
             <input :id="`plot-y-${v.name}`" type="checkbox" :value="v.name" :checked="view.plotY.includes(v.name)" @change="toggleY(v.name, $event.target.checked)" />
             <svg class="spark" viewBox="0 0 40 16" aria-hidden="true">
               <polyline :points="sparkline(v.name)" fill="none" stroke-linecap="round" stroke-linejoin="round"
-                        :stroke="view.plotY.includes(v.name) ? seriesColor(view.plotY.indexOf(v.name)) : 'var(--muted)'"
+                        :stroke="view.plotY.includes(v.name) ? lookOf(v.name).color : 'var(--muted)'"
                         :stroke-width="view.plotY.includes(v.name) ? 2.4 : 1.4"
-                        :stroke-dasharray="view.plotY.includes(v.name) && !overlayOn ? seriesDash(view.plotY.indexOf(v.name)) : null"
+                        :stroke-dasharray="view.plotY.includes(v.name) && !overlayOn ? (lookOf(v.name).dash || null) : null"
                         :opacity="view.plotY.includes(v.name) ? 1 : 0.7" />
             </svg>
             <span class="font-mono font-semibold">{{ v.label }}</span>
@@ -102,7 +143,7 @@
 
       <div :id="`panel-${tab}`" role="tabpanel" :aria-labelledby="`tab-${tab}`">
         <ResultChart v-if="tab === 'chart'" ref="chart" :result="run.result" :x="view.plotX" :ys="view.plotY" :range="view.axes"
-                     :overlays="overlays" :mode="view.curveMode" />
+                     :overlays="overlays" :mode="view.curveMode" :styles="view.curveStyles ?? {}" />
         <ResultChart3D v-else-if="tab === 'chart3d'" ref="chart3d" :result="run.result" :x="view.plotX" :y="y3" :z="z3" />
         <ResultTable v-else-if="tab === 'table'" :result="run.result" :columns="[view.plotX, ...view.plotY.filter((y) => y !== view.plotX)]" />
         <slot v-else name="animation" :result="run.result" />
@@ -128,19 +169,22 @@
 </template>
 
 <script>
-import { Box, ChartLine, Clapperboard, ClipboardCopy, Code, Download, FastForward, ImageDown, Printer, Ruler, Table, TriangleAlert } from 'lucide-vue-next'
+import { Box, ChartLine, Clapperboard, ClipboardCopy, Code, Download, FastForward, ImageDown, Printer, RotateCcw, Ruler, Table, TriangleAlert } from 'lucide-vue-next'
 import ResultChart from './ResultChart.vue'
 import ResultChart3D from './ResultChart3D.vue'
 import ResultTable from './ResultTable.vue'
 import { parseNumber } from '../engine/model.js'
 import { tableRows, toCsv, toTsv } from '../engine/export.js'
-import { seriesColor, seriesDash, sparkPoints } from '../chartStyle.js'
+import { CURVE_MODES, MARKERS, curveStyle, seriesColor, seriesDash, sparkPoints } from '../chartStyle.js'
+
+// light-theme values of the automatic curve colours, as start values of the colour picker
+const AUTO_HEX = ['#1d4fd8', '#d55e00', '#009e73', '#cc79a7', '#8a6d00', '#555f69']
 import { i18n } from '../i18n/index.js'
 import { download, downloadSvg } from '../site/download.js'
 
 export default {
   name: 'ResultPanel',
-  components: { Box, ChartLine, Clapperboard, ClipboardCopy, Code, Download, FastForward, ImageDown, Printer, Ruler, Table, TriangleAlert, ResultChart, ResultChart3D, ResultTable },
+  components: { Box, ChartLine, Clapperboard, ClipboardCopy, Code, Download, FastForward, ImageDown, Printer, RotateCcw, Ruler, Table, TriangleAlert, ResultChart, ResultChart3D, ResultTable },
   props: {
     runs: { type: Array, required: true }, // [{ result, error, ms }] per simulation
     active: { type: Number, required: true },
@@ -158,9 +202,11 @@ export default {
   },
   emits: ['update:view', 'continue', 'goto-program', 'report', 'announce'],
   data() {
-    return { axesOpen: false }
+    return { axesOpen: false, curveModes: CURVE_MODES, markers: MARKERS }
   },
   computed: {
+    shownY() { return this.view.plotY.filter((y) => y !== this.view.plotX) },
+    hasStyles() { return Object.keys(this.view.curveStyles ?? {}).length > 0 },
     run() { return this.runs[this.active] },
     tabs() {
       return [
@@ -202,6 +248,21 @@ export default {
     },
   },
   methods: {
+    labelOf(name) { return this.variables.find((v) => v.name === name)?.label ?? name },
+    // the curves in the graph, in the order that decides their automatic colour
+    // same numbering as the graph, which colours the curves in the order of plotY
+    lookOf(name) { return curveStyle(this.view.plotY.indexOf(name), this.view.curveStyles?.[name], this.view.curveMode) },
+    styleOf(name) {
+      const i = this.view.plotY.indexOf(name)
+      return this.view.curveStyles?.[name] ?? { mode: this.view.curveMode, dash: 0, width: 1, color: AUTO_HEX[i % AUTO_HEX.length], marker: 'disc', markerSize: 4, markerColor: null }
+    },
+    setStyle(name, changes) {
+      this.set({ curveStyles: { ...(this.view.curveStyles ?? {}), [name]: { ...this.styleOf(name), ...changes } } })
+    },
+    resetStyle(name) {
+      const { [name]: _, ...rest } = this.view.curveStyles ?? {}
+      this.set({ curveStyles: rest })
+    },
     seriesColor,
     seriesDash,
     dashFor(i) { return seriesDash(i + 1) || '6 4' },

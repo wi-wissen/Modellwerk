@@ -25,14 +25,25 @@
         <g fill="none" stroke-linejoin="round" stroke-linecap="round" :clip-path="`url(#${clipId})`">
           <template v-if="mode !== 'points'">
             <polyline v-for="o in overlayLines" :key="o.key" :points="o.points" :stroke="o.color" stroke-width="2" :stroke-dasharray="o.dash" opacity="0.85" />
-            <polyline v-for="(s, i) in lines" :key="s.name" :points="s.points" :stroke="s.color" stroke-width="2.5"
-                      :stroke-dasharray="dash(i)" />
           </template>
-          <template v-if="mode !== 'line'">
-            <g v-for="(s, i) in [...overlayLines, ...lines]" :key="'p' + (s.key ?? s.name)" :fill="s.color" stroke="none" :opacity="s.key ? 0.7 : 1">
-              <circle v-for="(pt, k) in s.markers" :key="k" :cx="pt[0]" :cy="pt[1]" :r="s.key ? 2.4 : 3" />
+          <g v-if="mode !== 'line'">
+            <g v-for="o in overlayLines" :key="'p' + o.key" :fill="o.color" stroke="none" opacity="0.7">
+              <circle v-for="(pt, k) in o.markers" :key="k" :cx="pt[0]" :cy="pt[1]" r="2.4" />
             </g>
-          </template>
+          </g>
+          <g v-for="s in lines" :key="s.name">
+            <polyline v-if="(s.look.mode === 'line' || s.look.mode === 'both') && s.look.dash !== null" :points="s.points"
+                      :stroke="s.look.color" :stroke-width="s.look.width" :stroke-dasharray="s.look.dash || null" />
+            <g v-if="s.look.mode === 'bars'" :stroke="s.look.color" :stroke-width="barWidth(s.markers.length)" stroke-linecap="butt">
+              <line v-for="(pt, k) in s.markers" :key="k" :x1="pt[0]" :x2="pt[0]" :y1="baseY" :y2="pt[1]" />
+            </g>
+            <g v-if="s.look.mode === 'points' || s.look.mode === 'both'">
+              <path v-if="s.look.marker === 'cross'" :d="crossPath(s.markers, s.look.markerSize)" :stroke="s.look.markerColor" stroke-width="1.6" />
+              <g v-else :fill="s.look.marker === 'disc' ? s.look.markerColor : 'var(--sheet)'" :stroke="s.look.marker === 'disc' ? 'none' : s.look.markerColor" stroke-width="1.6">
+                <circle v-for="(pt, k) in s.markers" :key="k" :cx="pt[0]" :cy="pt[1]" :r="s.look.markerSize" />
+              </g>
+            </g>
+          </g>
         </g>
 
         <g v-if="cursor !== null">
@@ -46,7 +57,7 @@
            :style="tipStyle" aria-hidden="true">
         <div class="font-semibold">{{ $t('chart.step', { n: cursor }) }} · {{ xLabel }} = {{ fmt(xs[cursor], 6) }}</div>
         <div v-for="(s, i) in lines" :key="'t' + s.name" class="flex items-center gap-2">
-          <svg width="22" height="8" aria-hidden="true"><line x1="1" y1="4" x2="21" y2="4" :stroke="s.color" stroke-width="2.5" :stroke-dasharray="dash(i)" /></svg>
+          <svg width="22" height="8" aria-hidden="true"><line x1="1" y1="4" x2="21" y2="4" :stroke="s.color" stroke-width="2.5" :stroke-dasharray="s.look.dash || null" /></svg>
           <span class="font-mono">{{ s.label }}</span><span class="ml-auto pl-3">{{ fmt(s.data[cursor], 6) }}</span>
         </div>
       </div>
@@ -59,7 +70,7 @@
 <script>
 import { formatNumber } from '../engine/model.js'
 import { numberLocale } from '../i18n/index.js'
-import { seriesColor, seriesDash, tickLabel } from '../chartStyle.js'
+import { curveStyle, seriesColor, seriesDash, tickLabel } from '../chartStyle.js'
 
 
 function niceStep(lo, hi, count) {
@@ -89,6 +100,8 @@ export default {
     overlays: { type: Array, default: () => [] },
     // 'line' | 'points' | 'both'
     mode: { type: String, default: 'line' },
+    // per-curve styles by variable name (see chartStyle.js curveStyle); missing = automatic
+    styles: { type: Object, default: () => ({}) },
   },
   data() {
     return { w: 640, h: 380, cursor: null, ro: null }
@@ -124,7 +137,8 @@ export default {
           const py = this.sy(data[k])
           if (Number.isFinite(px) && Number.isFinite(py)) points += `${px.toFixed(1)},${py.toFixed(1)} `
         }
-        return { name, label: this.result.display.get(name) ?? name, data, points, markers: this.markers(this.xs, data), color: seriesColor(i) }
+        const look = curveStyle(i, this.styles[name], this.mode)
+        return { name, label: this.result.display.get(name) ?? name, data, points, look, markers: look.mode === 'line' ? [] : this.markers(this.xs, data, look.mode === 'bars' ? 120 : 300), color: look.color }
       })
     },
     overlayLines() {
@@ -135,7 +149,7 @@ export default {
           const py = this.sy(o.data[k])
           if (Number.isFinite(px) && Number.isFinite(py)) points += `${px.toFixed(1)},${py.toFixed(1)} `
         }
-        return { ...o, points, markers: this.markers(o.xs, o.data), color: seriesColor(o.colorIndex), dash: seriesDash(o.dashIndex + 1) || '6 4' }
+        return { ...o, points, markers: this.mode === 'line' ? [] : this.markers(o.xs, o.data), color: seriesColor(o.colorIndex), dash: seriesDash(o.dashIndex + 1) || '6 4' }
       })
     },
     summary() {
@@ -145,6 +159,11 @@ export default {
     liveText() {
       if (this.cursor === null) return ''
       return `${this.xLabel} ${this.fmt(this.xs[this.cursor], 6)}: ` + this.lines.map((s) => `${s.label} ${this.fmt(s.data[this.cursor], 6)}`).join(', ')
+    },
+    // bars stand on zero, or on the lower edge when zero is outside the range
+    baseY() {
+      const [a, b] = this.yDomain
+      return this.sy(Math.min(Math.max(0, a), b))
     },
     tipStyle() {
       const px = this.sx(this.xs[this.cursor])
@@ -160,10 +179,9 @@ export default {
   },
   beforeUnmount() { this.ro?.disconnect() },
   methods: {
-    // at most ~300 point markers per curve
-    markers(xs, data) {
-      if (this.mode === 'line') return []
-      const every = Math.max(1, Math.ceil(data.length / 300))
+    // at most `limit` point markers (or bars) per curve
+    markers(xs, data, limit = 300) {
+      const every = Math.max(1, Math.ceil(data.length / limit))
       const out = []
       for (let k = 0; k < data.length; k += every) {
         const px = this.sx(xs[k])
@@ -171,6 +189,12 @@ export default {
         if (Number.isFinite(px) && Number.isFinite(py)) out.push([px, py])
       }
       return out
+    },
+    barWidth(count) {
+      return Math.max(1.5, Math.min(12, (this.pw / Math.max(1, count)) * 0.6))
+    },
+    crossPath(points, r) {
+      return points.map(([x, y]) => `M${(x - r).toFixed(1)},${(y - r).toFixed(1)}L${(x + r).toFixed(1)},${(y + r).toFixed(1)}M${(x - r).toFixed(1)},${(y + r).toFixed(1)}L${(x + r).toFixed(1)},${(y - r).toFixed(1)}`).join('')
     },
     manual([lo, hi], minKey, maxKey) {
       if (this.range.auto) return [lo, hi]
@@ -183,9 +207,15 @@ export default {
       const clone = this.$refs.svg.cloneNode(true)
       const css = getComputedStyle(document.documentElement)
       const resolve = (v) => v.replace(/var\((--[\w-]+)\)/g, (_, name) => css.getPropertyValue(name).trim() || '#000')
-      for (const el of [clone, ...clone.querySelectorAll('*')]) {
-        for (const attr of [...el.attributes]) if (attr.value.includes('var(')) el.setAttribute(attr.name, resolve(attr.value))
-      }
+      const originals = [this.$refs.svg, ...this.$refs.svg.querySelectorAll('*')]
+      ;[clone, ...clone.querySelectorAll('*')].forEach((el, k) => {
+        for (const attr of [...el.attributes]) {
+          if (!attr.value.includes('var(') && !attr.value.includes('color-mix(')) continue
+          // colours computed by the browser (also color-mix), so the file shows exactly what is on screen
+          const computed = ['fill', 'stroke'].includes(attr.name) ? getComputedStyle(originals[k])[attr.name] : ''
+          el.setAttribute(attr.name, computed && !computed.includes('(var') ? computed : resolve(attr.value))
+        }
+      })
       clone.querySelectorAll('circle, line[stroke-dasharray="3 3"]').forEach((el) => el.closest('g')?.parentNode === clone && el.remove())
       clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
       clone.setAttribute('font-family', 'Atkinson Hyperlegible Next, Arial, sans-serif')
