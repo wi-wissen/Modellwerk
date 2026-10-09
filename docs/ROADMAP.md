@@ -4,38 +4,40 @@ Derived from a comparison with the public documentation of the legacy program.
 
 ## Done
 
-- Modelling language incl. `^`, `=`, `:`, IF/WHILE for the rest of the line, `random(x)`
+- Modelling language incl. `^`, `=`, `:`, IF/WHILE for the rest of the line,
+  `random(x)` with a stored seed; semantics verified against the legacy program
+- Results bit-identical to the legacy program (52,720 stored values in 26 example
+  files, plus own test programs for functions, powers, IF/WHILE and `random`)
 - Sentence-based modelling, lossless program → sentences conversion
-- Influence diagram (drawn from the program), enlarge dialog
+- Editable influence diagram (stocks, rates, constants, flows, influence arrows,
+  formula panel with clickable inputs and functions, keyboard operation, problem
+  list), extended syntax with helper quantities, lossless program → diagram conversion
+- Macros (program blocks): create from selected lines, expand, edit
+- Projects with several simulations (copies, variants with other initial values),
+  overlaid in one graph with a legend
 - Initial values, repeat n times, continue by n steps
-- 2D graph with free x axis (phase diagrams), manual axis limits, PNG/SVG export
+- 2D graph with free x axis (phase diagrams), manual axis limits, line/points
+  styles, curve chips with a preview line, PNG/SVG export
+- 3D graph (x, y, z) with rotation
+- Animation with an own SVG sprite pack (ball, cart, spring, pendulum, rocket,
+  satellite, animals …), traces, play/pause/speed, keyboard control
 - Table, CSV export (German separators), copy as tab-separated text
-- Open PRG files, compare stored results bit for bit
+- Printable report: description, program, macros, initial values, graph with
+  legend, table
+- Open PRG files (all file variants), compare stored results bit for bit
 - Own project format with autosave
 - 20 examples with bilingual student guides
 - German/English, light/dark, text size, keyboard and screen reader support
 - Desktop/mobile shell and release pipeline
 
-## Next (core)
+## Next
 
-- Editable influence diagram: add stocks, rates, constants and arrows; formula
-  dialog with clickable inputs and functions; keyboard operation
-- "Extended syntax" for graphical models (helper quantities)
-- Verify `^` precedence, IF/WHILE, trigonometric functions and `random` against
-  PRG files created with the legacy program
-
-## Next (important)
-
-- Animation: sprite moves along x/y variables, play/pause/speed, traces, own SVG
-  sprite pack for typical experiments (ball, cart, spring, pendulum, satellite …)
-- 3D graph (x, y, z variables) with rotation, plus 2D projections
-- Variants: same program with other initial values overlaid in one graph
-- Macros as named, collapsible blocks
-- Report/print: program, models, graph, table, initial values
-- Curve styles (points, bars), legend options, number formats
-- Read the remaining PRG file variant (several simulations per file)
+- Undo/redo in the diagram editor; prevent overlapping nodes
+- Manual range inputs in the animation settings (the logic supports them)
+- Use more PRG metadata (x-axis variable, curve colours) when opening files
+- Compact diagram toolbar on phones
 
 ## Later
 
-- Annotations in the graph, inserted images
+- Annotations in the graph
 - Custom predicate wording (e.g. plain language)

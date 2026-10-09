@@ -1,8 +1,9 @@
 # Modellwerk
 
 Modelling and simulation for the classroom – in the browser, as a desktop app and on
-tablets. Students describe a model in sentences, as an influence diagram or as a short
-program; Modellwerk runs it step by step and shows graphs and tables.
+tablets. Students describe a model in sentences, draw it as an influence diagram or
+write a short program; Modellwerk runs it step by step and shows graphs, 3D graphs,
+tables and animations, and prints a report.
 
 Modellwerk is an independent new development. It opens files in the PRG format of an
 older Windows program and reproduces the values stored in them **bit for bit**.
@@ -90,7 +91,8 @@ writing their name as a statement.
 
 ```
 src/engine/      language, simulation, exact maths, PRG reader, verification,
-                 model analysis (roles, sentences ↔ program), CSV, project files
+                 model analysis (roles, sentences ↔ program), graph model
+                 (diagram ↔ program), animation, CSV, project files
 src/components/  app components (Vue 3, Options API)
 src/guides/      example overview and guide pages
 src/site/        shared header, footer, links, theme

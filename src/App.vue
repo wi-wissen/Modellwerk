@@ -297,7 +297,18 @@ export default {
       },
     },
   },
+  mounted() {
+    window.addEventListener('hashchange', this.onHash)
+  },
+  beforeUnmount() {
+    window.removeEventListener('hashchange', this.onHash)
+  },
   methods: {
+    // a changed app/#<example-id> link loads that example without a reload
+    onHash() {
+      const ex = EXAMPLES.find((e) => e.id === location.hash.slice(1))
+      if (ex && ex.id !== this.project.example) this.loadExample(ex)
+    },
     setLocale,
     announce(text) {
       this.announcement = ''

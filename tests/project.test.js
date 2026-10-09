@@ -18,6 +18,16 @@ describe('project files', () => {
     expect(back.view).toEqual({ plotX: 'ZEIT', overlay: true })
   })
 
+  it('keeps graph models and the extended-syntax switch', () => {
+    const graph = { nodes: [{ id: 'n1', kind: 'state', name: 'N', x: 0, y: 0, formula: '' }], links: [] }
+    const g = cleanSimulation({ origin: 'graph', graph, extended: true })
+    const back = parseProject(projectToText(toProject({ simulations: [g] }))).simulations[0]
+    expect(back.origin).toBe('graph')
+    expect(back.graph).toEqual(graph)
+    expect(back.extended).toBe(true)
+    expect(cleanSimulation({ origin: 'graph', graph: { nodes: 'x' } }).graph).toBeNull()
+  })
+
   it('reads version 1 files with a single model', () => {
     const v1 = { format: 'modellwerk', version: 1, model: { title: 'Old', source: 'a := 1', start: { A: 2 }, steps: 5 }, view: { plotX: 'A' } }
     const back = parseProject(JSON.stringify(v1))
