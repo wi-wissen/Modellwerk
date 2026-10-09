@@ -1,0 +1,882 @@
+[
+  {
+    "id": "lynx-and-hare",
+    "texts": {
+      "title": {
+        "de": "Luchs und Schneehase: Räuber-Beute-Zyklen",
+        "en": "Lynx and snowshoe hare: predator–prey cycles"
+      },
+      "topic": {
+        "de": "Populationsdynamik, Lotka-Volterra-Modell",
+        "en": "Population dynamics, Lotka–Volterra model"
+      },
+      "description": {
+        "de": "Die Pelzhandelsbilanzen der Hudson's Bay Company zeigen, dass die Zahl gehandelter Luchs- und Hasenfelle in Kanada in etwa zehnjährigen Wellen schwankt. Das Modell koppelt zwei Bestände: Hasen vermehren sich proportional zu ihrer Zahl und werden umso häufiger gefressen, je öfter Hase und Luchs sich begegnen; Luchse profitieren von diesen Begegnungen und sterben ohne Beute ab. Startwerte und Raten sind an die Felldaten 1900–1920 angepasst (Angaben in Tausend). Vergleiche die simulierten Kurven mit den historischen Werten und untersuche, wie die Luchsspitzen den Hasenspitzen hinterherlaufen.",
+        "en": "Fur-trade records of the Hudson's Bay Company show that the number of lynx and hare pelts traded in Canada rises and falls in roughly ten-year waves. The model couples two stocks: hares grow in proportion to their number and are eaten more often the more often hares and lynx meet; lynx benefit from these encounters and die out without prey. Initial values and rates are fitted to the 1900–1920 pelt data (in thousands). Compare the simulated curves with the historical numbers and look at how lynx peaks lag behind hare peaks."
+      }
+    },
+    "subject": "Biologie",
+    "level": "Klasse 11–13 (auch Mathematik)",
+    "mode": "program",
+    "source": "// Raeuber-Beute-Modell nach Lotka und Volterra\n// Bestaende in Tausend Tieren, Zeit in Jahren\nGeburten := Alpha * Hasen\nGefressen := Beta * Hasen * Luchse\nZuwachs := Delta * Hasen * Luchse\nSterben := Gamma * Luchse\nHasen := Hasen + (Geburten - Gefressen) * dt\nLuchse := Luchse + (Zuwachs - Sterben) * dt\nZeit := Zeit + dt",
+    "simplified": true,
+    "start": {
+      "ZEIT": 1900,
+      "HASEN": 30,
+      "LUCHSE": 4,
+      "ALPHA": 0.55,
+      "BETA": 0.028,
+      "GAMMA": 0.8,
+      "DELTA": 0.024,
+      "DT": 0.01,
+      "GEBURTEN": 0,
+      "GEFRESSEN": 0,
+      "ZUWACHS": 0,
+      "STERBEN": 0
+    },
+    "steps": 2000,
+    "plot": {
+      "x": "ZEIT",
+      "y": [
+        "HASEN",
+        "LUCHSE"
+      ]
+    },
+    "checks": [
+      {
+        "step": 500,
+        "variable": "HASEN",
+        "value": 18.414,
+        "time": 1905,
+        "note": "1905"
+      },
+      {
+        "step": 500,
+        "variable": "LUCHSE",
+        "value": 50.1091,
+        "time": 1905,
+        "note": "1905"
+      },
+      {
+        "step": 2000,
+        "variable": "HASEN",
+        "value": 17.218,
+        "time": 1920,
+        "note": "1920"
+      },
+      {
+        "step": 2000,
+        "variable": "LUCHSE",
+        "value": 5.03829,
+        "time": 1920,
+        "note": "1920"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Predator-Prey Population Dynamics: the Lotka-Volterra model in Stan (Bob Carpenter, 2018)",
+        "url": "https://mc-stan.org/learn-stan/case-studies/lotka-volterra-predator-prey.html",
+        "publisher": "Stan Development Team / Columbia University",
+        "license": "Text CC BY-NC 4.0, Code BSD-3 – nur Messwerte (Felldaten 1900–1920, ursprünglich Hudson's Bay Company via Hewitt 1921/Howard 2009) und geschätzte Parameter als Fakten übernommen, kein Text",
+        "licenseUrl": "https://creativecommons.org/licenses/by-nc/4.0/",
+        "usedFor": "Daten",
+        "accessed": "2026-10-09"
+      },
+      {
+        "title": "Lotka–Volterra equations",
+        "url": "https://en.wikipedia.org/wiki/Lotka%E2%80%93Volterra_equations",
+        "publisher": "Wikipedia, The Free Encyclopedia (Wikimedia Foundation)",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "usedFor": "Aufgabenidee",
+        "accessed": "2026-10-09"
+      },
+      {
+        "title": "Lotka-Volterra-Gleichungen",
+        "url": "https://de.wikipedia.org/wiki/Lotka-Volterra-Gleichungen",
+        "publisher": "Wikipedia – Die freie Enzyklopädie (Wikimedia Foundation)",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "usedFor": "Aufgabenidee",
+        "accessed": "2026-10-09"
+      }
+    ],
+    "notes": "Parameter (alpha=0,55; beta=0,028; gamma=0,80; delta=0,024 pro Jahr) sind die Bayes-Schätzwerte aus der Stan-Fallstudie; Startwerte = Felle 1900 (Hasen 30, Luchse 4 Tausend). Historische Vergleichswerte (Tausend Felle) aus derselben Datentabelle, z. B. 1900: H 30,0 / L 4,0; 1901: L 6,1; 1919: H 16,2; 1920: H 24,7 / L 8,6. Das explizite Euler-Verfahren lässt die Amplitude langsam anwachsen; mit dt=0,01 bleibt der Effekt über 20 Jahre klein (siehe checks). Die Felldaten sind Fangzahlen, keine Bestandszählungen – im Unterricht thematisieren."
+  },
+  {
+    "id": "sir-epidemic",
+    "texts": {
+      "title": {
+        "de": "Grippewelle an der Schule (SIR-Modell)",
+        "en": "Flu outbreak at a school (SIR model)"
+      },
+      "topic": {
+        "de": "Epidemiologie, Kompartimentmodell",
+        "en": "Epidemiology, compartment model"
+      },
+      "description": {
+        "de": "Eine Schule mit 1000 Personen: Drei Erkrankte bringen eine Grippe mit. Jeder Kontakt zwischen Gesunden und Kranken kann zu einer Ansteckung führen, Kranke werden im Mittel nach fünf Tagen wieder gesund und sind dann immun. Das Modell zeigt, wann die Welle ihren Höhepunkt erreicht und wie viele Personen nie erkranken. Variiere die Ansteckungsrate (z. B. durch Lüften oder Masken) und beobachte, wie sich Höhe und Zeitpunkt des Gipfels verschieben.",
+        "en": "A school of 1000 people: three sick students bring in the flu. Each contact between healthy and sick people may cause an infection; on average the sick recover after five days and are then immune. The model shows when the wave peaks and how many people never fall ill. Vary the infection rate (e.g. through ventilation or masks) and see how the height and timing of the peak shift."
+      }
+    },
+    "subject": "Biologie / Mathematik",
+    "level": "Klasse 9–12",
+    "mode": "program",
+    "source": "// SIR-Modell: Gesunde (empfaenglich), Kranke, Genesene (immun)\n// Zeit in Tagen\nAnsteckungen := Beta * Gesunde * Kranke / N\nGenesungen := Gamma * Kranke\nGesunde := Gesunde - Ansteckungen * dt\nKranke := Kranke + (Ansteckungen - Genesungen) * dt\nGenesene := Genesene + Genesungen * dt\nZeit := Zeit + dt",
+    "simplified": true,
+    "start": {
+      "ZEIT": 0,
+      "GESUNDE": 997,
+      "KRANKE": 3,
+      "GENESENE": 0,
+      "N": 1000,
+      "BETA": 0.5,
+      "GAMMA": 0.2,
+      "DT": 0.1,
+      "ANSTECKUNGEN": 0,
+      "GENESUNGEN": 0
+    },
+    "steps": 1000,
+    "plot": {
+      "x": "ZEIT",
+      "y": [
+        "GESUNDE",
+        "KRANKE",
+        "GENESENE"
+      ]
+    },
+    "checks": [
+      {
+        "step": 200,
+        "variable": "KRANKE",
+        "value": 234.117,
+        "time": 20,
+        "note": "Tag 20, kurz vor dem Gipfel (Maximum ca. 236 bei Tag 20,8)"
+      },
+      {
+        "step": 1000,
+        "variable": "GESUNDE",
+        "value": 105.649,
+        "time": 100,
+        "note": "Tag 100: rund 106 Personen bleiben gesund"
+      },
+      {
+        "step": 1000,
+        "variable": "GENESENE",
+        "value": 894.346,
+        "time": 100,
+        "note": "Tag 100"
+      }
+    ],
+    "sources": [
+      {
+        "title": "SIR-Modell",
+        "url": "https://de.wikipedia.org/wiki/SIR-Modell",
+        "publisher": "Wikipedia – Die freie Enzyklopädie (Wikimedia Foundation)",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "usedFor": "Aufgabenidee",
+        "accessed": "2026-10-09"
+      },
+      {
+        "title": "Compartmental models in epidemiology",
+        "url": "https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology",
+        "publisher": "Wikipedia, The Free Encyclopedia (Wikimedia Foundation)",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "usedFor": "Aufgabenidee",
+        "accessed": "2026-10-09"
+      }
+    ],
+    "notes": "Basisreproduktionszahl R0 = Beta/Gamma = 2,5 – liegt im Bereich, den der Wikipedia-Artikel für Influenza nennt (2 bis 3). Mittlere Krankheitsdauer 1/Gamma = 5 Tage (Annahme). Startwerte 997/3 wie im Beispiel des Wikipedia-Artikels, Raten selbst gewählt. Die Summe Gesunde+Kranke+Genesene bleibt exakt 1000."
+  },
+  {
+    "id": "newtons-law-of-cooling",
+    "texts": {
+      "title": {
+        "de": "Wie schnell kühlt mein Kaffee ab?",
+        "en": "How fast does my coffee cool down?"
+      },
+      "topic": {
+        "de": "Wärmelehre, Newtonsches Abkühlungsgesetz",
+        "en": "Thermodynamics, Newton's law of cooling"
+      },
+      "description": {
+        "de": "Ein frisch aufgebrühter Kaffee hat etwa 90 °C, das Zimmer 20 °C. Der Wärmestrom an die Umgebung ist umso größer, je größer der Temperaturunterschied ist – deshalb kühlt der Kaffee anfangs schnell und später immer langsamer ab. Bestimme mit dem Modell, wann der Kaffee Trinktemperatur (etwa 60 °C) erreicht, und vergleiche mit einer eigenen Messreihe; aus der Messung lässt sich die Abkühlkonstante k anpassen.",
+        "en": "Freshly brewed coffee is about 90 °C, the room is 20 °C. The heat flow to the surroundings grows with the temperature difference, so the coffee cools quickly at first and then more and more slowly. Use the model to find when the coffee reaches drinking temperature (about 60 °C) and compare with your own measurements; fit the cooling constant k to your data."
+      }
+    },
+    "subject": "Physik",
+    "level": "Klasse 8–10",
+    "mode": "program",
+    "source": "// Newtonsches Abkuehlungsgesetz, Zeit in Minuten\nAbkuehlung := k * (Temperatur - Raumtemperatur)\nTemperatur := Temperatur - Abkuehlung * dt\nZeit := Zeit + dt",
+    "simplified": true,
+    "start": {
+      "ZEIT": 0,
+      "TEMPERATUR": 90,
+      "RAUMTEMPERATUR": 20,
+      "K": 0.04,
+      "DT": 0.1,
+      "ABKUEHLUNG": 0
+    },
+    "steps": 600,
+    "plot": {
+      "x": "ZEIT",
+      "y": [
+        "TEMPERATUR",
+        "RAUMTEMPERATUR"
+      ]
+    },
+    "checks": [
+      {
+        "step": 100,
+        "variable": "TEMPERATUR",
+        "value": 66.8848,
+        "time": 10,
+        "note": "nach 10 min (exakt 66,92 °C)"
+      },
+      {
+        "step": 140,
+        "variable": "TEMPERATUR",
+        "value": 59.9398,
+        "time": 14,
+        "note": "nach 14 min Trinktemperatur 60 °C erreicht"
+      },
+      {
+        "step": 300,
+        "variable": "TEMPERATUR",
+        "value": 41.0329,
+        "time": 30,
+        "note": "nach 30 min"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Newton's law of cooling",
+        "url": "https://en.wikipedia.org/wiki/Newton%27s_law_of_cooling",
+        "publisher": "Wikipedia, The Free Encyclopedia (Wikimedia Foundation)",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "usedFor": "Aufgabenidee",
+        "accessed": "2026-10-09"
+      }
+    ],
+    "notes": "k = 0,04 pro Minute ist eine selbst gewählte Größenordnung für eine offene Tasse (Halbwertszeit der Temperaturdifferenz ca. 17 min); sollte durch eine eigene Messung (Thermometer, Stoppuhr) ersetzt werden. Erweiterung: Milch zu Beginn oder am Ende zugeben (Mischungstemperatur) – klassische Fragestellung."
+  },
+  {
+    "id": "skydiver-air-resistance",
+    "texts": {
+      "title": {
+        "de": "Fallschirmspringer im freien Fall",
+        "en": "Skydiver in free fall"
+      },
+      "topic": {
+        "de": "Mechanik, Fall mit Luftreibung",
+        "en": "Mechanics, falling with air resistance"
+      },
+      "description": {
+        "de": "Ein Fallschirmspringer (80 kg) springt in 4000 m Höhe ab und fällt in Bauchlage. Die Gewichtskraft bleibt gleich, die Luftwiderstandskraft wächst mit dem Quadrat der Geschwindigkeit. Nach einigen Sekunden heben sich beide Kräfte nahezu auf und die Geschwindigkeit nähert sich einem Grenzwert. Ermittle diese Endgeschwindigkeit, die Fallstrecke in den ersten 10 Sekunden und untersuche den Einfluss von Masse und Körperhaltung (Fläche, cw-Wert).",
+        "en": "A skydiver (80 kg) jumps from 4000 m and falls belly-down. Gravity stays constant while drag grows with the square of the speed. After a few seconds both forces nearly balance and the speed approaches a limit. Find this terminal velocity and the distance fallen in the first 10 seconds, and explore the influence of mass and body posture (area, drag coefficient)."
+      }
+    },
+    "subject": "Physik",
+    "level": "Klasse 10–11",
+    "mode": "program",
+    "source": "// Fall mit Luftreibung (Newton-Reibung), Zeit in s\nGewichtskraft := Masse * g\nReibungskraft := 0,5 * Cw * Rho * Flaeche * V * V\nBeschl := (Gewichtskraft - Reibungskraft) / Masse\nV := V + Beschl * dt\nHoehe := Hoehe - V * dt\nKmh := V * 3,6\nZeit := Zeit + dt",
+    "simplified": true,
+    "start": {
+      "ZEIT": 0,
+      "V": 0,
+      "HOEHE": 4000,
+      "MASSE": 80,
+      "G": 9.81,
+      "CW": 0.78,
+      "RHO": 1.2,
+      "FLAECHE": 0.67,
+      "DT": 0.01,
+      "GEWICHTSKRAFT": 0,
+      "REIBUNGSKRAFT": 0,
+      "BESCHL": 0,
+      "KMH": 0
+    },
+    "steps": 3000,
+    "plot": {
+      "x": "ZEIT",
+      "y": [
+        "V"
+      ]
+    },
+    "checks": [
+      {
+        "step": 1000,
+        "variable": "V",
+        "value": 48.095,
+        "time": 10,
+        "note": "nach 10 s (ca. 173 km/h; Fallstrecke ca. 329 m, Wikipedia: ca. 300 m)"
+      },
+      {
+        "step": 1000,
+        "variable": "HOEHE",
+        "value": 3671.2,
+        "time": 10,
+        "note": "nach 10 s"
+      },
+      {
+        "step": 3000,
+        "variable": "KMH",
+        "value": 180.101,
+        "time": 30,
+        "note": "nach 30 s ≈ Endgeschwindigkeit 50,03 m/s"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Fallschirmspringen",
+        "url": "https://de.wikipedia.org/wiki/Fallschirmspringen",
+        "publisher": "Wikipedia – Die freie Enzyklopädie (Wikimedia Foundation)",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "usedFor": "Parameter",
+        "accessed": "2026-10-09"
+      },
+      {
+        "title": "Strömungswiderstandskoeffizient",
+        "url": "https://de.wikipedia.org/wiki/Str%C3%B6mungswiderstandskoeffizient",
+        "publisher": "Wikipedia – Die freie Enzyklopädie (Wikimedia Foundation)",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "usedFor": "Parameter",
+        "accessed": "2026-10-09"
+      }
+    ],
+    "notes": "Wikipedia (Fallschirmspringen): in Bauchlage werden in den ersten 10 s etwa 300 m zurückgelegt, danach ca. 180 km/h. cw = 0,78 ist der Tabellenwert „Mensch, stehend“ (nur Näherung für Bauchlage); die Fläche 0,67 m² ist so gewählt, dass die Endgeschwindigkeit ca. 180 km/h beträgt. Konstante Luftdichte (in 4000 m eigentlich ca. 0,8 kg/m³). Die Öffnung des Schirms ist nicht modelliert (Erweiterung: zweites Modell mit großer Fläche und cw 1,33)."
+  },
+  {
+    "id": "damped-spring-pendulum",
+    "texts": {
+      "title": {
+        "de": "Gedämpftes Federpendel",
+        "en": "Damped spring pendulum"
+      },
+      "topic": {
+        "de": "Mechanische Schwingungen",
+        "en": "Mechanical oscillations"
+      },
+      "description": {
+        "de": "Ein Körper von 200 g hängt an einer Schraubenfeder (Federkonstante 20 N/m) und wird 5 cm aus der Ruhelage ausgelenkt. Die rücktreibende Federkraft ist proportional zur Auslenkung, eine kleine Reibungskraft proportional zur Geschwindigkeit. Das Modell liefert eine Schwingung mit langsam abnehmender Amplitude. Lies die Periodendauer ab und vergleiche sie mit der Formel T = 2π·√(m/D); untersuche den Einfluss von Masse, Federkonstante und Dämpfung.",
+        "en": "A 200 g mass hangs on a coil spring (spring constant 20 N/m) and is pulled 5 cm from equilibrium. The restoring spring force is proportional to the displacement, a small friction force proportional to velocity. The model produces an oscillation with slowly decreasing amplitude. Read off the period and compare it with T = 2π·√(m/D); explore the effect of mass, spring constant and damping."
+      }
+    },
+    "subject": "Physik",
+    "level": "Klasse 10–12",
+    "mode": "program",
+    "source": "// Federpendel mit geschwindigkeitsproportionaler Daempfung\n// Auslenkung S in m, Zeit in s\nFederkraft := -D * S\nReibung := -Daempfung * V\nBeschl := (Federkraft + Reibung) / Masse\nV := V + Beschl * dt\n// S wird mit der neuen Geschwindigkeit berechnet (Euler-Cromer),\n// sonst waechst die Amplitude kuenstlich an\nS := S + V * dt\nZeit := Zeit + dt",
+    "simplified": false,
+    "start": {
+      "ZEIT": 0,
+      "S": 0.05,
+      "V": 0,
+      "MASSE": 0.2,
+      "D": 20,
+      "DAEMPFUNG": 0.04,
+      "DT": 0.001,
+      "FEDERKRAFT": 0,
+      "REIBUNG": 0,
+      "BESCHL": 0
+    },
+    "steps": 5000,
+    "plot": {
+      "x": "ZEIT",
+      "y": [
+        "S"
+      ]
+    },
+    "checks": [
+      {
+        "step": 628,
+        "variable": "S",
+        "value": 0.0469553,
+        "time": 0.628,
+        "note": "nach ca. einer Periode (0,628 s)"
+      },
+      {
+        "step": 5000,
+        "variable": "S",
+        "value": 0.0292245,
+        "time": 5,
+        "note": "nach 5 s, Amplitude ≈ 2,9 cm (Theorie 3,0 cm)"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Federpendel",
+        "url": "https://de.wikipedia.org/wiki/Federpendel",
+        "publisher": "Wikipedia – Die freie Enzyklopädie (Wikimedia Foundation)",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "usedFor": "Aufgabenidee",
+        "accessed": "2026-10-09"
+      }
+    ],
+    "notes": "Theoretische Periodendauer T = 2π·√(0,2/20) ≈ 0,628 s. Abklingkonstante Daempfung/(2·Masse) = 0,1 1/s, d. h. Amplitude nach 5 s etwa 5 cm·e^(-0,5) ≈ 3,0 cm. Didaktischer Hinweis: Steht die Zeile S := S + V*dt vor der V-Zeile (rein explizites Euler), wächst die Amplitude ohne Dämpfung künstlich an – guter Anlass, das Verfahren zu diskutieren."
+  },
+  {
+    "id": "drug-level-ibuprofen",
+    "texts": {
+      "title": {
+        "de": "Wirkstoffspiegel bei regelmäßiger Tabletteneinnahme",
+        "en": "Drug level with regular tablet doses"
+      },
+      "topic": {
+        "de": "Pharmakokinetik, Aufnahme und Abbau",
+        "en": "Pharmacokinetics, absorption and elimination"
+      },
+      "description": {
+        "de": "Jemand nimmt alle 8 Stunden eine Schmerztablette mit 400 mg Ibuprofen. Der Wirkstoff gelangt zunächst in den Magen-Darm-Trakt, wird von dort ins Blut aufgenommen und anschließend mit einer Halbwertszeit von etwa zwei Stunden abgebaut. Das Modell zeigt den typischen Sägezahnverlauf der Wirkstoffmenge im Körper. Untersuche, wann das Maximum nach einer Einnahme erreicht wird und warum sich der Wirkstoff bei diesem Abstand kaum anreichert – und was bei kürzeren Abständen passieren würde.",
+        "en": "Someone takes a 400 mg ibuprofen pain tablet every 8 hours. The drug first enters the gut, is absorbed into the blood and then eliminated with a half-life of about two hours. The model shows the typical sawtooth pattern of the amount of drug in the body. Find when the peak occurs after a dose and why the drug hardly accumulates at this interval – and what would happen with shorter intervals."
+      }
+    },
+    "subject": "Biologie / Mathematik",
+    "level": "Klasse 9–12",
+    "mode": "program",
+    "source": "// Zwei-Kompartiment-Modell: Magen/Darm -> Koerper\n// Zeit in Stunden, Mengen in mg\n// Gabe ist 1*Dosis, wenn Zaehler ein Vielfaches von Takt ist, sonst 0\nGabe := Dosis * int(1 - frac(Zaehler / Takt) + 0,0001)\nMagen := Magen + Gabe\nKe := ln(2) / Halbwertszeit\nAufnahme := Ka * Magen\nAbbau := Ke * Koerper\nMagen := Magen - Aufnahme * dt\nKoerper := Koerper + (Aufnahme - Abbau) * dt\nZaehler := Zaehler + 1\nZeit := Zeit + dt",
+    "simplified": true,
+    "start": {
+      "ZEIT": 0,
+      "MAGEN": 0,
+      "KOERPER": 0,
+      "DOSIS": 400,
+      "TAKT": 80,
+      "ZAEHLER": 0,
+      "HALBWERTSZEIT": 2,
+      "KA": 1.5,
+      "DT": 0.1,
+      "GABE": 0,
+      "KE": 0,
+      "AUFNAHME": 0,
+      "ABBAU": 0
+    },
+    "steps": 480,
+    "plot": {
+      "x": "ZEIT",
+      "y": [
+        "KOERPER",
+        "MAGEN"
+      ]
+    },
+    "checks": [
+      {
+        "step": 12,
+        "variable": "KOERPER",
+        "value": 266.682,
+        "time": 1.2,
+        "note": "Maximum nach 1. Dosis bei ca. 1,2 h"
+      },
+      {
+        "step": 80,
+        "variable": "KOERPER",
+        "value": 30.9502,
+        "time": 8,
+        "note": "kurz vor/bei 2. Dosis (8 h)"
+      },
+      {
+        "step": 480,
+        "variable": "KOERPER",
+        "value": 32.9084,
+        "time": 48,
+        "note": "nach 48 h"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Ibuprofen",
+        "url": "https://de.wikipedia.org/wiki/Ibuprofen",
+        "publisher": "Wikipedia – Die freie Enzyklopädie (Wikimedia Foundation)",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "usedFor": "Parameter",
+        "accessed": "2026-10-09"
+      }
+    ],
+    "notes": "Aus Wikipedia: Plasmahalbwertszeit 2–3 h, Maximum 1–2 h nach Einnahme, rezeptfreie Einzeldosis bis 400 mg, Tageshöchstdosis rezeptfrei 1200 mg (daher 3 × 400 mg im 8-h-Takt). Die Aufnahmerate Ka = 1,5 1/h ist selbst gewählt, so dass das Maximum nach ca. 1,3 h liegt. Takt = 80 Schritte = 8 h bei dt = 0,1 h; bei anderem dt muss Takt angepasst werden. Modell rechnet mit Mengen (mg), nicht mit Konzentrationen. Kein medizinischer Rat."
+  },
+  {
+    "id": "radioactive-decay",
+    "texts": {
+      "title": {
+        "de": "Zerfall von Barium-137m aus dem Isotopengenerator",
+        "en": "Decay of barium-137m from an isotope generator"
+      },
+      "topic": {
+        "de": "Radioaktivität, Halbwertszeit",
+        "en": "Radioactivity, half-life"
+      },
+      "description": {
+        "de": "Im Physikunterricht wird aus einem Cäsium-Barium-Generator kurzlebiges Barium-137m herausgespült. In jeder Sekunde zerfällt ein fester Bruchteil der noch vorhandenen Kerne. Formuliere das Modell in Sätzen: Die Zahl der Bariumkerne nimmt um die Zerfälle ab, die Zerfälle sind proportional zur Zahl der Kerne. Lies im Diagramm die Halbwertszeit ab und vergleiche mit einer Messung der Zählrate.",
+        "en": "In physics class, short-lived barium-137m is washed out of a caesium–barium generator. Every second a fixed fraction of the remaining nuclei decays. Build the model from sentences: the number of barium nuclei decreases by the decays, and the decays are proportional to the number of nuclei. Read the half-life off the graph and compare with a count-rate measurement."
+      }
+    },
+    "subject": "Physik / Chemie",
+    "level": "Klasse 9–10",
+    "mode": "sentences",
+    "sentences": [
+      {
+        "subject": "Barium",
+        "predicate": "decrease",
+        "object": "Zerfaelle"
+      },
+      {
+        "subject": "Zerfaelle",
+        "predicate": "proportional",
+        "object": "Barium"
+      }
+    ],
+    "simplified": true,
+    "start": {
+      "ZEIT": 0,
+      "BARIUM": 100000,
+      "ZERFAELLE": 0,
+      "FZERFAELLE": 0.004527
+    },
+    "steps": 900,
+    "plot": {
+      "x": "ZEIT",
+      "y": [
+        "BARIUM"
+      ]
+    },
+    "checks": [
+      {
+        "step": 153,
+        "variable": "BARIUM",
+        "value": 49947.2,
+        "time": 153,
+        "note": "nach 153 s ≈ 1 Halbwertszeit"
+      },
+      {
+        "step": 306,
+        "variable": "BARIUM",
+        "value": 24947.2,
+        "time": 306,
+        "note": "nach 2 Halbwertszeiten"
+      },
+      {
+        "step": 600,
+        "variable": "BARIUM",
+        "value": 6571.9,
+        "time": 600,
+        "note": "nach 10 min"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Cäsium-Barium-Generator",
+        "url": "https://de.wikipedia.org/wiki/C%C3%A4sium-Barium-Generator",
+        "publisher": "Wikipedia – Die freie Enzyklopädie (Wikimedia Foundation)",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "usedFor": "Aufgabenidee",
+        "accessed": "2026-10-09"
+      },
+      {
+        "title": "Caesium-137",
+        "url": "https://de.wikipedia.org/wiki/Caesium-137",
+        "publisher": "Wikipedia – Die freie Enzyklopädie (Wikimedia Foundation)",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "usedFor": "Parameter",
+        "accessed": "2026-10-09"
+      }
+    ],
+    "notes": "Halbwertszeit Ba-137m 2,552 min = 153,1 s (Wikipedia Caesium-137) → Zerfallsfaktor pro Sekunde FZERFAELLE = ln 2 / 153,1 ≈ 0,004527. Ein Zeitschritt = 1 s (der generierte Programmtext endet mit Zeit := Zeit + 1). 100 000 Kerne als runde Startzahl; Zählrate am Messgerät = Zerfaelle × Nachweiswahrscheinlichkeit. Generiertes Programm (erwartet): Zerfaelle := FZerfaelle * Barium; Barium := Barium - Zerfaelle; Zeit := Zeit + 1."
+  },
+  {
+    "id": "iss-orbit",
+    "texts": {
+      "title": {
+        "de": "Die Umlaufbahn der ISS",
+        "en": "The orbit of the ISS"
+      },
+      "topic": {
+        "de": "Gravitation, Satellitenbahnen",
+        "en": "Gravitation, satellite orbits"
+      },
+      "description": {
+        "de": "Die Internationale Raumstation kreist in rund 420 km Höhe um die Erde. Im Modell wirkt auf die Station nur die Gravitationskraft der Erde, die mit dem Quadrat des Abstands abnimmt; Ort und Geschwindigkeit werden in x- und y-Richtung getrennt berechnet. Bestimme die Umlaufzeit und vergleiche mit den rund 92 Minuten der echten ISS. Was passiert, wenn die Startgeschwindigkeit etwas größer oder kleiner gewählt wird?",
+        "en": "The International Space Station orbits Earth at about 420 km altitude. In the model only Earth's gravity acts on the station, decreasing with the square of the distance; position and velocity are computed separately in the x and y directions. Determine the orbital period and compare it with the real ISS's roughly 92 minutes. What happens if the initial speed is chosen slightly larger or smaller?"
+      }
+    },
+    "subject": "Physik",
+    "level": "Klasse 11–13",
+    "mode": "program",
+    "source": "// Satellitenbahn in der Bahnebene, Erdmittelpunkt im Ursprung\n// Laengen in m, Zeit in s\nAbstand := sqrt(sqr(X) + sqr(Y))\nAX := -GM * X / (Abstand * Abstand * Abstand)\nAY := -GM * Y / (Abstand * Abstand * Abstand)\nVX := VX + AX * dt\nVY := VY + AY * dt\n// Ort mit neuer Geschwindigkeit (Euler-Cromer) haelt die Bahn stabil\nX := X + VX * dt\nY := Y + VY * dt\nHoehe := (sqrt(sqr(X) + sqr(Y)) - Erdradius) / 1000\nZeit := Zeit + dt",
+    "simplified": true,
+    "start": {
+      "ZEIT": 0,
+      "X": 6791000,
+      "Y": 0,
+      "VX": 0,
+      "VY": 7661,
+      "GM": 398600000000000,
+      "ERDRADIUS": 6371000,
+      "DT": 1,
+      "ABSTAND": 6791000,
+      "AX": 0,
+      "AY": 0,
+      "HOEHE": 420
+    },
+    "steps": 8000,
+    "plot": {
+      "x": "X",
+      "y": [
+        "Y"
+      ]
+    },
+    "checks": [
+      {
+        "step": 5569,
+        "variable": "X",
+        "value": 6791000,
+        "time": 5569,
+        "note": "nach einem Umlauf (5569 s = 92,8 min) wieder nahe Startpunkt 6 791 000 m"
+      },
+      {
+        "step": 5569,
+        "variable": "Y",
+        "value": 1371.83,
+        "time": 5569,
+        "note": "nach einem Umlauf"
+      },
+      {
+        "step": 8000,
+        "variable": "HOEHE",
+        "value": 417.545,
+        "time": 8000,
+        "note": "Höhe schwankt durch das Verfahren nur zwischen 415,6 und 423,4 km"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Earth Fact Sheet",
+        "url": "https://nssdc.gsfc.nasa.gov/planetary/factsheet/earthfact.html",
+        "publisher": "NASA Goddard Space Flight Center, NSSDCA (David R. Williams)",
+        "license": "Keine Lizenzangabe auf der Seite; Werk einer US-Bundesbehörde, in den USA nach 17 U.S.C. § 105 gemeinfrei – nur Zahlenwerte (Fakten) übernommen",
+        "licenseUrl": "https://www.law.cornell.edu/uscode/text/17/105",
+        "usedFor": "Parameter",
+        "accessed": "2026-10-09"
+      },
+      {
+        "title": "Internationale Raumstation",
+        "url": "https://de.wikipedia.org/wiki/Internationale_Raumstation",
+        "publisher": "Wikipedia – Die freie Enzyklopädie (Wikimedia Foundation)",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "usedFor": "Parameter",
+        "accessed": "2026-10-09"
+      }
+    ],
+    "notes": "GM = 3,986·10^14 m³/s² und mittlerer Erdradius 6371 km aus dem NASA Earth Fact Sheet. Bahnhöhe 420 km (Wikipedia: typisch 370–460 km, Umlaufzeit ca. 92,7 min). Kreisbahngeschwindigkeit √(GM/r) = 7661 m/s. Luftreibung und Erdabplattung vernachlässigt. Mit rein explizitem Euler (Ort vor Geschwindigkeit) driftet die Bahn spürbar nach außen. Alternative Achsen: { x: ZEIT, y: [HOEHE] }."
+  },
+  {
+    "id": "earth-energy-balance",
+    "texts": {
+      "title": {
+        "de": "Energiebilanz der Erde bei doppeltem CO₂",
+        "en": "Earth's energy balance with doubled CO₂"
+      },
+      "topic": {
+        "de": "Klima, Strahlungsbilanz, Treibhauseffekt",
+        "en": "Climate, radiation budget, greenhouse effect"
+      },
+      "description": {
+        "de": "Die Erde erhält Energie von der Sonne und strahlt Wärme ins All ab. Sind beide Ströme gleich groß, bleibt die mittlere Temperatur konstant. Verdoppelt sich die CO₂-Konzentration gegenüber dem vorindustriellen Wert, kommt ein zusätzlicher Strahlungsantrieb hinzu; die Oberfläche (vor allem die obere Meeresschicht) erwärmt sich, bis die Abstrahlung den Überschuss wieder ausgleicht. Das stark vereinfachte Nulldimensionale Modell zeigt, wie lange das dauert und wie groß die Erwärmung ohne Rückkopplungen wäre.",
+        "en": "Earth receives energy from the Sun and radiates heat to space. When both flows are equal, the mean temperature stays constant. If the CO₂ concentration doubles relative to pre-industrial levels, an additional radiative forcing appears; the surface (mainly the upper ocean layer) warms until outgoing radiation balances the surplus again. This highly simplified zero-dimensional model shows how long that takes and how large the warming would be without feedbacks."
+      }
+    },
+    "subject": "Geografie / Physik",
+    "level": "Klasse 11–13",
+    "mode": "program",
+    "source": "// Nulldimensionales Energiebilanzmodell, Zeit in Jahren\n// Temperatur T in Kelvin, Stroeme in W/m^2\nEinstrahlung := Solarkonstante * (1 - Albedo) / 4\nAntrieb := 5,35 * ln(Kohlendioxid / Bezugswert)\nAbstrahlung := Emission * Sigma * sqr(sqr(T))\nBilanz := Einstrahlung + Antrieb - Abstrahlung\nT := T + Bilanz / Waermekapazitaet * Sekunden * dt\nCelsius := T - 273,15\nZeit := Zeit + dt",
+    "simplified": true,
+    "start": {
+      "ZEIT": 0,
+      "T": 288,
+      "KOHLENDIOXID": 560,
+      "BEZUGSWERT": 280,
+      "SOLARKONSTANTE": 1361,
+      "ALBEDO": 0.294,
+      "SIGMA": 5.67e-08,
+      "EMISSION": 0.6157,
+      "WAERMEKAPAZITAET": 200000000,
+      "SEKUNDEN": 31560000,
+      "DT": 0.1,
+      "EINSTRAHLUNG": 0,
+      "ANTRIEB": 0,
+      "ABSTRAHLUNG": 0,
+      "BILANZ": 0,
+      "CELSIUS": 14.85
+    },
+    "steps": 300,
+    "plot": {
+      "x": "ZEIT",
+      "y": [
+        "CELSIUS"
+      ]
+    },
+    "checks": [
+      {
+        "step": 1,
+        "variable": "ANTRIEB",
+        "value": 3.70834,
+        "time": 0.1,
+        "note": "Strahlungsantrieb bei CO2-Verdopplung"
+      },
+      {
+        "step": 50,
+        "variable": "CELSIUS",
+        "value": 15.8956,
+        "time": 5,
+        "note": "nach 5 Jahren"
+      },
+      {
+        "step": 300,
+        "variable": "CELSIUS",
+        "value": 15.9685,
+        "time": 30,
+        "note": "nach 30 Jahren ≈ Gleichgewicht 15,97 °C (+1,1 K)"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Earth Fact Sheet",
+        "url": "https://nssdc.gsfc.nasa.gov/planetary/factsheet/earthfact.html",
+        "publisher": "NASA Goddard Space Flight Center, NSSDCA (David R. Williams)",
+        "license": "Keine Lizenzangabe auf der Seite; Werk einer US-Bundesbehörde, in den USA nach 17 U.S.C. § 105 gemeinfrei – nur Zahlenwerte (Fakten) übernommen",
+        "licenseUrl": "https://www.law.cornell.edu/uscode/text/17/105",
+        "usedFor": "Parameter",
+        "accessed": "2026-10-09"
+      },
+      {
+        "title": "Strahlungsantrieb",
+        "url": "https://de.wikipedia.org/wiki/Strahlungsantrieb",
+        "publisher": "Wikipedia – Die freie Enzyklopädie (Wikimedia Foundation)",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "usedFor": "Parameter",
+        "accessed": "2026-10-09"
+      },
+      {
+        "title": "Kohlenstoffdioxid in der Erdatmosphäre",
+        "url": "https://de.wikipedia.org/wiki/Kohlenstoffdioxid_in_der_Erdatmosph%C3%A4re",
+        "publisher": "Wikipedia – Die freie Enzyklopädie (Wikimedia Foundation)",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "usedFor": "Parameter",
+        "accessed": "2026-10-09"
+      }
+    ],
+    "notes": "Solarkonstante 1361 W/m² und Bond-Albedo 0,294 aus NASA Earth Fact Sheet; Formel ΔF = 5,35 W/m²·ln(C/C0) und vorindustriell 280 ppm aus Wikipedia. Der effektive Emissionsgrad 0,6157 ist so gewählt, dass bei 280 ppm Gleichgewicht bei 288 K (15 °C, NASA) herrscht. Wärmekapazität 2·10^8 J/(m²K) ≈ 70 m Ozean-Deckschicht × 71 % Meeresfläche (Annahme aus c_Wasser = 4,19 kJ/(kg·K)). Ohne Rückkopplungen (Wasserdampf, Eis-Albedo) ergibt sich nur ca. +1,1 K; reale Klimasensitivität ist etwa 2–3-mal so groß – das ist ein guter Diskussionsanlass, kein Prognosewert."
+  },
+  {
+    "id": "population-germany",
+    "texts": {
+      "title": {
+        "de": "Bevölkerung Deutschlands ohne Zuwanderung",
+        "en": "Germany's population without migration"
+      },
+      "topic": {
+        "de": "Bevölkerungsentwicklung, natürliche Bevölkerungsbewegung",
+        "en": "Population development, natural change"
+      },
+      "description": {
+        "de": "2024 lebten in Deutschland rund 83,6 Millionen Menschen. Es wurden etwa 677 000 Kinder geboren, aber gut eine Million Menschen starben. Das Satzmodell nimmt an, dass Geburten und Sterbefälle jeweils proportional zur Bevölkerung sind, und rechnet in Jahresschritten weiter. Wie entwickelt sich die Einwohnerzahl, wenn diese Raten gleich bleiben und niemand zu- oder abwandert? Diskutiere anschließend, warum die Annahme konstanter Raten zu einfach ist (Altersstruktur, Wanderungen).",
+        "en": "In 2024 about 83.6 million people lived in Germany. Roughly 677,000 children were born, but slightly more than one million people died. The sentence model assumes births and deaths are each proportional to the population and steps forward year by year. How does the population develop if these rates stay constant and nobody moves in or out? Afterwards discuss why constant rates are too simple (age structure, migration)."
+      }
+    },
+    "subject": "Geografie / Mathematik",
+    "level": "Klasse 7–10",
+    "mode": "sentences",
+    "sentences": [
+      {
+        "subject": "Bevoelkerung",
+        "predicate": "increase",
+        "object": "Geburten"
+      },
+      {
+        "subject": "Bevoelkerung",
+        "predicate": "decrease",
+        "object": "Sterbefaelle"
+      },
+      {
+        "subject": "Geburten",
+        "predicate": "proportional",
+        "object": "Bevoelkerung"
+      },
+      {
+        "subject": "Sterbefaelle",
+        "predicate": "proportional",
+        "object": "Bevoelkerung"
+      }
+    ],
+    "simplified": true,
+    "start": {
+      "ZEIT": 2024,
+      "BEVOELKERUNG": 83.6,
+      "GEBURTEN": 0,
+      "STERBEFAELLE": 0,
+      "FGEBURTEN": 0.0081,
+      "FSTERBEFAELLE": 0.01205
+    },
+    "steps": 50,
+    "plot": {
+      "x": "ZEIT",
+      "y": [
+        "BEVOELKERUNG"
+      ]
+    },
+    "checks": [
+      {
+        "step": 1,
+        "variable": "GEBURTEN",
+        "value": 0.67716,
+        "time": 2025,
+        "note": "Geburten im 1. Jahr (Mio.)"
+      },
+      {
+        "step": 10,
+        "variable": "BEVOELKERUNG",
+        "value": 80.3559,
+        "time": 2034,
+        "note": "Jahr 2034"
+      },
+      {
+        "step": 50,
+        "variable": "BEVOELKERUNG",
+        "value": 68.5904,
+        "time": 2074,
+        "note": "Jahr 2074"
+      }
+    ],
+    "sources": [
+      {
+        "title": "Lebendgeborene und Gestorbene (Tabelle)",
+        "url": "https://www.destatis.de/DE/Themen/Gesellschaft-Umwelt/Bevoelkerung/Geburten/Tabellen/lebendgeborene-gestorbene.html",
+        "publisher": "Statistisches Bundesamt (Destatis)",
+        "license": "© Statistisches Bundesamt (Destatis), 2026 – „Vervielfältigung und Verbreitung, auch auszugsweise, mit Quellennachweis gestattet“ (Impressum); GENESIS-Online-Daten unter Datenlizenz Deutschland – Namensnennung – Version 2.0. Nur Zahlenwerte übernommen.",
+        "licenseUrl": "https://www.govdata.de/dl-de/by-2-0",
+        "usedFor": "Daten",
+        "accessed": "2026-10-09"
+      },
+      {
+        "title": "Bevölkerung Deutschlands wächst im Jahr 2024 geringfügig um 0,1 % (Pressemitteilung Nr. 221 vom 20. Juni 2025)",
+        "url": "https://www.destatis.de/DE/Presse/Pressemitteilungen/2025/06/PD25_221_124.html",
+        "publisher": "Statistisches Bundesamt (Destatis)",
+        "license": "© Statistisches Bundesamt (Destatis) – Vervielfältigung und Verbreitung mit Quellennachweis gestattet (Impressum); nur Zahlenwerte übernommen",
+        "licenseUrl": "https://www.destatis.de/DE/Service/Impressum/_inhalt.html",
+        "usedFor": "Daten",
+        "accessed": "2026-10-09"
+      }
+    ],
+    "notes": "Daten 2024: Lebendgeborene 677 117, Gestorbene 1 007 758, Bevölkerung am 31.12.2024 knapp 83,6 Mio. (vorläufiger Wanderungssaldo +420 000). FGEBURTEN = 677117/83,6 Mio ≈ 0,0081; FSTERBEFAELLE = 1007758/83,6 Mio ≈ 0,01205 (pro Jahr). Bevölkerung in Millionen, ein Zeitschritt = 1 Jahr. Erweiterung: Satz „Bevoelkerung zu Zuwanderung“ mit Zuwanderung ≈ 0,42 Mio. Quellennachweis: „Statistisches Bundesamt (Destatis), 2026“."
+  }
+]

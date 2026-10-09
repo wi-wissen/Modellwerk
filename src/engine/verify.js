@@ -8,8 +8,8 @@ function sameBits(a, b) {
 }
 
 /**
- * Rechnet eine aus einer Originaldatei gelesene Simulation nach und vergleicht
- * jeden gespeicherten Wert Bit für Bit (IEEE-754-Double).
+ * Recalculates a simulation read from a PRG file and compares every stored
+ * value bit for bit (IEEE-754 double).
  */
 export function verifySimulation(sim) {
   const caseSensitive = sim.variables.some((v) => v.name !== v.name.toUpperCase())

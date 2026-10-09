@@ -3,17 +3,21 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Modellbildung und Simulation im Browser – moderne Neuentwicklung, rechengleich zu Moebius 3.0",
+  "description": "Modelling and simulation in the browser",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "dev:app": "vite --mode app --port 5174 --strictPort",
+    "build:app": "vite build --mode app",
+    "tauri": "tauri",
     "build:single": "vite build --mode single",
     "preview": "vite preview",
     "test": "vitest run",
-    "verify": "node scripts/verify-originals.mjs"
+    "verify": "node scripts/verify-prg.mjs"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
+    "@tauri-apps/cli": "^2.12.0",
     "@vitejs/plugin-vue": "^6.0.9",
     "tailwindcss": "^4.3.3",
     "vite": "^8.3.4",
@@ -21,6 +25,8 @@
     "vitest": "^5.0.3"
   },
   "dependencies": {
+    "@fontsource/atkinson-hyperlegible-mono": "^5.3.0",
+    "@fontsource/atkinson-hyperlegible-next": "^5.3.0",
     "lucide-vue-next": "^1.0.0",
     "vue": "^3.5.43"
   }

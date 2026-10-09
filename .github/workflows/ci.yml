@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      # Proof against reference PRG files. They are copyrighted and therefore not in
+      # the repository; provide them via a private location and set PRG_REFERENCE_DIR.
+      - name: Compare with reference PRG files
+        if: vars.PRG_REFERENCE_DIR != ''
+        env:
+          PRG_REFERENCE_DIR: ${{ vars.PRG_REFERENCE_DIR }}
+        run: npm run verify
+      - run: npm run build
+      - run: npm run build:app
+      - uses: actions/upload-artifact@v4
+        with:
+          name: website
+          path: dist/

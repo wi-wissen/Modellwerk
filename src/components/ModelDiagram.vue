@@ -1,17 +1,18 @@
 <template>
-  <section aria-labelledby="diagram-title" class="flex flex-col gap-3">
-    <div>
-      <h3 id="diagram-title" class="text-lg font-bold">Wirkungsdiagramm</h3>
-      <p class="text-muted text-[0.95rem] max-w-[62ch]">
-        Das Diagramm zeigt, welche Größe welche beeinflusst. Dicke Pfeile sind Zu- und Abflüsse,
-        dünne gestrichelte Pfeile zeigen, wovon eine Rate abhängt.
-      </p>
+  <section :aria-labelledby="large ? null : 'diagram-title'" class="flex flex-col gap-3">
+    <div v-if="!large" class="flex flex-wrap items-start justify-between gap-3">
+      <div class="min-w-0 max-w-[62ch]">
+        <h3 id="diagram-title" class="text-lg font-bold">{{ $t('diagram.title') }}</h3>
+        <p class="text-muted text-[0.95rem]">{{ $t('diagram.intro') }}</p>
+      </div>
+      <button type="button" class="btn" @click="$emit('enlarge')"><Maximize2 :size="18" aria-hidden="true" /> {{ $t('diagram.enlarge') }}</button>
     </div>
 
     <div class="panel overflow-x-auto p-2">
-      <svg :viewBox="`0 0 ${width} ${height}`" :width="width" :height="height" class="block max-w-none"
+      <svg :viewBox="`0 0 ${width} ${height}`" class="mx-auto block h-auto w-full"
+           :style="{ minWidth: `${Math.round(width * (large ? 1 : 0.7))}px`, maxHeight: large ? '68vh' : null }"
            role="img" aria-labelledby="diagram-svg-title diagram-svg-desc">
-        <title id="diagram-svg-title">Wirkungsdiagramm des Modells</title>
+        <title id="diagram-svg-title">{{ $t('diagram.svgTitle') }}</title>
         <desc id="diagram-svg-desc">{{ textDescription.join(' ') }}</desc>
         <defs>
           <marker id="arrow-flow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
@@ -43,32 +44,37 @@
       </svg>
     </div>
 
-    <ul class="flex flex-wrap gap-2 text-sm" aria-label="Legende">
-      <li class="chip role-state">▭ Zustandsgröße</li>
-      <li class="chip role-rate">◯ Veränderungsrate</li>
-      <li class="chip role-constant">⬭ Konstante</li>
-      <li class="chip role-time">⬭ Zeit</li>
+    <ul class="flex flex-wrap gap-2 text-sm" :aria-label="$t('diagram.legend')">
+      <li class="chip role-state">▭ {{ $t('roles.stateLong') }}</li>
+      <li class="chip role-rate">◯ {{ $t('roles.rateLong') }}</li>
+      <li class="chip role-constant">⬭ {{ $t('roles.constantLong') }}</li>
+      <li class="chip role-time">⬭ {{ $t('roles.timeLong') }}</li>
     </ul>
 
     <details class="text-sm">
-      <summary class="cursor-pointer font-semibold text-muted">Diagramm als Text</summary>
+      <summary class="cursor-pointer font-semibold text-muted">{{ $t('diagram.asText') }}</summary>
       <ul class="mt-2 list-disc pl-5">
         <li v-for="(t, i) in textDescription" :key="i">{{ t }}</li>
       </ul>
     </details>
-    <p class="text-sm text-muted">Im Mockup wird das Diagramm aus dem Programm gezeichnet. Im fertigen Programm kann man es auch direkt zeichnen.</p>
+    <p v-if="!large" class="text-sm text-muted">{{ $t('diagram.mockupNote') }}</p>
   </section>
 </template>
 
 <script>
+import { Maximize2 } from 'lucide-vue-next'
+
 const ROW = { constant: 44, time: 44, rate: 160, state: 290 }
 const GAP = { constant: 120, time: 120, rate: 150, state: 170 }
 
 export default {
   name: 'ModelDiagram',
+  components: { Maximize2 },
   props: {
     analysis: { type: Object, required: true },
+    large: { type: Boolean, default: false },
   },
+  emits: ['enlarge'],
   computed: {
     label() {
       return (name) => this.analysis.program.variables.get(name) ?? name
@@ -105,12 +111,12 @@ export default {
     flowEdges() {
       return this.analysis.flows
         .filter((f) => this.layout.has(f.rate) && this.layout.has(f.state))
-        .map((f) => this.edge(f.rate, f.state, 32, 30, f.sign))
+        .map((f) => this.edge(f.rate, f.state, f.sign))
     },
     infoEdges() {
       return this.analysis.influences
         .filter((e) => this.layout.has(e.from) && this.layout.has(e.to) && e.from !== e.to)
-        .map((e) => this.edge(e.from, e.to, this.radius(e.from), this.radius(e.to)))
+        .map((e) => this.edge(e.from, e.to))
     },
     textDescription() {
       const { flows, influences, roles } = this.analysis
@@ -119,22 +125,28 @@ export default {
         if (r !== 'state') continue
         const zu = flows.filter((f) => f.state === n && f.sign === '+').map((f) => this.label(f.rate))
         const ab = flows.filter((f) => f.state === n && f.sign === '-').map((f) => this.label(f.rate))
-        out.push(`${this.label(n)} ist eine Zustandsgröße${zu.length ? `, Zufluss: ${zu.join(', ')}` : ''}${ab.length ? `, Abfluss: ${ab.join(', ')}` : ''}.`)
+        const parts = [this.$t('diagram.stateLine', { name: this.label(n) })]
+        if (zu.length) parts.push(this.$t('diagram.inflow', { list: zu.join(', ') }))
+        if (ab.length) parts.push(this.$t('diagram.outflow', { list: ab.join(', ') }))
+        out.push(parts.join(', ') + '.')
       }
       for (const [n, r] of roles) {
         if (r !== 'rate') continue
         const from = influences.filter((e) => e.to === n).map((e) => this.label(e.from))
-        out.push(`${this.label(n)} wird berechnet${from.length ? ` aus ${from.join(', ')}` : ''}.`)
+        out.push(this.$t(from.length ? 'diagram.rateFrom' : 'diagram.rateLine', { name: this.label(n), list: from.join(', ') }) + '.')
       }
       return out
     },
   },
   methods: {
-    radius(name) {
-      const r = this.layout.get(name)?.role
-      return r === 'state' ? 30 : r === 'rate' ? 30 : 18
+    // distance from a node's centre to its outline in direction (ux, uy)
+    reach(name, ux, uy) {
+      const role = this.layout.get(name)?.role
+      if (role === 'state') return Math.min(64 / Math.abs(ux || 1e-9), 26 / Math.abs(uy || 1e-9))
+      const [rx, ry] = role === 'rate' ? [54, 28] : [52, 16]
+      return 1 / Math.sqrt((ux / rx) ** 2 + (uy / ry) ** 2)
     },
-    edge(from, to, r1, r2, sign) {
+    edge(from, to, sign) {
       const a = this.layout.get(from)
       const b = this.layout.get(to)
       const dx = b.x - a.x
@@ -142,6 +154,8 @@ export default {
       const len = Math.hypot(dx, dy) || 1
       const ux = dx / len
       const uy = dy / len
+      const r1 = this.reach(from, ux, uy)
+      const r2 = this.reach(to, ux, uy)
       const x1 = a.x + ux * r1
       const y1 = a.y + uy * r1
       const x2 = b.x - ux * (r2 + 4)

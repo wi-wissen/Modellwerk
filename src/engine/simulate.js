@@ -1,9 +1,9 @@
 import { FUNCTIONS, ModelError, parseProgram } from './language.js'
 
-export const MAX_STEPS = 8191 // Grenze des Originals („max. 8191“)
+export const MAX_STEPS = 8191 // limit of the legacy program
 const MAX_WHILE = 100000
 
-/** Zufallsgenerator wie Delphis System.Random (lineare Kongruenz, Faktor $08088405). */
+/** Random generator compatible with Delphi's System.Random (LCG, multiplier $08088405). */
 export function delphiRandom(seed = 0) {
   let s = seed >>> 0
   return () => {
@@ -13,13 +13,13 @@ export function delphiRandom(seed = 0) {
 }
 
 /**
- * Führt das Programm `steps`-mal aus. Ergebnis: Startwerte plus die Werte aller
- * Variablen nach jedem Durchlauf – genau so, wie Moebius sie speichert.
+ * Runs the program `steps` times. Result: initial values plus the values of all
+ * variables after each pass – exactly as PRG files store them.
  */
 export function simulate(source, startValues, steps, options = {}) {
   const program = typeof source === 'string' ? parseProgram(source, options) : source
   if (program.errors.length) throw program.errors[0]
-  if (!(steps >= 0 && steps <= MAX_STEPS)) throw new ModelError(`Anzahl der Durchläufe muss zwischen 0 und ${MAX_STEPS} liegen.`)
+  if (!(steps >= 0 && steps <= MAX_STEPS)) throw new ModelError('stepsRange', { max: MAX_STEPS })
 
   const env = new Map()
   for (const name of program.variables.keys()) env.set(name, 0)
@@ -61,7 +61,7 @@ export function simulate(source, startValues, steps, options = {}) {
     else {
       let guard = 0
       while (test(s.cond)) {
-        if (++guard > MAX_WHILE) throw new ModelError('Vermutlich Endlosschleife.', s.line)
+        if (++guard > MAX_WHILE) throw new ModelError('endlessLoop', {}, s.line)
         exec(s.body)
       }
     }

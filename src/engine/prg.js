@@ -1,21 +1,21 @@
-// Liest Simulationen aus Moebius-3.0-Dateien (.prg, Kennung „MOEBIUS30“).
+// Reads simulations from PRG files (signature "MOEBIUS30").
 //
-// Aufbau eines Simulationsblocks (aus den Originaldateien erschlossen):
-//   u32 Länge, Name der Simulation (cp1252)
-//   u32 Zeilenzahl, je Zeile: u32 Länge + Text   → Algorithmus
-//   u32 (unbekannt, bisher immer 0)
-//   u32 Variablenzahl, je Variable:
-//     u32 Länge + Name (Großbuchstaben, sofern Groß-/Kleinschreibung aus)
-//     5 Byte Optionen, f64 Startwert, 2 Byte Optionen,
-//     u32 Anzahl N, N × f64 Ergebniswerte nach jedem Durchlauf,
-//     53 Byte Darstellungsoptionen
-// Alle übrigen Inhalte (Arbeitsblatt, Texte, Grafiken) werden hier übergangen.
+// Layout of a simulation block (reverse engineered from reference files):
+//   u32 length + simulation name (cp1252)
+//   u32 line count, per line: u32 length + text   → program
+//   u32 (unknown, so far always 0)
+//   u32 variable count, per variable:
+//     u32 length + name (upper case unless case sensitivity is on)
+//     5 option bytes, f64 initial value, 2 option bytes,
+//     u32 count N, N × f64 result values after each pass,
+//     53 bytes of display options
+// Everything else (worksheet, text, graphics) is skipped here.
 
 const RECORD_TRAILER = 53
 const decoder = new TextDecoder('windows-1252')
 const NAME = /^[A-Za-zÄÖÜäöüß_][A-Za-z0-9ÄÖÜäöüß_]*$/
 
-export function isMoebiusFile(bytes) {
+export function isPrgFile(bytes) {
   return decoder.decode(bytes.subarray(0, 9)) === 'MOEBIUS30'
 }
 
@@ -68,9 +68,9 @@ function programBefore(r, varOffset) {
   return null
 }
 
-/** Liefert alle erkannten Simulationen mit Programm, Startwerten und Originalergebnissen. */
+/** Returns all detected simulations with program, initial values and stored results. */
 export function readPrg(bytes) {
-  if (!isMoebiusFile(bytes)) throw new Error('Keine Moebius-Datei (Kennung MOEBIUS30 fehlt).')
+  if (!isPrgFile(bytes)) throw Object.assign(new Error('Unsupported PRG format (signature MOEBIUS30 missing).'), { code: 'unsupportedFormat' })
   const r = reader(bytes)
   const simulations = []
   let p = 0

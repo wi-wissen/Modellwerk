@@ -1,39 +1,63 @@
-// Algorithmische Modellsprache (kompatibel zu Moebius 3.0).
+// Algorithmic modelling language, compatible with PRG files (format MOEBIUS30).
 //
-// Verifiziert gegen Originaldateien:
-//   Zuweisung `Name := Ausdruck`, + - * /, Klammern, unäres Minus,
-//   Dezimalkomma und -punkt, Kommentare `//`, mehrere Anweisungen mit `;`,
-//   Funktionen SQR SQRT EXP. Jede Operation rundet auf IEEE-754-Double.
-// Aus der Original-EXE bekannt, Semantik noch nicht verifiziert:
-//   IF … THEN, WHILE … DO, Vergleiche, SIN COS ARCTAN LN FRAC INT ABS RANDOM.
-
+// Verified against reference files:
+//   assignment `name := expression`, + - * /, parentheses, unary minus,
+//   decimal comma and point, `//` comments, several statements per line with `;`,
+//   functions SQR SQRT EXP. Every operation rounds to an IEEE-754 double.
+// Known from the legacy executable, semantics not yet verified:
+//   IF … THEN, WHILE … DO, comparisons, SIN COS ARCTAN LN FRAC INT ABS RANDOM.
 import { exactExp } from './exactmath.js'
 
+// Default (English) error texts; the UI translates by `code`.
+export const ERROR_TEXTS = {
+  unknownChar: 'Unknown character "{char}".',
+  operatorExpected: 'Operator expected.',
+  thenExpected: 'THEN expected.',
+  doExpected: 'DO expected.',
+  variableExpected: 'Variable expected.',
+  assignToFunction: '"{name}" is a function and cannot be assigned.',
+  assignExpected: '":=" expected.',
+  comparisonExpected: 'Comparison expected.',
+  operandExpected: 'Constant, variable or function expected.',
+  closeParenExpected: '")" expected.',
+  openParenExpected: '"(" expected.',
+  unknownFunction: 'Unknown function "{name}".',
+  stepsRange: 'Number of steps must be between 0 and {max}.',
+  endlessLoop: 'Probably an endless loop.',
+}
+
+export function formatText(template, params = {}) {
+  return template.replace(/\{(\w+)\}/g, (_, k) => String(params[k] ?? ''))
+}
+
 export class ModelError extends Error {
-  constructor(message, line = null, column = null) {
-    super(message)
+  constructor(code, params = {}, line = null, column = null) {
+    super(formatText(ERROR_TEXTS[code] ?? code, params))
+    this.code = code
+    this.params = params
     this.line = line
     this.column = column
   }
 }
 
 export const FUNCTIONS = {
-  SQR: { arity: 1, label: 'Quadrat', fn: (x) => x * x },
-  SQRT: { arity: 1, label: 'Wurzel', fn: Math.sqrt },
-  EXP: { arity: 1, label: 'e hoch x', fn: exactExp },
-  LN: { arity: 1, label: 'natürlicher Logarithmus', fn: Math.log },
-  SIN: { arity: 1, label: 'Sinus (Bogenmaß)', fn: Math.sin },
-  COS: { arity: 1, label: 'Kosinus (Bogenmaß)', fn: Math.cos },
-  ARCTAN: { arity: 1, label: 'Arkustangens', fn: Math.atan },
-  ABS: { arity: 1, label: 'Betrag', fn: Math.abs },
-  INT: { arity: 1, label: 'ganzzahliger Teil', fn: Math.trunc },
-  FRAC: { arity: 1, label: 'Nachkommateil', fn: (x) => x - Math.trunc(x) },
-  RANDOM: { arity: 0, label: 'Zufallszahl zwischen 0 und 1', fn: null },
+  SQR: { arity: 1, fn: (x) => x * x },
+  SQRT: { arity: 1, fn: Math.sqrt },
+  EXP: { arity: 1, fn: exactExp },
+  LN: { arity: 1, fn: Math.log },
+  SIN: { arity: 1, fn: Math.sin },
+  COS: { arity: 1, fn: Math.cos },
+  ARCTAN: { arity: 1, fn: Math.atan },
+  ABS: { arity: 1, fn: Math.abs },
+  INT: { arity: 1, fn: Math.trunc },
+  FRAC: { arity: 1, fn: (x) => x - Math.trunc(x) },
+  RANDOM: { arity: 0, fn: null },
 }
 
 const KEYWORDS = new Set(['IF', 'THEN', 'WHILE', 'DO'])
 const IDENT_START = /[A-Za-zÄÖÜäöüß_]/
 const IDENT_PART = /[A-Za-z0-9ÄÖÜäöüß_]/
+const DIGIT = /[0-9]/
 
 function tokenizeLine(text, line) {
   const tokens = []
@@ -43,19 +67,19 @@ function tokenizeLine(text, line) {
     if (c === ' ' || c === '\t' || c === '\r') { i++; continue }
     if (c === '/' && text[i + 1] === '/') break
     const col = i + 1
-    if (/[0-9]/.test(c) || ((c === ',' || c === '.') && /[0-9]/.test(text[i + 1] ?? ''))) {
+    if (DIGIT.test(c) || ((c === ',' || c === '.') && DIGIT.test(text[i + 1] ?? ''))) {
       let j = i
-      while (j < text.length && /[0-9]/.test(text[j])) j++
+      while (j < text.length && DIGIT.test(text[j])) j++
       if (text[j] === ',' || text[j] === '.') {
         j++
-        while (j < text.length && /[0-9]/.test(text[j])) j++
+        while (j < text.length && DIGIT.test(text[j])) j++
       }
       if (/[eE]/.test(text[j] ?? '') && /[-+0-9]/.test(text[j + 1] ?? '')) {
         let k = j + 1
         if (text[k] === '+' || text[k] === '-') k++
-        if (/[0-9]/.test(text[k] ?? '')) {
+        if (DIGIT.test(text[k] ?? '')) {
           j = k
-          while (j < text.length && /[0-9]/.test(text[j])) j++
+          while (j < text.length && DIGIT.test(text[j])) j++
         }
       }
       const raw = text.slice(i, j)
@@ -83,7 +107,7 @@ function tokenizeLine(text, line) {
       i++
       continue
     }
-    throw new ModelError(`Unbekanntes Zeichen „${c}“.`, line, col)
+    throw new ModelError('unknownChar', { char: c }, line, col)
   }
   return tokens
 }
@@ -100,12 +124,12 @@ class Parser {
     return k && k.type === type && (value === undefined || k.value === value)
   }
   take() { return this.t[this.i++] }
-  fail(msg) {
+  fail(code, params) {
     const k = this.peek()
-    throw new ModelError(msg, this.line, k ? k.col : null)
+    throw new ModelError(code, params, this.line, k ? k.col : null)
   }
-  expect(type, value, msg) {
-    if (!this.is(type, value)) this.fail(msg)
+  expect(type, value, code) {
+    if (!this.is(type, value)) this.fail(code)
     return this.take()
   }
 
@@ -114,7 +138,7 @@ class Parser {
     while (this.peek()) {
       if (this.is('op', ';')) { this.take(); continue }
       out.push(this.statement())
-      if (this.peek() && !this.is('op', ';')) this.fail('Operator erwartet.')
+      if (this.peek() && !this.is('op', ';')) this.fail('operatorExpected')
     }
     return out
   }
@@ -122,24 +146,24 @@ class Parser {
     if (this.is('kw', 'IF')) {
       this.take()
       const cond = this.comparison()
-      this.expect('kw', 'THEN', 'THEN erwartet.')
+      this.expect('kw', 'THEN', 'thenExpected')
       return { kind: 'if', cond, body: this.statement(), line: this.line }
     }
     if (this.is('kw', 'WHILE')) {
       this.take()
       const cond = this.comparison()
-      this.expect('kw', 'DO', 'DO erwartet.')
+      this.expect('kw', 'DO', 'doExpected')
       return { kind: 'while', cond, body: this.statement(), line: this.line }
     }
-    const target = this.expect('id', undefined, 'Variable erwartet.')
-    if (FUNCTIONS[target.value]) this.fail(`„${target.raw}“ ist eine Funktion und kann keinen Wert bekommen.`)
-    this.expect('op', ':=', '„:=“ erwartet (Zuweisung).')
+    const target = this.expect('id', undefined, 'variableExpected')
+    if (FUNCTIONS[target.value]) this.fail('assignToFunction', { name: target.raw })
+    this.expect('op', ':=', 'assignExpected')
     return { kind: 'assign', name: target.value, raw: target.raw, expr: this.expr(), line: this.line }
   }
   comparison() {
     const left = this.expr()
     const k = this.peek()
-    if (!k || k.type !== 'op' || !['<', '>', '=', '<=', '>=', '<>'].includes(k.value)) this.fail('Vergleich erwartet.')
+    if (!k || k.type !== 'op' || !['<', '>', '=', '<=', '>=', '<>'].includes(k.value)) this.fail('comparisonExpected')
     this.take()
     return { kind: 'cmp', op: k.value, left, right: this.expr() }
   }
@@ -166,12 +190,12 @@ class Parser {
   }
   atom() {
     const k = this.peek()
-    if (!k) this.fail('Konstante, Variable oder Funktion erwartet.')
+    if (!k) this.fail('operandExpected')
     if (k.type === 'num') { this.take(); return { kind: 'num', value: k.value } }
     if (this.is('op', '(')) {
       this.take()
       const e = this.expr()
-      this.expect('op', ')', '„)“ erwartet.')
+      this.expect('op', ')', 'closeParenExpected')
       return e
     }
     if (k.type === 'id') {
@@ -179,19 +203,19 @@ class Parser {
       const f = FUNCTIONS[k.value]
       if (f) {
         if (f.arity === 0) return { kind: 'call', name: k.value, arg: null }
-        this.expect('op', '(', '„(“ erwartet.')
+        this.expect('op', '(', 'openParenExpected')
         const arg = this.expr()
-        this.expect('op', ')', '„)“ erwartet.')
+        this.expect('op', ')', 'closeParenExpected')
         return { kind: 'call', name: k.value, arg }
       }
-      if (this.is('op', '(')) this.fail(`Unbekannte Funktion „${k.raw}“.`)
+      if (this.is('op', '(')) this.fail('unknownFunction', { name: k.raw })
       return { kind: 'var', name: k.value, raw: k.raw }
     }
-    this.fail('Konstante, Variable oder Funktion erwartet.')
+    this.fail('operandExpected')
   }
 }
 
-/** Parst den Programmtext; liefert Anweisungen und alle vorkommenden Variablen. */
+/** Parses program text; returns statements, errors and all variables that occur. */
 export function parseProgram(source, { caseSensitive = false } = {}) {
   const statements = []
   const errors = []

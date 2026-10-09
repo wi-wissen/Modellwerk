@@ -33,7 +33,7 @@
 
       <div v-if="cursor !== null" class="pointer-events-none absolute top-2 rounded-lg border border-line bg-sheet px-3 py-2 text-sm shadow-md tabular"
            :style="tipStyle" aria-hidden="true">
-        <div class="font-semibold">Schritt {{ cursor }} · {{ xLabel }} = {{ fmt(xs[cursor], 6) }}</div>
+        <div class="font-semibold">{{ $t('chart.step', { n: cursor }) }} · {{ xLabel }} = {{ fmt(xs[cursor], 6) }}</div>
         <div v-for="(s, i) in lines" :key="'t' + s.name" class="flex items-center gap-2">
           <svg width="22" height="8" aria-hidden="true"><line x1="1" y1="4" x2="21" y2="4" :stroke="s.color" stroke-width="2.5" :stroke-dasharray="dash(i)" /></svg>
           <span class="font-mono">{{ s.label }}</span><span class="ml-auto pl-3">{{ fmt(s.data[cursor], 6) }}</span>
@@ -41,17 +41,15 @@
       </div>
     </div>
     <p class="sr-only" aria-live="polite">{{ liveText }}</p>
-    <figcaption id="chart-help" class="text-sm text-muted">
-      Zeiger über das Diagramm bewegen oder Diagramm anklicken und mit den Pfeiltasten ← → Werte ablesen.
-    </figcaption>
+    <figcaption id="chart-help" class="text-sm text-muted">{{ $t('chart.help') }}</figcaption>
   </figure>
 </template>
 
 <script>
 import { formatNumber } from '../engine/model.js'
+import { numberLocale } from '../i18n/index.js'
+import { seriesColor, seriesDash } from '../chartStyle.js'
 
-const COLORS = ['var(--s1)', 'var(--s2)', 'var(--s3)', 'var(--s4)', 'var(--s5)', 'var(--s6)']
-const DASHES = ['', '8 5', '2 4', '12 4 2 4', '4 3', '16 6']
 
 function niceStep(lo, hi, count) {
   const raw = (hi - lo) / count
@@ -76,9 +74,14 @@ export default {
     ys: { type: Array, required: true },
   },
   data() {
-    return { w: 640, h: 380, cursor: null, m: { l: 64, r: 16, t: 14, b: 44 }, ro: null }
+    return { w: 640, h: 380, cursor: null, ro: null }
   },
   computed: {
+    // left margin grows with the longest y tick label so nothing is clipped
+    m() {
+      const longest = Math.max(...this.yTicksRaw.map((t) => this.fmt(t).length))
+      return { l: Math.max(44, longest * 7.4 + 16), r: 16, t: 14, b: 44 }
+    },
     pw() { return this.w - this.m.l - this.m.r },
     ph() { return this.h - this.m.t - this.m.b },
     xs() { return this.result.series[this.x] ?? [] },
@@ -90,7 +93,8 @@ export default {
       return [Math.floor(lo / step + 1e-9) * step, Math.ceil(hi / step - 1e-9) * step]
     },
     xTicks() { return niceTicks(...this.xDomain, Math.max(2, Math.floor(this.pw / 90))) },
-    yTicks() { return niceTicks(...this.yDomain, 6) },
+    yTicksRaw() { return niceTicks(...this.yDomain, 6) },
+    yTicks() { return this.yTicksRaw },
     lines() {
       return this.ys.filter((n) => this.result.series[n]).map((name, i) => {
         const data = this.result.series[name]
@@ -100,12 +104,12 @@ export default {
           const py = this.sy(data[k])
           if (Number.isFinite(px) && Number.isFinite(py)) points += `${px.toFixed(1)},${py.toFixed(1)} `
         }
-        return { name, label: this.result.display.get(name) ?? name, data, points, color: COLORS[i % COLORS.length] }
+        return { name, label: this.result.display.get(name) ?? name, data, points, color: seriesColor(i) }
       })
     },
     summary() {
-      const parts = this.lines.map((s) => `${s.label} von ${this.fmt(s.data[0])} bis ${this.fmt(s.data[s.data.length - 1])}`)
-      return `Diagramm über ${this.xLabel}, ${this.result.steps} Schritte: ${parts.join('; ')}.`
+      const parts = this.lines.map((s) => this.$t('chart.range', { name: s.label, from: this.fmt(s.data[0]), to: this.fmt(s.data[s.data.length - 1]) }))
+      return this.$t('chart.summary', { x: this.xLabel, steps: this.result.steps, parts: parts.join('; ') })
     },
     liveText() {
       if (this.cursor === null) return ''
@@ -135,8 +139,8 @@ export default {
     },
     sx(v) { const [a, b] = this.xDomain; return this.m.l + ((v - a) / (b - a)) * this.pw },
     sy(v) { const [a, b] = this.yDomain; return this.m.t + this.ph - ((v - a) / (b - a)) * this.ph },
-    dash(i) { return DASHES[i % DASHES.length] },
-    fmt(v, d = 4) { return formatNumber(v, d) },
+    dash(i) { return seriesDash(i) },
+    fmt(v, d = 4) { return formatNumber(v, d, numberLocale()) },
     onPointer(ev) {
       const rect = ev.currentTarget.getBoundingClientRect()
       const px = ((ev.clientX - rect.left) / rect.width) * this.w

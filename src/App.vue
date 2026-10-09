@@ -1,34 +1,32 @@
 <template>
-  <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 btn btn-primary">Zum Inhalt springen</a>
+  <a href="#main" class="btn btn-primary sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50">{{ $t('app.skip') }}</a>
 
-  <div class="flex min-h-full flex-col">
+  <div class="flex min-h-screen flex-col">
     <header class="border-b border-line bg-sheet">
       <div class="mx-auto flex max-w-[96rem] flex-wrap items-center gap-x-6 gap-y-3 px-4 py-3 sm:px-6">
-        <div class="flex items-center gap-3">
-          <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true">
-            <rect x="1" y="1" width="32" height="32" rx="9" fill="var(--accent)" />
-            <path d="M7 24 C 12 24, 13 10, 18 10 S 24 20, 27 12" fill="none" stroke="var(--accent-ink)" stroke-width="2.6" stroke-linecap="round" />
-            <circle cx="27" cy="12" r="2.6" fill="var(--accent-ink)" />
-          </svg>
-          <div class="leading-tight">
-            <p class="text-lg font-extrabold tracking-tight">Modellwerk</p>
-            <p class="text-xs text-muted">Modellbildung &amp; Simulation</p>
-          </div>
-        </div>
+        <component :is="homeHref ? 'a' : 'div'" :href="homeHref" class="flex items-center gap-3 rounded-lg no-underline" :title="homeHref ? $t('app.home') : null">
+          <img :src="logoUrl" width="36" height="36" alt="" />
+          <span class="leading-tight">
+            <span class="block text-lg font-extrabold tracking-tight text-ink">Modellwerk</span>
+            <span class="block text-xs text-muted">{{ $t('app.tagline') }}</span>
+          </span>
+        </component>
 
-        <nav class="order-3 flex basis-full flex-wrap items-center gap-2 lg:order-none lg:basis-auto lg:flex-1" aria-label="Datei und Werkzeuge">
-          <button type="button" class="btn" @click="$refs.examples.showModal()"><BookOpen :size="18" aria-hidden="true" /> Beispiele</button>
-          <label class="btn cursor-pointer">
-            <FolderOpen :size="18" aria-hidden="true" /> Moebius-Datei öffnen
+        <nav class="order-3 flex basis-full flex-wrap items-center gap-2 lg:order-none lg:basis-auto lg:flex-1" :aria-label="$t('app.toolsNav')">
+          <button type="button" class="btn" @click="$refs.examples.showModal()"><BookOpen :size="18" aria-hidden="true" /> {{ $t('app.examples') }}</button>
+          <label class="btn cursor-pointer has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-accent" :title="$t('app.openHint')">
+            <FolderOpen :size="18" aria-hidden="true" /> {{ $t('app.open') }}
             <input id="open-prg" type="file" accept=".prg,.PRG" class="sr-only" @change="openPrg($event)" />
           </label>
-          <button type="button" class="btn" @click="$refs.verify.show()"><ShieldCheck :size="18" aria-hidden="true" /> Mit Original vergleichen</button>
         </nav>
 
-        <div class="ml-auto flex items-center gap-1" role="group" aria-label="Darstellung">
-          <button type="button" class="btn btn-quiet" title="Schrift kleiner" aria-label="Schrift kleiner" @click="setScale(-1)"><AArrowDown :size="20" aria-hidden="true" /></button>
-          <button type="button" class="btn btn-quiet" title="Schrift größer" aria-label="Schrift größer" @click="setScale(1)"><AArrowUp :size="20" aria-hidden="true" /></button>
-          <button type="button" class="btn btn-quiet" :title="themeLabel" :aria-label="themeLabel" @click="cycleTheme">
+        <div class="ml-auto flex items-center gap-1" role="group" :aria-label="$t('app.display')">
+          <button type="button" class="btn btn-quiet" :aria-label="`${$t('app.language')}: ${otherLocale.name}`" :lang="otherLocale.code" @click="switchLocale">
+            <Languages :size="20" aria-hidden="true" /> <span class="text-sm">{{ otherLocale.code.toUpperCase() }}</span>
+          </button>
+          <button type="button" class="btn btn-quiet" :title="$t('app.textSmaller')" :aria-label="$t('app.textSmaller')" @click="setScale(-1)"><AArrowDown :size="20" aria-hidden="true" /></button>
+          <button type="button" class="btn btn-quiet" :title="$t('app.textLarger')" :aria-label="$t('app.textLarger')" @click="setScale(1)"><AArrowUp :size="20" aria-hidden="true" /></button>
+          <button type="button" class="btn btn-quiet" :title="$t(`app.theme.${theme}`)" :aria-label="$t(`app.theme.${theme}`)" @click="cycleTheme">
             <Sun v-if="theme === 'light'" :size="20" aria-hidden="true" /><Moon v-else-if="theme === 'dark'" :size="20" aria-hidden="true" /><Monitor v-else :size="20" aria-hidden="true" />
           </button>
         </div>
@@ -36,62 +34,73 @@
     </header>
 
     <main id="main" class="mx-auto flex w-full max-w-[96rem] flex-1 flex-col gap-5 px-4 py-5 sm:px-6">
-      <div class="flex flex-wrap items-end justify-between gap-4">
-        <div class="min-w-0 max-w-[70ch]">
-          <p class="eyebrow">{{ model.topic }}</p>
-          <h1 class="text-2xl font-extrabold tracking-tight sm:text-3xl">{{ model.title }}</h1>
-          <p class="mt-1 text-muted">{{ model.description }}</p>
-        </div>
-        <p class="chip role-time !text-sm" role="status">
-          <Sigma :size="15" aria-hidden="true" /> rechnet wie Moebius 3.0 – bitgenau geprüft
-        </p>
+      <div class="min-w-0 max-w-[70ch]">
+        <p class="eyebrow">{{ texts.topic }}</p>
+        <h1 class="text-2xl font-extrabold tracking-tight sm:text-3xl">{{ texts.title }}</h1>
+        <p class="mt-1 text-muted">{{ texts.description }}</p>
+        <details v-if="currentExample?.sources?.length" class="mt-2 text-sm">
+          <summary class="cursor-pointer font-semibold text-muted">{{ $t('app.sources') }} ({{ currentExample.sources.length }})</summary>
+          <ul class="mt-2 flex flex-col gap-1.5">
+            <li v-for="(src, i) in currentExample.sources" :key="i">
+              <a :href="src.url" target="_blank" rel="noopener" class="font-semibold text-accent-strong underline underline-offset-2">{{ src.title }}</a>
+              <span class="text-muted"> – {{ src.publisher }} · {{ src.license }}</span>
+            </li>
+          </ul>
+        </details>
       </div>
 
       <div class="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
-        <!-- Modell -->
+        <!-- model -->
         <section class="panel flex min-w-0 flex-col gap-5 p-4 sm:p-5" aria-labelledby="model-heading">
           <div class="flex flex-wrap items-center justify-between gap-3">
-            <h2 id="model-heading" class="flex items-center gap-2 text-xl font-bold"><span class="step">1</span> Modell</h2>
-            <div role="tablist" aria-label="Darstellung des Modells" class="flex flex-wrap gap-1 rounded-xl bg-sunken p-1" @keydown="tabKeys($event, modelTabs, 'modelTab')">
-              <button v-for="t in modelTabs" :id="`tab-${t.id}`" :key="t.id" type="button" role="tab" class="btn !border-transparent"
+            <h2 id="model-heading" class="flex items-center gap-2 text-xl font-bold"><span class="step">1</span> {{ $t('app.model') }}</h2>
+            <div role="tablist" class="seg" :aria-label="$t('app.modelViews')" @keydown="tabKeys($event, modelTabs, 'modelTab')">
+              <button v-for="t in modelTabs" :id="`tab-${t.id}`" :key="t.id" type="button" role="tab"
                       :aria-selected="modelTab === t.id" :aria-controls="`panel-${t.id}`" :tabindex="modelTab === t.id ? 0 : -1"
                       @click="modelTab = t.id">
-                <component :is="t.icon" :size="18" aria-hidden="true" /> {{ t.label }}
+                <component :is="t.icon" :size="18" aria-hidden="true" /> {{ $t(`app.tabs.${t.id}`) }}
               </button>
             </div>
           </div>
 
-          <div :id="`panel-${modelTab}`" role="tabpanel" :aria-labelledby="`tab-${modelTab}`">
-            <SentenceEditor v-if="modelTab === 'sentences'"
-                            :sentences="model.sentences" :simplified="model.simplified" :out-of-sync="model.origin === 'program' && model.sentences.length > 0"
-                            @update:sentences="setSentences" @update:simplified="setSimplified" @resync="model.origin = 'sentences'" />
-            <ModelDiagram v-else-if="modelTab === 'diagram'" :analysis="analysis" />
+          <div :id="`panel-${modelTab}`" role="tabpanel" :aria-labelledby="`tab-${modelTab}`" class="flex flex-col gap-4">
+            <template v-if="modelTab === 'sentences'">
+              <div v-if="model.origin === 'program'" class="flex flex-col gap-3 rounded-xl border p-4"
+                   :class="conversion.ok ? 'border-accent bg-accent-soft' : 'border-line bg-sunken'">
+                <p v-if="!model.sentences.length" class="text-muted">{{ $t('app.writtenAsProgram') }}</p>
+                <p v-if="conversion.ok">{{ $t('sentences.convertible') }}</p>
+                <p v-else-if="conversion.line" class="text-muted">{{ $t('sentences.notConvertible', { line: conversion.line }) }}</p>
+                <div v-if="conversion.ok">
+                  <button type="button" class="btn btn-primary" @click="convertToSentences"><MessageSquareText :size="18" aria-hidden="true" /> {{ $t('sentences.convert') }}</button>
+                </div>
+              </div>
+              <SentenceEditor v-if="model.sentences.length || model.origin === 'sentences'"
+                              :sentences="model.sentences" :simplified="model.simplified" :out-of-sync="model.origin === 'program' && model.sentences.length > 0 && !conversion.ok"
+                              @update:sentences="setSentences" @update:simplified="setSimplified" @resync="model.origin = 'sentences'" />
+              <div v-if="model.origin === 'sentences' && model.sentences.length" class="rounded-xl bg-sunken p-3">
+                <p class="eyebrow mb-1 flex items-center gap-1"><ArrowRight :size="14" aria-hidden="true" /> {{ $t('app.becomesProgram') }}</p>
+                <pre class="overflow-x-auto font-mono text-sm leading-6">{{ source }}</pre>
+              </div>
+            </template>
+            <ModelDiagram v-else-if="modelTab === 'diagram'" :analysis="analysis" @enlarge="$refs.diagram.showModal()" />
             <ProgramEditor v-else :model-value="source" :errors="analysis.program.errors" @update:model-value="setSource" />
           </div>
 
-          <div v-if="modelTab === 'sentences' && model.sentences.length" class="rounded-xl bg-sunken p-3">
-            <p class="eyebrow mb-1 flex items-center gap-1"><ArrowRight :size="14" aria-hidden="true" /> Daraus wird dieses Programm</p>
-            <pre class="overflow-x-auto font-mono text-sm leading-6">{{ source }}</pre>
-          </div>
-          <p v-if="modelTab === 'sentences' && !model.sentences.length" class="rounded-xl bg-sunken p-3 text-muted">
-            Dieses Modell wurde direkt als Programm geschrieben. Du kannst es unter „Programm“ ansehen oder hier mit Sätzen neu beginnen.
-          </p>
-
           <hr class="border-line" />
-          <div class="flex items-center gap-2"><span class="step">2</span><span class="text-xl font-bold">Startwerte</span></div>
+          <h2 class="flex items-center gap-2 text-xl font-bold"><span class="step">2</span> {{ $t('app.startValues') }}</h2>
           <StartValues :analysis="analysis" :values="model.start" :steps="model.steps" :reset-key="loadCount"
                        @update:values="model.start = $event" @update:steps="model.steps = $event" />
         </section>
 
-        <!-- Ergebnis -->
+        <!-- result -->
         <section class="panel flex min-w-0 flex-col gap-4 p-4 sm:p-5 xl:sticky xl:top-4" aria-labelledby="result-heading">
           <div class="flex flex-wrap items-center justify-between gap-3">
-            <h2 id="result-heading" class="flex items-center gap-2 text-xl font-bold"><span class="step">3</span> Ergebnis</h2>
-            <div role="tablist" aria-label="Darstellung des Ergebnisses" class="flex gap-1 rounded-xl bg-sunken p-1" @keydown="tabKeys($event, resultTabs, 'resultTab')">
-              <button v-for="t in resultTabs" :id="`tab-${t.id}`" :key="t.id" type="button" role="tab" class="btn !border-transparent"
+            <h2 id="result-heading" class="flex items-center gap-2 text-xl font-bold"><span class="step">3</span> {{ $t('app.result') }}</h2>
+            <div role="tablist" class="seg" :aria-label="$t('app.resultViews')" @keydown="tabKeys($event, resultTabs, 'resultTab')">
+              <button v-for="t in resultTabs" :id="`tab-${t.id}`" :key="t.id" type="button" role="tab"
                       :aria-selected="resultTab === t.id" :aria-controls="`panel-${t.id}`" :tabindex="resultTab === t.id ? 0 : -1"
                       @click="resultTab = t.id">
-                <component :is="t.icon" :size="18" aria-hidden="true" /> {{ t.label }}
+                <component :is="t.icon" :size="18" aria-hidden="true" /> {{ $t(`app.tabs.${t.id}`) }}
               </button>
             </div>
           </div>
@@ -99,29 +108,35 @@
           <div v-if="run.error" class="flex items-start gap-3 rounded-xl border border-bad bg-bad-soft p-4" role="alert">
             <TriangleAlert :size="22" aria-hidden="true" class="mt-0.5 flex-none text-bad" />
             <div>
-              <p class="font-bold">Das Modell kann noch nicht berechnet werden.</p>
-              <p>{{ run.error.line ? `Zeile ${run.error.line}: ` : '' }}{{ run.error.message }}</p>
-              <button type="button" class="btn mt-2" @click="modelTab = 'program'"><Code :size="16" aria-hidden="true" /> Zum Programm</button>
+              <p class="font-bold">{{ $t('app.cannotCompute') }}</p>
+              <p>{{ run.error.line ? `${$t('app.lineN', { n: run.error.line })}: ` : '' }}{{ $errorText(run.error) }}</p>
+              <button type="button" class="btn mt-2" @click="modelTab = 'program'"><Code :size="16" aria-hidden="true" /> {{ $t('app.toProgram') }}</button>
             </div>
           </div>
 
           <template v-else>
             <fieldset class="flex flex-col gap-3">
-              <legend class="sr-only">Achsen wählen</legend>
+              <legend class="sr-only">{{ $t('app.axes') }}</legend>
               <div class="flex flex-wrap items-center gap-x-4 gap-y-2">
                 <label class="inline-flex items-center gap-2">
-                  <span class="font-semibold">{{ resultTab === 'chart' ? 'Waagrechte Achse' : 'Sortiert nach' }}</span>
+                  <span class="font-semibold">{{ $t(resultTab === 'chart' ? 'app.xAxis' : 'app.sortBy') }}</span>
                   <select id="plot-x" v-model="plotX" class="field !w-auto font-mono">
                     <option v-for="v in variableList" :key="v.name" :value="v.name">{{ v.label }}</option>
                   </select>
                 </label>
-                <span v-if="resultTab === 'chart' && plotX !== timeVar" class="chip role-constant">Phasendiagramm</span>
+                <span v-if="resultTab === 'chart' && plotX !== timeVar" class="chip role-constant">{{ $t('app.phase') }}</span>
               </div>
               <div class="flex flex-wrap items-center gap-2">
-                <span class="font-semibold">{{ resultTab === 'chart' ? 'Kurven' : 'Spalten' }}:</span>
-                <label v-for="v in variableList" :key="v.name" :class="`role-${v.role}`"
-                       class="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-line px-2.5 py-1 text-sm has-[:checked]:border-[var(--role)] has-[:checked]:bg-[var(--role-soft)]">
-                  <input :id="`plot-y-${v.name}`" v-model="plotY" type="checkbox" :value="v.name" class="size-4 accent-[var(--role)]" />
+                <span class="font-semibold">{{ $t(resultTab === 'chart' ? 'app.curves' : 'app.columns') }}:</span>
+                <label v-for="v in variableList" :key="v.name" class="toggle">
+                  <input :id="`plot-y-${v.name}`" v-model="plotY" type="checkbox" :value="v.name" />
+                  <svg class="spark" viewBox="0 0 40 16" aria-hidden="true">
+                    <polyline :points="sparkline(v.name)" fill="none" stroke-linecap="round" stroke-linejoin="round"
+                              :stroke="plotY.includes(v.name) ? seriesColor(plotY.indexOf(v.name)) : 'var(--muted)'"
+                              :stroke-width="plotY.includes(v.name) ? 2.4 : 1.4"
+                              :stroke-dasharray="plotY.includes(v.name) ? seriesDash(plotY.indexOf(v.name)) : null"
+                              :opacity="plotY.includes(v.name) ? 1 : 0.7" />
+                  </svg>
                   <span class="font-mono font-semibold">{{ v.label }}</span>
                 </label>
               </div>
@@ -132,16 +147,41 @@
               <ResultTable v-else :result="run.result" :columns="[plotX, ...plotY.filter((y) => y !== plotX)]" />
             </div>
 
-            <p class="text-sm text-muted tabular">
-              {{ model.steps }} Schritte · {{ variableList.length }} Größen · berechnet in {{ run.ms }} ms
-            </p>
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <p class="text-sm text-muted tabular">{{ $t('app.stats', { steps: model.steps, vars: variableList.length, ms: run.ms }) }}</p>
+              <div class="flex flex-wrap gap-2">
+                <button type="button" class="btn" @click="copyTable"><ClipboardCopy :size="18" aria-hidden="true" /> {{ $t('app.copyTable') }}</button>
+                <button type="button" class="btn" @click="downloadCsv"><Download :size="18" aria-hidden="true" /> {{ $t('app.saveCsv') }}</button>
+              </div>
+            </div>
           </template>
         </section>
       </div>
     </main>
 
-    <footer class="border-t border-line px-4 py-4 text-center text-sm text-muted sm:px-6">
-      Modellwerk – Mockup einer Neuentwicklung. Rechenkern geprüft gegen die mitgelieferten Ergebnisse von Moebius 3.0 (Detlef Hoche).
+    <footer class="mt-6 border-t border-line bg-sheet">
+      <div class="mx-auto grid max-w-[96rem] gap-6 px-4 py-6 text-sm sm:px-6 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)]">
+        <div class="flex flex-col gap-2">
+          <p class="flex items-center gap-2 font-bold"><img :src="logoUrl" width="22" height="22" alt="" /> Modellwerk</p>
+          <p class="max-w-[46ch] text-muted">{{ $t('footer.about') }}</p>
+          <p class="text-muted tabular">{{ $t('footer.version', { v: version }) }}</p>
+        </div>
+        <div class="flex flex-col gap-2">
+          <h2 class="font-bold">{{ $t('footer.compatTitle') }}</h2>
+          <p class="text-muted">{{ $t('footer.compatText') }}</p>
+          <p><button type="button" class="btn-link font-semibold" @click="$refs.compare.show()">{{ $t('footer.compatButton') }}</button></p>
+        </div>
+        <div class="flex flex-col gap-2">
+          <h2 class="font-bold">{{ $t('footer.privacyTitle') }}</h2>
+          <p class="text-muted">{{ $t('footer.privacyText') }}</p>
+          <label class="mt-1 inline-flex items-center gap-2">
+            <span class="font-semibold">{{ $t('app.language') }}</span>
+            <select id="footer-locale" class="field !w-auto" :value="$i18n.locale" @change="setLocale($event.target.value)">
+              <option v-for="(l, code) in locales" :key="code" :value="code" :lang="code">{{ l.name }}</option>
+            </select>
+          </label>
+        </div>
+      </div>
     </footer>
   </div>
 
@@ -149,21 +189,23 @@
     <div class="flex flex-col gap-4 p-5">
       <div class="flex items-start justify-between gap-3">
         <div>
-          <h2 id="examples-title" class="text-xl font-bold">Beispiel öffnen</h2>
-          <p class="text-muted">Jedes Beispiel lässt sich frei verändern.</p>
+          <h2 id="examples-title" class="text-xl font-bold">{{ $t('app.examplesTitle') }}</h2>
+          <p class="text-muted">{{ $t('app.examplesHint') }}</p>
         </div>
-        <button type="button" class="btn btn-quiet" aria-label="Schließen" @click="$refs.examples.close()"><X :size="20" aria-hidden="true" /></button>
+        <button type="button" class="btn btn-quiet" :aria-label="$t('app.close')" @click="$refs.examples.close()"><X :size="20" aria-hidden="true" /></button>
       </div>
       <ul class="grid gap-3 sm:grid-cols-2">
         <li v-for="ex in examples" :key="ex.id">
-          <button type="button" class="flex h-full w-full flex-col items-start gap-1 rounded-xl border border-line p-4 text-left hover:border-accent hover:bg-accent-soft"
+          <button type="button" class="flex h-full w-full flex-col items-start gap-1 rounded-xl border p-4 text-left hover:border-accent"
+                  :class="model.id === ex.id ? 'is-selected' : 'border-line'"
                   :aria-current="model.id === ex.id ? 'true' : undefined" @click="loadExample(ex); $refs.examples.close()">
-            <span class="eyebrow">{{ ex.topic }}</span>
-            <span class="text-lg font-bold">{{ ex.title }}</span>
-            <span class="text-sm text-muted">{{ ex.description }}</span>
-            <span class="mt-1 inline-flex items-center gap-1 text-sm font-semibold text-accent">
+            <span class="eyebrow">{{ exampleText(ex, 'topic') }}</span>
+            <span class="text-lg font-bold text-ink">{{ exampleText(ex, 'title') }}</span>
+            <span class="text-sm text-muted">{{ exampleText(ex, 'description') }}</span>
+            <span v-if="ex.sources?.length" class="text-xs text-muted">{{ $t('app.sourceShort', { publisher: ex.sources[0].publisher, n: ex.sources.length }) }}</span>
+            <span class="mt-1 inline-flex items-center gap-1 text-sm font-semibold">
               <component :is="ex.mode === 'sentences' ? 'MessageSquareText' : 'Code'" :size="15" aria-hidden="true" />
-              {{ ex.mode === 'sentences' ? 'in Sätzen beschrieben' : 'als Programm geschrieben' }}
+              {{ $t(ex.mode === 'sentences' ? 'app.inSentences' : 'app.asProgram') }}
             </span>
           </button>
         </li>
@@ -171,42 +213,45 @@
     </div>
   </dialog>
 
-  <VerifyDialog ref="verify" @open-simulation="loadSimulation" />
+  <dialog ref="diagram" class="m-auto w-[calc(100vw-2rem)] max-w-[110rem] max-h-[calc(100vh-2rem)] rounded-2xl border border-line bg-sheet p-0 text-ink shadow-2xl backdrop:bg-black/50" aria-labelledby="diagram-dialog-title">
+    <div class="flex flex-col gap-3 p-5">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <h2 id="diagram-dialog-title" class="text-xl font-bold">{{ $t('app.diagramDialog') }} · {{ texts.title }}</h2>
+          <p class="text-muted">{{ $t('diagram.intro') }}</p>
+        </div>
+        <button type="button" class="btn btn-quiet" :aria-label="$t('app.close')" @click="$refs.diagram.close()"><X :size="20" aria-hidden="true" /></button>
+      </div>
+      <ModelDiagram :analysis="analysis" large />
+    </div>
+  </dialog>
+
+  <CompareDialog ref="compare" @open-simulation="loadSimulation" />
 
   <p class="sr-only" aria-live="polite">{{ announcement }}</p>
 </template>
 
 <script>
-import { AArrowDown, AArrowUp, ArrowRight, BookOpen, ChartLine, Code, FolderOpen, MessageSquareText, Monitor, Moon, ShieldCheck, Sigma, Sun, Table, TriangleAlert, Workflow, X } from 'lucide-vue-next'
+import { AArrowDown, AArrowUp, ArrowRight, BookOpen, ChartLine, ClipboardCopy, Code, Download, FolderOpen, Languages, MessageSquareText, Monitor, Moon, Sun, Table, TriangleAlert, Workflow, X } from 'lucide-vue-next'
 import SentenceEditor from './components/SentenceEditor.vue'
 import ProgramEditor from './components/ProgramEditor.vue'
 import ModelDiagram from './components/ModelDiagram.vue'
 import StartValues from './components/StartValues.vue'
 import ResultChart from './components/ResultChart.vue'
 import ResultTable from './components/ResultTable.vue'
-import VerifyDialog from './components/VerifyDialog.vue'
-import { analyse, sentencesToProgram } from './engine/model.js'
+import CompareDialog from './components/CompareDialog.vue'
+import { analyse, programToSentences, sentencesToProgram } from './engine/model.js'
 import { simulate } from './engine/simulate.js'
 import { readPrg } from './engine/prg.js'
+import { tableRows, toCsv, toTsv } from './engine/export.js'
 import { EXAMPLES } from './examples.js'
+import { LOCALES, i18n, setLocale } from './i18n/index.js'
+import { seriesColor, seriesDash, sparkPoints } from './chartStyle.js'
+import logoUrl from './assets/logo.svg'
+import { siteLink } from './site/links.js'
+import pkg from '../package.json' with { type: 'json' }
 
 const THEMES = ['system', 'light', 'dark']
-
-function modelFromExample(ex) {
-  return {
-    id: ex.id,
-    title: ex.title,
-    topic: ex.topic,
-    description: ex.description,
-    simplified: ex.simplified ?? true,
-    sentences: ex.sentences ? ex.sentences.map((s) => ({ ...s })) : [],
-    origin: ex.mode === 'sentences' ? 'sentences' : 'program',
-    source: ex.source ?? '',
-    start: { ...ex.start },
-    steps: ex.steps,
-    caseSensitive: false,
-  }
-}
 
 function store(key, value) {
   try {
@@ -217,39 +262,87 @@ function store(key, value) {
   }
 }
 
+function modelFromExample(ex) {
+  return {
+    id: ex.id,
+    texts: ex.texts ?? null,
+    imported: null,
+    simplified: ex.simplified ?? true,
+    sentences: ex.sentences ? ex.sentences.map((s) => ({ ...s })) : [],
+    origin: ex.mode === 'sentences' ? 'sentences' : 'program',
+    source: ex.source ?? '',
+    start: { ...ex.start },
+    steps: ex.steps,
+    caseSensitive: false,
+    timeName: 'Zeit',
+    dtName: 'DeltaT',
+  }
+}
+
 export default {
   name: 'App',
   components: {
-    AArrowDown, AArrowUp, ArrowRight, BookOpen, ChartLine, Code, FolderOpen, MessageSquareText, Monitor, Moon, ShieldCheck, Sigma, Sun, Table, TriangleAlert, Workflow, X,
-    SentenceEditor, ProgramEditor, ModelDiagram, StartValues, ResultChart, ResultTable, VerifyDialog,
+    AArrowDown, AArrowUp, ArrowRight, BookOpen, ChartLine, ClipboardCopy, Code, Download, FolderOpen, Languages, MessageSquareText, Monitor, Moon, Sun, Table, TriangleAlert, Workflow, X,
+    SentenceEditor, ProgramEditor, ModelDiagram, StartValues, ResultChart, ResultTable, CompareDialog,
   },
   data() {
+    // deep link from the guide pages: app/#<example-id>
+    const first = EXAMPLES.find((e) => e.id === location.hash.slice(1)) ?? EXAMPLES[0]
     return {
+      logoUrl,
+      version: pkg.version,
+      // the standalone builds (desktop/mobile app, offline file) have no landing page
+      homeHref: ['app', 'single'].includes(import.meta.env.MODE) ? null : siteLink('../'),
+      locales: LOCALES,
       examples: EXAMPLES,
-      model: modelFromExample(EXAMPLES[0]),
+      model: modelFromExample(first),
       loadCount: 0,
-      modelTab: EXAMPLES[0].mode === 'sentences' ? 'sentences' : 'program',
+      modelTab: first.mode === 'sentences' ? 'sentences' : 'program',
       resultTab: 'chart',
-      plotX: EXAMPLES[0].plot.x,
-      plotY: [...EXAMPLES[0].plot.y],
+      plotX: first.plot.x,
+      plotY: [...first.plot.y],
       theme: store('theme') ?? 'system',
       textScale: store('textScale') ?? 1,
       announcement: '',
       modelTabs: [
-        { id: 'sentences', label: 'Sätze', icon: 'MessageSquareText' },
-        { id: 'diagram', label: 'Diagramm', icon: 'Workflow' },
-        { id: 'program', label: 'Programm', icon: 'Code' },
+        { id: 'sentences', icon: 'MessageSquareText' },
+        { id: 'diagram', icon: 'Workflow' },
+        { id: 'program', icon: 'Code' },
       ],
       resultTabs: [
-        { id: 'chart', label: 'Schaubild', icon: 'ChartLine' },
-        { id: 'table', label: 'Tabelle', icon: 'Table' },
+        { id: 'chart', icon: 'ChartLine' },
+        { id: 'table', icon: 'Table' },
       ],
     }
   },
   computed: {
+    texts() {
+      const m = this.model
+      if (m.imported) {
+        return {
+          title: m.imported.title || this.$t('app.importedTitle'),
+          topic: this.$t('app.importedFrom', { file: m.imported.file }),
+          description: m.imported.error ? this.$t('app.openFailed', { message: m.imported.error }) : this.$t('app.importedDescription'),
+        }
+      }
+      const ex = EXAMPLES.find((e) => e.id === m.id)
+      return { title: this.exampleText(ex, 'title'), topic: this.exampleText(ex, 'topic'), description: this.exampleText(ex, 'description') }
+    },
+    currentExample() {
+      return EXAMPLES.find((e) => e.id === this.model.id) ?? null
+    },
+    otherLocale() {
+      const code = i18n.locale === 'de' ? 'en' : 'de'
+      return { code, name: LOCALES[code].name }
+    },
     source() {
-      if (this.model.origin === 'sentences') return sentencesToProgram(this.model.sentences, { simplified: this.model.simplified })
+      if (this.model.origin === 'sentences') {
+        return sentencesToProgram(this.model.sentences, { simplified: this.model.simplified, timeName: this.model.timeName, dtName: this.model.dtName })
+      }
       return this.model.source
+    },
+    conversion() {
+      return this.model.origin === 'program' ? programToSentences(this.model.source) : { ok: false, line: null }
     },
     analysis() {
       return analyse(this.source, { caseSensitive: this.model.caseSensitive })
@@ -269,9 +362,6 @@ export default {
         return { error }
       }
     },
-    themeLabel() {
-      return { system: 'Farben: wie das System', light: 'Farben: hell', dark: 'Farben: dunkel' }[this.theme]
-    },
   },
   watch: {
     variableList(list) {
@@ -280,47 +370,58 @@ export default {
       const ys = this.plotY.filter((n) => names.has(n))
       if (ys.length !== this.plotY.length) this.plotY = ys
     },
-    theme: { immediate: true, handler(t) {
-      if (t === 'system') delete document.documentElement.dataset.theme
-      else document.documentElement.dataset.theme = t
-      store('theme', t)
-    } },
-    textScale: { immediate: true, handler(s) {
-      document.documentElement.style.setProperty('--text-scale', s)
-      store('textScale', s)
-    } },
+    theme: {
+      immediate: true,
+      handler(t) {
+        if (t === 'system') delete document.documentElement.dataset.theme
+        else document.documentElement.dataset.theme = t
+        store('theme', t)
+      },
+    },
+    textScale: {
+      immediate: true,
+      handler(s) {
+        document.documentElement.style.setProperty('--text-scale', s)
+        store('textScale', s)
+      },
+    },
   },
   methods: {
+    seriesColor,
+    seriesDash,
+    setLocale,
+    exampleText(ex, key) {
+      if (!ex) return ''
+      return ex.texts ? ex.texts[key][i18n.locale] ?? ex.texts[key].de : this.$t(`examples.${ex.id}.${key}`)
+    },
+    sparkline(name) {
+      return sparkPoints(this.run.result?.series[name])
+    },
+    switchLocale() {
+      setLocale(this.otherLocale.code)
+    },
     loadExample(ex) {
       this.model = modelFromExample(ex)
       this.modelTab = ex.mode === 'sentences' ? 'sentences' : 'program'
       this.plotX = ex.plot.x
       this.plotY = [...ex.plot.y]
       this.loadCount++
-      this.announcement = `Beispiel „${ex.title}“ geladen.`
+      this.announcement = this.$t('app.exampleLoaded', { title: this.exampleText(ex, 'title') })
     },
-    loadSimulation(sim, fileName = '') {
+    loadSimulation(sim, file = '') {
       const caseSensitive = sim.variables.some((v) => v.name !== v.name.toUpperCase())
       this.model = {
-        id: null,
-        title: sim.name || fileName || 'Importiertes Modell',
-        topic: `Aus Moebius-Datei${fileName ? ` „${fileName}“` : ''}`,
-        description: 'Programm, Startwerte und Schrittzahl wurden aus der Originaldatei übernommen.',
-        simplified: true,
-        sentences: [],
-        origin: 'program',
-        source: sim.source,
+        ...modelFromExample({ id: null, mode: 'program', source: sim.source, start: {}, steps: sim.steps }),
+        imported: { title: sim.name, file },
         start: Object.fromEntries(sim.variables.map((v) => [v.name, v.start])),
-        steps: sim.steps,
         caseSensitive,
       }
       this.modelTab = 'program'
-      const a = analyse(sim.source, { caseSensitive })
-      const vars = [...a.roles]
+      const vars = [...analyse(sim.source, { caseSensitive }).roles]
       this.plotX = vars.find(([, r]) => r === 'time')?.[0] ?? vars[0]?.[0]
       this.plotY = vars.filter(([, r]) => r === 'state').map(([n]) => n).slice(0, 4)
       this.loadCount++
-      this.announcement = `Modell „${this.model.title}“ geöffnet.`
+      this.announcement = this.$t('app.modelOpened', { title: this.texts.title })
     },
     async openPrg(ev) {
       const file = ev.target.files[0]
@@ -328,13 +429,43 @@ export default {
       if (!file) return
       try {
         const sims = readPrg(new Uint8Array(await file.arrayBuffer()))
-        if (!sims.length) throw new Error('In dieser Datei wurde kein Modell mit gespeicherten Werten gefunden.')
+        if (!sims.length) throw new Error(this.$t('app.noModelInFile'))
         this.loadSimulation(sims[0], file.name)
       } catch (e) {
-        this.announcement = e.message
-        window.setTimeout(() => { this.announcement = '' }, 8000)
-        this.model = { ...this.model, description: `Öffnen fehlgeschlagen: ${e.message}` }
+        const message = e.code ? this.$t(`app.${e.code}`) : e.message
+        this.model = { ...this.model, imported: { title: file.name, file: file.name, error: message } }
+        this.announcement = this.$t('app.openFailed', { message })
       }
+    },
+    exportData() {
+      const columns = [this.plotX, ...this.plotY.filter((y) => y !== this.plotX)]
+      const display = this.run.result.display
+      return { header: [this.$t('table.step'), ...columns.map((c) => display.get(c) ?? c)], rows: tableRows(this.run.result, columns) }
+    },
+    downloadCsv() {
+      const { header, rows } = this.exportData()
+      const blob = new Blob([toCsv(header, rows, i18n.locale)], { type: 'text/csv;charset=utf-8' })
+      const link = document.createElement('a')
+      link.href = URL.createObjectURL(blob)
+      link.download = `${this.texts.title.replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '') || 'modellwerk'}.csv`
+      link.click()
+      setTimeout(() => URL.revokeObjectURL(link.href), 1000)
+      this.announcement = this.$t('app.csvSaved')
+    },
+    async copyTable() {
+      const { header, rows } = this.exportData()
+      try {
+        await navigator.clipboard.writeText(toTsv(header, rows, i18n.locale))
+        this.announcement = this.$t('app.tableCopied')
+      } catch {
+        this.announcement = this.$t('app.copyFailed')
+      }
+    },
+    convertToSentences() {
+      const c = this.conversion
+      if (!c.ok) return
+      Object.assign(this.model, { sentences: c.sentences, simplified: c.simplified, timeName: c.timeName, dtName: c.dtName, origin: 'sentences' })
+      this.announcement = this.$t('sentences.converted')
     },
     setSentences(s) {
       this.model.sentences = s
@@ -345,12 +476,12 @@ export default {
       this.model.origin = 'sentences'
     },
     setSource(text) {
-      if (this.model.origin === 'sentences') this.model.origin = 'program'
+      this.model.origin = 'program'
       this.model.source = text
     },
     cycleTheme() {
       this.theme = THEMES[(THEMES.indexOf(this.theme) + 1) % THEMES.length]
-      this.announcement = this.themeLabel
+      this.announcement = this.$t(`app.theme.${this.theme}`)
     },
     setScale(d) {
       const steps = [0.875, 1, 1.125, 1.25, 1.5]
@@ -372,10 +503,3 @@ export default {
   },
 }
 </script>
-
-<style>
-.step {
-  display: inline-grid; place-items: center; width: 1.75rem; height: 1.75rem; border-radius: 999px;
-  background: var(--accent); color: var(--accent-ink); font-size: 0.95rem; font-weight: 800;
-}
-</style>

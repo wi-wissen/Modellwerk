@@ -1,6 +1,7 @@
 node_modules
 dist
 dist-single
+dist-app
 src-tauri/target
 *.log
 .DS_Store

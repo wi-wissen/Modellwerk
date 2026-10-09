@@ -1,0 +1,50 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "Modellwerk",
+  "version": "0.1.0",
+  "identifier": "app.modellwerk.desktop",
+  "build": {
+    "frontendDist": "../dist-app",
+    "devUrl": "http://localhost:5174",
+    "beforeDevCommand": "npm run dev:app",
+    "beforeBuildCommand": "npm run build:app"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Modellwerk",
+        "width": 1280,
+        "height": 840,
+        "minWidth": 380,
+        "minHeight": 560,
+        "resizable": true,
+        "fullscreen": false
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; script-src 'self'; connect-src ipc: http://ipc.localhost"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "android": {
+      "debugApplicationIdSuffix": ".debug"
+    },
+    "category": "Education",
+    "shortDescription": "Modellbildung und Simulation für den Unterricht",
+    "longDescription": "Modellwerk: Modelle in Sätzen, als Wirkungsdiagramm oder als Programm beschreiben und sofort berechnen.",
+    "linux": {
+      "deb": {
+        "section": "education"
+      }
+    }
+  }
+}

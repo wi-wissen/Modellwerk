@@ -1,24 +1,25 @@
+@import "./fonts.css";
 @import "tailwindcss";
 
-/* Layout: Arbeitsplatz mit zwei Flächen – links das Modell, rechts das Ergebnis –
-   und ein schmaler Kopf mit beschrifteten Aktionen. Rollenfarben (Zustand, Rate,
-   Konstante) ziehen sich durch Sätze, Diagramm, Programm und Startwerte. */
+/* Layout: a workbench with two surfaces – the model on the left, the result on
+   the right – under a slim header with labelled actions. One accent blue is used
+   for actions, selection, stocks and the first curve; role colours (stock, rate,
+   constant, time) are shared by sentences, diagram, program and initial values. */
 :root {
-  --paper: #f5f7f4;        /* Grundfläche, leicht grünstichig wie Millimeterpapier */
-  --sheet: #ffffff;        /* Arbeitsflächen */
-  --sunken: #eceff0;
-  --ink: #18222c;          /* Text */
-  --muted: #4f5b66;        /* Nebentext, AA auf paper und sheet */
+  --paper: #f5f7f4;          /* page ground, slightly green like graph paper */
+  --sheet: #ffffff;          /* work surfaces */
+  --sunken: #eef1f2;
+  --ink: #18222c;
+  --muted: #4f5b66;          /* AA on paper and sheet */
   --line: #cfd6db;
   --grid: #e3e8ea;
-  --accent: #1d4fd8;       /* Aktionen, Fokus */
-  --accent-ink: #ffffff;
-  --accent-soft: #e4ebff;
-  --state: #1f5fbf;        /* Zustandsgröße */
-  --state-soft: #e3edfb;
-  --rate: #a84a00;         /* Veränderungsrate */
+  --accent: #1d4fd8;         /* the one blue */
+  --accent-ink: #ffffff;     /* text on accent */
+  --accent-soft: #e6edff;    /* selected background */
+  --accent-strong: #173fae;  /* text on accent-soft */
+  --rate: #a84a00;
   --rate-soft: #fbeadb;
-  --const: #6b3fa0;        /* Konstante */
+  --const: #6b3fa0;
   --const-soft: #efe7f8;
   --time: #4f5b66;
   --time-soft: #e9edf0;
@@ -26,30 +27,30 @@
   --ok-soft: #e1f3e7;
   --bad: #b3261e;
   --bad-soft: #fbe5e3;
-  /* Okabe-Ito, farbenblind-sicher; Reihenfolge der Kurven */
-  --s1: #0072b2; --s2: #d55e00; --s3: #009e73; --s4: #cc79a7; --s5: #8a6d00; --s6: #56b4e9;
+  /* curve colours, Okabe-Ito based (colour-blind safe), first = accent */
+  --s1: var(--accent); --s2: #d55e00; --s3: #009e73; --s4: #cc79a7; --s5: #8a6d00; --s6: #555f69;
   --font-body: "Atkinson Hyperlegible Next", "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "Atkinson Hyperlegible Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
   --text-scale: 1;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --paper: #11161b; --sheet: #182028; --sunken: #0d1216; --ink: #e8edf1; --muted: #a5b1bc;
-    --line: #2e3a45; --grid: #24303a; --accent: #8fb0ff; --accent-ink: #0b1220; --accent-soft: #1d2a47;
-    --state: #8ab8ff; --state-soft: #1b2b44; --rate: #ffb27a; --rate-soft: #3a2616;
-    --const: #c9a6f5; --const-soft: #2c2140; --time: #a5b1bc; --time-soft: #222c35;
-    --ok: #6fd69a; --ok-soft: #15301f; --bad: #ff9b92; --bad-soft: #3b1a18;
-    --s1: #56b4e9; --s2: #ff9a52; --s3: #2fd3a3; --s4: #f0a3cc; --s5: #f0e442; --s6: #9ad0f5;
+    --paper: #11161b; --sheet: #182028; --sunken: #0f141a; --ink: #e8edf1; --muted: #a5b1bc;
+    --line: #2e3a45; --grid: #24303a;
+    --accent: #8fb0ff; --accent-ink: #0b1220; --accent-soft: #1f2d4d; --accent-strong: #c4d4ff;
+    --rate: #ffb27a; --rate-soft: #3a2616; --const: #c9a6f5; --const-soft: #2c2140;
+    --time: #a5b1bc; --time-soft: #222c35; --ok: #6fd69a; --ok-soft: #15301f; --bad: #ff9b92; --bad-soft: #3b1a18;
+    --s2: #ff9a52; --s3: #2fd3a3; --s4: #f0a3cc; --s5: #f0e442; --s6: #b8c2cc;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --paper: #11161b; --sheet: #182028; --sunken: #0d1216; --ink: #e8edf1; --muted: #a5b1bc;
-  --line: #2e3a45; --grid: #24303a; --accent: #8fb0ff; --accent-ink: #0b1220; --accent-soft: #1d2a47;
-  --state: #8ab8ff; --state-soft: #1b2b44; --rate: #ffb27a; --rate-soft: #3a2616;
-  --const: #c9a6f5; --const-soft: #2c2140; --time: #a5b1bc; --time-soft: #222c35;
-  --ok: #6fd69a; --ok-soft: #15301f; --bad: #ff9b92; --bad-soft: #3b1a18;
-  --s1: #56b4e9; --s2: #ff9a52; --s3: #2fd3a3; --s4: #f0a3cc; --s5: #f0e442; --s6: #9ad0f5;
+  --paper: #11161b; --sheet: #182028; --sunken: #0f141a; --ink: #e8edf1; --muted: #a5b1bc;
+  --line: #2e3a45; --grid: #24303a;
+  --accent: #8fb0ff; --accent-ink: #0b1220; --accent-soft: #1f2d4d; --accent-strong: #c4d4ff;
+  --rate: #ffb27a; --rate-soft: #3a2616; --const: #c9a6f5; --const-soft: #2c2140;
+  --time: #a5b1bc; --time-soft: #222c35; --ok: #6fd69a; --ok-soft: #15301f; --bad: #ff9b92; --bad-soft: #3b1a18;
+  --s2: #ff9a52; --s3: #2fd3a3; --s4: #f0a3cc; --s5: #f0e442; --s6: #b8c2cc;
   color-scheme: dark;
 }
 
@@ -63,14 +64,11 @@
   --color-accent: var(--accent);
   --color-accent-ink: var(--accent-ink);
   --color-accent-soft: var(--accent-soft);
-  --color-state: var(--state);
-  --color-state-soft: var(--state-soft);
+  --color-accent-strong: var(--accent-strong);
   --color-rate: var(--rate);
   --color-rate-soft: var(--rate-soft);
   --color-const: var(--const);
   --color-const-soft: var(--const-soft);
-  --color-time: var(--time);
-  --color-time-soft: var(--time-soft);
   --color-ok: var(--ok);
   --color-ok-soft: var(--ok-soft);
   --color-bad: var(--bad);
@@ -79,56 +77,102 @@
   --font-mono: var(--font-mono);
 }
 
-html { font-size: calc(100% * var(--text-scale)); }
-html, body, #app { height: 100%; }
-body {
-  background: var(--paper);
-  color: var(--ink);
-  font-family: var(--font-body);
-  font-size: 1rem;
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-}
-h1, h2, h3 { text-wrap: balance; }
-.tabular { font-variant-numeric: tabular-nums; }
-.eyebrow { font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 700; color: var(--muted); }
+@layer base {
+  html { font-size: calc(100% * var(--text-scale)); }
+  html, body, #app { min-height: 100%; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3 { text-wrap: balance; }
+  .tabular { font-variant-numeric: tabular-nums; }
+  .eyebrow { font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 700; color: var(--muted); }
 
-:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
-
-.btn {
-  display: inline-flex; align-items: center; gap: 0.45rem;
-  min-height: 2.5rem; padding: 0.4rem 0.85rem; border-radius: 0.6rem;
-  font-weight: 600; font-size: 0.95rem; line-height: 1.2;
-  border: 1px solid var(--line); background: var(--sheet); color: var(--ink);
-  cursor: pointer; transition: background-color 120ms, border-color 120ms;
-}
-.btn:hover { border-color: var(--accent); background: var(--accent-soft); }
-.btn-primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
-.btn-primary:hover { background: var(--accent); filter: brightness(1.08); }
-.btn-quiet { border-color: transparent; background: transparent; }
-.btn[aria-pressed="true"], .btn[aria-selected="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--ink); }
-.btn svg { flex: none; }
-
-.field {
-  width: 100%; min-height: 2.5rem; padding: 0.4rem 0.6rem; border-radius: 0.5rem;
-  border: 1px solid var(--line); background: var(--sheet); color: var(--ink);
-}
-.field:focus { border-color: var(--accent); }
-.field[aria-invalid="true"] { border-color: var(--bad); background: var(--bad-soft); }
-
-.panel { background: var(--sheet); border: 1px solid var(--line); border-radius: 0.9rem; }
-
-.role-state { --role: var(--state); --role-soft: var(--state-soft); }
-.role-rate { --role: var(--rate); --role-soft: var(--rate-soft); }
-.role-constant { --role: var(--const); --role-soft: var(--const-soft); }
-.role-time { --role: var(--time); --role-soft: var(--time-soft); }
-.chip {
-  display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.05rem 0.5rem;
-  border-radius: 999px; font-size: 0.78rem; font-weight: 700;
-  color: var(--role); background: var(--role-soft); border: 1px solid color-mix(in srgb, var(--role) 35%, transparent);
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
 }
 
-.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+@layer components {
+  /* Buttons */
+  .btn {
+    display: inline-flex; align-items: center; gap: 0.45rem;
+    min-height: 2.5rem; padding: 0.4rem 0.85rem; border-radius: 0.6rem;
+    font-weight: 600; font-size: 0.95rem; line-height: 1.2;
+    border: 1px solid var(--line); background: var(--sheet); color: var(--ink);
+    cursor: pointer; transition: background-color 120ms, border-color 120ms, color 120ms;
+  }
+  .btn:hover { border-color: var(--accent); }
+  .btn-primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .btn-primary:hover { filter: brightness(1.08); }
+  .btn-quiet { border-color: transparent; background: transparent; }
+  .btn-quiet:hover { background: var(--sunken); border-color: transparent; }
+  .btn-link { border: 0; background: none; padding: 0; min-height: 0; color: var(--accent-strong); text-decoration: underline; text-underline-offset: 3px; }
+  .btn-link:hover { text-decoration-thickness: 2px; }
+  .btn svg { flex: none; }
+
+  /* One selection pattern for tabs, toggles and chips */
+  .is-selected,
+  .seg > [aria-selected="true"],
+  .toggle:has(input:checked) {
+    background: var(--accent-soft); color: var(--accent-strong); border-color: var(--accent);
+  }
+
+  /* Segmented control (tabs) */
+  .seg { display: inline-flex; flex-wrap: wrap; gap: 0.25rem; padding: 0.25rem; border: 1px solid var(--line); border-radius: 0.75rem; background: var(--sheet); }
+  .seg > button {
+    display: inline-flex; align-items: center; gap: 0.45rem; min-height: 2.25rem; padding: 0.3rem 0.8rem;
+    border: 1px solid transparent; border-radius: 0.55rem; background: transparent; color: var(--muted);
+    font-weight: 600; font-size: 0.95rem; cursor: pointer;
+  }
+  .seg > button:hover { color: var(--ink); background: var(--sunken); }
+  .seg > button[aria-selected="true"]:hover { background: var(--accent-soft); color: var(--accent-strong); }
+
+  /* Toggle chip: native checkbox hidden, state shown by the chip itself */
+  .toggle {
+    display: inline-flex; align-items: center; gap: 0.45rem; min-height: 2rem; padding: 0.2rem 0.7rem;
+    border: 1px solid var(--line); border-radius: 999px; background: var(--sheet); color: var(--ink);
+    font-size: 0.9rem; cursor: pointer; transition: background-color 120ms, border-color 120ms;
+  }
+  .toggle:hover { border-color: var(--accent); }
+  .toggle input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+  .toggle:has(input:focus-visible) { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .toggle .spark { width: 2.5rem; height: 1rem; flex: none; }
+
+  /* Form fields */
+  .field {
+    width: 100%; min-height: 2.5rem; padding: 0.4rem 0.6rem; border-radius: 0.5rem;
+    border: 1px solid var(--line); background: var(--sheet); color: var(--ink);
+  }
+  .field:focus { border-color: var(--accent); }
+  .field[aria-invalid="true"] { border-color: var(--bad); background: var(--bad-soft); }
+  input[type="checkbox"] { accent-color: var(--accent); }
+
+  .panel { background: var(--sheet); border: 1px solid var(--line); border-radius: 0.9rem; }
+  /* the editor clips its textarea, so the focus ring goes on the whole editor */
+  .editor:focus-within { outline: 3px solid var(--accent); outline-offset: 2px; border-color: var(--accent); }
+  .editor textarea:focus-visible { outline: none; }
+
+  /* Roles */
+  .role-state { --role: var(--accent); --role-soft: var(--accent-soft); --role-strong: var(--accent-strong); }
+  .role-rate { --role: var(--rate); --role-soft: var(--rate-soft); --role-strong: var(--rate); }
+  .role-constant { --role: var(--const); --role-soft: var(--const-soft); --role-strong: var(--const); }
+  .role-time { --role: var(--time); --role-soft: var(--time-soft); --role-strong: var(--time); }
+  .chip {
+    display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.05rem 0.5rem;
+    border-radius: 999px; font-size: 0.78rem; font-weight: 700;
+    color: var(--role-strong); background: var(--role-soft);
+  }
+
+  .step {
+    display: inline-grid; place-items: center; width: 1.75rem; height: 1.75rem; border-radius: 999px;
+    background: var(--accent); color: var(--accent-ink); font-size: 0.95rem; font-weight: 800;
+  }
+
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }
