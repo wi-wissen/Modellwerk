@@ -1,0 +1,11 @@
+{
+  "name": "Modellwerk",
+  "short_name": "Modellwerk",
+  "description": "Modellbildung und Simulation für den Unterricht",
+  "start_url": "app/",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1d4fd8",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

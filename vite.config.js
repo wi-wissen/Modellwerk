@@ -1,5 +1,6 @@
-import { readFileSync, rmSync, writeFileSync, mkdirSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { createHash } from 'node:crypto'
+import { mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs'
+import { relative, resolve } from 'node:path'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import tailwindcss from '@tailwindcss/vite'
@@ -35,6 +36,41 @@ function guidePages() {
   }
 }
 
+// Service worker listing every built file, so the website works offline after
+// the first visit. Runs after guidePages, which writes the guide pages.
+function offlineCache() {
+  return {
+    name: 'modellwerk-offline-cache',
+    closeBundle() {
+      const out = resolve(here, 'dist')
+      const files = []
+      const walk = (dir) => {
+        for (const name of readdirSync(dir)) {
+          const path = resolve(dir, name)
+          if (statSync(path).isDirectory()) walk(path)
+          else files.push(relative(out, path).split('\\').join('/'))
+        }
+      }
+      walk(out)
+      const list = files.filter((f) => f !== 'sw.js' && f !== 'artifact.html').sort()
+      const hash = createHash('sha256')
+      for (const f of list) hash.update(f).update(readFileSync(resolve(out, f)))
+      const sw = readFileSync(resolve(here, 'scripts/sw-template.js'), 'utf8')
+        .replace('%VERSION%', hash.digest('hex').slice(0, 12))
+        .replace('%FILES%', JSON.stringify(list))
+      writeFileSync(resolve(out, 'sw.js'), sw)
+    },
+  }
+}
+
+// The standalone builds are not installable web pages: drop the manifest link.
+function withoutManifest() {
+  return {
+    name: 'modellwerk-without-manifest',
+    transformIndexHtml: (html) => html.replace(/\s*<link rel="manifest"[^>]*>/, ''),
+  }
+}
+
 // Build modes:
 //   (default)      website: landing page /, examples /examples/…, app /app/  → dist/
 //   --mode app     the app alone, for the Tauri desktop/mobile shell         → dist-app/
@@ -48,7 +84,7 @@ export default defineConfig(({ mode }) => {
       vue(),
       tailwindcss(),
       ...(mode === 'single' ? [viteSingleFile()] : []),
-      ...(standalone ? [] : [guidePages()]),
+      ...(standalone ? [withoutManifest()] : [guidePages(), offlineCache()]),
     ],
     server: { fs: { allow: [here] } },
     build: {
