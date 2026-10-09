@@ -1,0 +1,27 @@
+{
+  "name": "modellwerk",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Modellbildung und Simulation im Browser – moderne Neuentwicklung, rechengleich zu Moebius 3.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "build:single": "vite build --mode single",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "verify": "node scripts/verify-originals.mjs"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@vitejs/plugin-vue": "^6.0.9",
+    "tailwindcss": "^4.3.3",
+    "vite": "^8.3.4",
+    "vite-plugin-singlefile": "^2.3.3",
+    "vitest": "^5.0.3"
+  },
+  "dependencies": {
+    "lucide-vue-next": "^1.0.0",
+    "vue": "^3.5.43"
+  }
+}
