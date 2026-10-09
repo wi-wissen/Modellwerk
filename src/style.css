@@ -1,0 +1,135 @@
+@import "tailwindcss";
+
+/* Layout: Arbeitsplatz mit zwei Flächen – links das Modell, rechts das Ergebnis –
+   und ein schmaler Kopf mit beschrifteten Aktionen. Rollenfarben (Zustand, Rate,
+   Konstante) ziehen sich durch Sätze, Diagramm, Programm und Startwerte. */
+:root {
+  --paper: #f5f7f4;        /* Grundfläche, leicht grünstichig wie Millimeterpapier */
+  --sheet: #ffffff;        /* Arbeitsflächen */
+  --sunken: #eceff0;
+  --ink: #18222c;          /* Text */
+  --muted: #4f5b66;        /* Nebentext, AA auf paper und sheet */
+  --line: #cfd6db;
+  --grid: #e3e8ea;
+  --accent: #1d4fd8;       /* Aktionen, Fokus */
+  --accent-ink: #ffffff;
+  --accent-soft: #e4ebff;
+  --state: #1f5fbf;        /* Zustandsgröße */
+  --state-soft: #e3edfb;
+  --rate: #a84a00;         /* Veränderungsrate */
+  --rate-soft: #fbeadb;
+  --const: #6b3fa0;        /* Konstante */
+  --const-soft: #efe7f8;
+  --time: #4f5b66;
+  --time-soft: #e9edf0;
+  --ok: #17703a;
+  --ok-soft: #e1f3e7;
+  --bad: #b3261e;
+  --bad-soft: #fbe5e3;
+  /* Okabe-Ito, farbenblind-sicher; Reihenfolge der Kurven */
+  --s1: #0072b2; --s2: #d55e00; --s3: #009e73; --s4: #cc79a7; --s5: #8a6d00; --s6: #56b4e9;
+  --font-body: "Atkinson Hyperlegible Next", "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Atkinson Hyperlegible Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --text-scale: 1;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #11161b; --sheet: #182028; --sunken: #0d1216; --ink: #e8edf1; --muted: #a5b1bc;
+    --line: #2e3a45; --grid: #24303a; --accent: #8fb0ff; --accent-ink: #0b1220; --accent-soft: #1d2a47;
+    --state: #8ab8ff; --state-soft: #1b2b44; --rate: #ffb27a; --rate-soft: #3a2616;
+    --const: #c9a6f5; --const-soft: #2c2140; --time: #a5b1bc; --time-soft: #222c35;
+    --ok: #6fd69a; --ok-soft: #15301f; --bad: #ff9b92; --bad-soft: #3b1a18;
+    --s1: #56b4e9; --s2: #ff9a52; --s3: #2fd3a3; --s4: #f0a3cc; --s5: #f0e442; --s6: #9ad0f5;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #11161b; --sheet: #182028; --sunken: #0d1216; --ink: #e8edf1; --muted: #a5b1bc;
+  --line: #2e3a45; --grid: #24303a; --accent: #8fb0ff; --accent-ink: #0b1220; --accent-soft: #1d2a47;
+  --state: #8ab8ff; --state-soft: #1b2b44; --rate: #ffb27a; --rate-soft: #3a2616;
+  --const: #c9a6f5; --const-soft: #2c2140; --time: #a5b1bc; --time-soft: #222c35;
+  --ok: #6fd69a; --ok-soft: #15301f; --bad: #ff9b92; --bad-soft: #3b1a18;
+  --s1: #56b4e9; --s2: #ff9a52; --s3: #2fd3a3; --s4: #f0a3cc; --s5: #f0e442; --s6: #9ad0f5;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-sheet: var(--sheet);
+  --color-sunken: var(--sunken);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-state: var(--state);
+  --color-state-soft: var(--state-soft);
+  --color-rate: var(--rate);
+  --color-rate-soft: var(--rate-soft);
+  --color-const: var(--const);
+  --color-const-soft: var(--const-soft);
+  --color-time: var(--time);
+  --color-time-soft: var(--time-soft);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-bad: var(--bad);
+  --color-bad-soft: var(--bad-soft);
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-mono);
+}
+
+html { font-size: calc(100% * var(--text-scale)); }
+html, body, #app { height: 100%; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3 { text-wrap: balance; }
+.tabular { font-variant-numeric: tabular-nums; }
+.eyebrow { font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 700; color: var(--muted); }
+
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 0.45rem;
+  min-height: 2.5rem; padding: 0.4rem 0.85rem; border-radius: 0.6rem;
+  font-weight: 600; font-size: 0.95rem; line-height: 1.2;
+  border: 1px solid var(--line); background: var(--sheet); color: var(--ink);
+  cursor: pointer; transition: background-color 120ms, border-color 120ms;
+}
+.btn:hover { border-color: var(--accent); background: var(--accent-soft); }
+.btn-primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn-primary:hover { background: var(--accent); filter: brightness(1.08); }
+.btn-quiet { border-color: transparent; background: transparent; }
+.btn[aria-pressed="true"], .btn[aria-selected="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--ink); }
+.btn svg { flex: none; }
+
+.field {
+  width: 100%; min-height: 2.5rem; padding: 0.4rem 0.6rem; border-radius: 0.5rem;
+  border: 1px solid var(--line); background: var(--sheet); color: var(--ink);
+}
+.field:focus { border-color: var(--accent); }
+.field[aria-invalid="true"] { border-color: var(--bad); background: var(--bad-soft); }
+
+.panel { background: var(--sheet); border: 1px solid var(--line); border-radius: 0.9rem; }
+
+.role-state { --role: var(--state); --role-soft: var(--state-soft); }
+.role-rate { --role: var(--rate); --role-soft: var(--rate-soft); }
+.role-constant { --role: var(--const); --role-soft: var(--const-soft); }
+.role-time { --role: var(--time); --role-soft: var(--time-soft); }
+.chip {
+  display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.05rem 0.5rem;
+  border-radius: 999px; font-size: 0.78rem; font-weight: 700;
+  color: var(--role); background: var(--role-soft); border: 1px solid color-mix(in srgb, var(--role) 35%, transparent);
+}
+
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
