@@ -57,7 +57,6 @@
         <li v-for="(t, i) in textDescription" :key="i">{{ t }}</li>
       </ul>
     </details>
-    <p v-if="!large" class="text-sm text-muted">{{ $t('diagram.mockupNote') }}</p>
   </section>
 </template>
 

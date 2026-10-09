@@ -415,7 +415,7 @@ export default {
     compatButton: 'PRG-Datei vergleichen',
     privacyTitle: 'Datenschutz',
     privacyText: 'Modelle und Dateien bleiben auf deinem Gerät. Es werden keine Daten übertragen.',
-    version: 'Version {v} · Mockup',
+    version: 'Version {v}',
   },
   sentences: {
     onlyProgram: 'Dieses Modell gibt es nur als Programm.',
@@ -476,7 +476,6 @@ export default {
     svgTitle: 'Wirkungsdiagramm des Modells',
     legend: 'Legende',
     asText: 'Diagramm als Text',
-    mockupNote: 'Im Mockup wird das Diagramm aus dem Programm gezeichnet. Im fertigen Programm kann man es auch direkt zeichnen.',
     stateLine: '{name} ist eine Zustandsgröße',
     inflow: 'Zufluss: {list}',
     outflow: 'Abfluss: {list}',

@@ -415,7 +415,7 @@ export default {
     compatButton: 'Compare PRG file',
     privacyTitle: 'Privacy',
     privacyText: 'Models and files stay on your device. No data is sent anywhere.',
-    version: 'Version {v} · Mock-up',
+    version: 'Version {v}',
   },
   sentences: {
     onlyProgram: 'This model only exists as a program.',
@@ -476,7 +476,6 @@ export default {
     svgTitle: 'Influence diagram of the model',
     legend: 'Legend',
     asText: 'Diagram as text',
-    mockupNote: 'In this mock-up the diagram is drawn from the program. The finished app will also let you draw it directly.',
     stateLine: '{name} is a stock',
     inflow: 'inflow: {list}',
     outflow: 'outflow: {list}',
