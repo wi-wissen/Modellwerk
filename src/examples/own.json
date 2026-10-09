@@ -24,7 +24,7 @@
       "en": "Grades 10–13"
     },
     "mode": "program",
-    "source": "// Blitzkondensator wird ueber einen Widerstand geladen\n// Einheiten: V, A, C, F, Ohm, J, s\nStrom := (Quellspannung - Spannung) / Widerstand\nLadung := Ladung + Strom * dt\nSpannung := Ladung / Kapazitaet\nEnergie := 0,5 * Kapazitaet * sqr(Spannung)\nZeit := Zeit + dt",
+    "source": "// Blitzkondensator wird ueber einen Widerstand geladen\n// Einheiten: V, A, C, F, Ohm, J, s\nSpannung := Ladung / Kapazitaet\nStrom := (Quellspannung - Spannung) / Widerstand\nLadung := Ladung + Strom * dt\nEnergie := 0,5 * Kapazitaet * sqr(Spannung)\nZeit := Zeit + dt",
     "simplified": true,
     "start": {
       "QUELLSPANNUNG": 300,
@@ -48,7 +48,7 @@
       {
         "step": 150,
         "variable": "SPANNUNG",
-        "value": 190,
+        "value": 189.3,
         "note": {
           "de": "nach 1,5 s = R·C: ca. 63 % von 300 V",
           "en": "after 1.5 s = R·C: about 63 % of 300 V"
@@ -627,7 +627,7 @@
       "en": "Grades 11–13"
     },
     "mode": "program",
-    "source": "// Fadenpendel mit 80 Grad Ausschlag: genau (sin) und Kleinwinkel-Naeherung (sin x = x)\n// Winkel im Bogenmass, zur Anzeige in Grad umgerechnet\nWinkelbeschleunigung := -Ortsfaktor / Laenge * sin(Winkel)\nWinkelgeschwindigkeit := Winkelgeschwindigkeit + Winkelbeschleunigung * dt\nWinkel := Winkel + Winkelgeschwindigkeit * dt\nNaeherungsbeschleunigung := -Ortsfaktor / Laenge * Naeherung\nNaeherungsgeschwindigkeit := Naeherungsgeschwindigkeit + Naeherungsbeschleunigung * dt\nNaeherung := Naeherung + Naeherungsgeschwindigkeit * dt\nWinkelGrad := Winkel * 180 / Kreiszahl\nNaeherungGrad := Naeherung * 180 / Kreiszahl\nZeit := Zeit + dt",
+    "source": "// Fadenpendel mit 80 Grad Ausschlag: genau (sin) und Kleinwinkel-Naeherung (sin x = x)\n// Winkel im Bogenmass, zur Anzeige in Grad umgerechnet\nWinkelbeschleunigung := -Ortsfaktor / Laenge * sin(Winkel)\nNaeherungsbeschleunigung := -Ortsfaktor / Laenge * Naeherung\nWinkelgeschwindigkeit := Winkelgeschwindigkeit + Winkelbeschleunigung * dt\nWinkel := Winkel + Winkelgeschwindigkeit * dt\nNaeherungsgeschwindigkeit := Naeherungsgeschwindigkeit + Naeherungsbeschleunigung * dt\nNaeherung := Naeherung + Naeherungsgeschwindigkeit * dt\nWinkelGrad := Winkel * 180 / Kreiszahl\nNaeherungGrad := Naeherung * 180 / Kreiszahl\nZeit := Zeit + dt",
     "simplified": true,
     "start": {
       "LAENGE": 1,

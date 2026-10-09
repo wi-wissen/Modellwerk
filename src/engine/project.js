@@ -39,7 +39,7 @@ export function cleanSimulation(m = {}) {
     example: typeof m.example === 'string' ? m.example : null,
     simplified: m.simplified !== false,
     sentences: Array.isArray(m.sentences)
-      ? m.sentences.filter((s) => s && typeof s.subject === 'string').map((s) => ({ subject: s.subject, predicate: String(s.predicate), object: String(s.object ?? '') }))
+      ? m.sentences.filter((s) => s && typeof s.subject === 'string').map((s) => ({ subject: s.subject, predicate: String(s.predicate), object: String(s.object ?? ''), ...(typeof s.factor === 'string' && s.factor.trim() ? { factor: s.factor } : {}) }))
       : [],
     origin: ['sentences', 'graph'].includes(m.origin) ? m.origin : 'program',
     source: text(m.source),

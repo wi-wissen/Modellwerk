@@ -78,9 +78,12 @@ describe('program to sentences', () => {
 
   it('refuses programs that would not round-trip exactly', async () => {
     const { programToSentences } = await import('../src/engine/model.js')
-    expect(programToSentences('a := g - k*v\nv := v + a*dt\nt := t + dt')).toEqual({ ok: false, line: 1, reason: 'pattern' })
+    // a stock changed by a term that is not a named quantity
+    expect(programToSentences('v := v + (g - k*v)*dt\nt := t + dt')).toMatchObject({ ok: false, line: 1, reason: 'pattern' })
     // rate defined after the stock update: order would change, so no conversion
     expect(programToSentences('N := N + G\nG := FG*N\nT := T + 1').ok).toBe(false)
+    // a condition is named before anything else
+    expect(programToSentences('a := 1\nIF a > 0 THEN a := 2\nt := t + 1')).toMatchObject({ ok: false, line: 2, reason: 'condition' })
   })
 })
 
@@ -160,5 +163,44 @@ describe('macros', () => {
   it('reports errors inside a macro at the calling line', () => {
     const p = parseProgram('x := 1\nKaputt', { macros: [{ name: 'Kaputt', body: 'y := (2' }] })
     expect(p.errors[0]).toMatchObject({ code: 'macroInvalid', line: 2 })
+  })
+})
+
+describe('sentences for every example without conditions', () => {
+  it('convert losslessly: the regenerated program gives bit-identical results', async () => {
+    const { EXAMPLES } = await import('../src/examples.js')
+    const { programToSentences, sentencesToProgram } = await import('../src/engine/model.js')
+    const { simulate } = await import('../src/engine/simulate.js')
+    let converted = 0
+    for (const ex of EXAMPLES) {
+      const p = ex.mode === 'sentences' ? sentencesToProgram(ex.sentences, { simplified: ex.simplified ?? true }) : ex.source
+      const r = programToSentences(p)
+      if (/\bIF\b|\bWHILE\b/i.test(p)) { expect(r).toMatchObject({ ok: false, reason: 'condition' }); continue }
+      expect(r.ok, ex.id).toBe(true)
+      const again = sentencesToProgram(r.sentences, r)
+      const a = simulate(p, ex.start, ex.steps)
+      const b = simulate(again, ex.start, ex.steps)
+      for (const name of Object.keys(a.series)) expect(Array.from(b.series[name]), `${ex.id} ${name}`).toEqual(Array.from(a.series[name]))
+      converted++
+    }
+    expect(converted).toBeGreaterThanOrEqual(12)
+  })
+
+  it('reads named factors and calculated quantities', async () => {
+    const { programToSentences } = await import('../src/engine/model.js')
+    const r = programToSentences('Geburten := Alpha * Hasen\nHasen := Hasen + (Geburten - Tod)*dt\nU := Q / C\nt := t + dt')
+    expect(r.ok).toBe(true)
+    expect(r.sentences).toEqual([
+      { subject: 'Geburten', predicate: 'proportional', object: 'Hasen', factor: 'Alpha' },
+      { subject: 'Hasen', predicate: 'increase', object: 'Geburten' },
+      { subject: 'Hasen', predicate: 'decrease', object: 'Tod' },
+      { subject: 'U', predicate: 'equals', object: 'Q / C' },
+    ])
+  })
+
+  it('does not call a sum proportional', async () => {
+    const { programToSentences } = await import('../src/engine/model.js')
+    const r = programToSentences('a := k * b + c\nt := t + 1')
+    expect(r.sentences[0].predicate).toBe('equals')
   })
 })

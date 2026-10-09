@@ -216,7 +216,7 @@ describe('parseFormula', () => {
 })
 
 describe('programToGraph', () => {
-  const lossless = ['sunflower', 'lynx-and-hare', 'sir-epidemic', 'newtons-law-of-cooling', 'radioactive-decay']
+  const lossless = ['sunflower', 'lynx-and-hare', 'sir-epidemic', 'newtons-law-of-cooling', 'radioactive-decay', 'population-germany']
 
   for (const ex of EXAMPLES) {
     const p = programOf(ex)

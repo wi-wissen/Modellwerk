@@ -273,6 +273,13 @@
     ],
     "lines": [
       {
+        "code": "Spannung := Ladung / Kapazitaet",
+        "explanation": {
+          "de": "Aus der Ladung zu Beginn des Schritts folgt die Spannung am Kondensator: U = Q / C.",
+          "en": "The charge at the start of the step gives the voltage across the capacitor: U = Q / C."
+        }
+      },
+      {
         "code": "Strom := (Quellspannung - Spannung) / Widerstand",
         "explanation": {
           "de": "Der Strom ergibt sich aus der Spannung, die noch am Widerstand liegt (ohmsches Gesetz).",
@@ -284,13 +291,6 @@
         "explanation": {
           "de": "In der Zeit dt fließt die Ladung Strom · dt auf den Kondensator.",
           "en": "In the time dt, the charge current · dt flows onto the capacitor."
-        }
-      },
-      {
-        "code": "Spannung := Ladung / Kapazitaet",
-        "explanation": {
-          "de": "Aus Ladung und Kapazität folgt die neue Spannung: U = Q / C.",
-          "en": "The new voltage follows from charge and capacitance: U = Q / C."
         }
       },
       {
@@ -2104,6 +2104,13 @@
         }
       },
       {
+        "code": "Naeherungsbeschleunigung := -Ortsfaktor / Laenge * Naeherung",
+        "explanation": {
+          "de": "Näherungspendel: Statt sin(Winkel) wird einfach der Winkel verwendet.",
+          "en": "Approximate pendulum: instead of sin(angle), the angle itself is used."
+        }
+      },
+      {
         "code": "Winkelgeschwindigkeit := Winkelgeschwindigkeit + Winkelbeschleunigung * dt",
         "explanation": {
           "de": "Neue Winkelgeschwindigkeit.",
@@ -2115,13 +2122,6 @@
         "explanation": {
           "de": "Neuer Winkel – mit der schon neuen Geschwindigkeit. So bleibt die Schwingung stabil.",
           "en": "New angle – using the already updated velocity. This keeps the oscillation stable."
-        }
-      },
-      {
-        "code": "Naeherungsbeschleunigung := -Ortsfaktor / Laenge * Naeherung",
-        "explanation": {
-          "de": "Näherungspendel: Statt sin(Winkel) wird einfach der Winkel verwendet.",
-          "en": "Approximate pendulum: instead of sin(angle), the angle itself is used."
         }
       },
       {
@@ -4494,6 +4494,17 @@
         }
       },
       {
+        "name": "Erwaermung",
+        "meaning": {
+          "de": "Temperaturänderung pro Jahr",
+          "en": "temperature change per year"
+        },
+        "unit": {
+          "de": "K/Jahr",
+          "en": "K/year"
+        }
+      },
+      {
         "name": "Waermekapazitaet",
         "meaning": {
           "de": "Energie, die nötig ist, um 1 m² Erdoberfläche (samt oberer Meeresschicht) um 1 K zu erwärmen",
@@ -4579,10 +4590,17 @@
         }
       },
       {
-        "code": "T := T + Bilanz / Waermekapazitaet * Sekunden * dt",
+        "code": "Erwaermung := Bilanz / Waermekapazitaet * Sekunden",
         "explanation": {
-          "de": "Der Überschuss in J pro Jahr, geteilt durch die Wärmekapazität, ergibt die Temperaturänderung pro Jahr; mal dt für einen Schritt von 0,1 Jahren.",
-          "en": "The surplus in J per year divided by the heat capacity gives the temperature change per year; times dt for a step of 0.1 years."
+          "de": "Der Überschuss in J pro Jahr, geteilt durch die Wärmekapazität, ergibt die Temperaturänderung pro Jahr.",
+          "en": "The surplus in J per year divided by the heat capacity gives the temperature change per year."
+        }
+      },
+      {
+        "code": "T := T + Erwaermung * dt",
+        "explanation": {
+          "de": "Die Temperatur ändert sich um die Erwärmung mal dt – ein Schritt von 0,1 Jahren.",
+          "en": "The temperature changes by the warming rate times dt – a step of 0.1 years."
         }
       },
       {

@@ -616,7 +616,7 @@
     "subject": "Geografie / Physik",
     "level": "Klasse 11–13",
     "mode": "program",
-    "source": "// Nulldimensionales Energiebilanzmodell, Zeit in Jahren\n// Temperatur T in Kelvin, Stroeme in W/m^2\nEinstrahlung := Solarkonstante * (1 - Albedo) / 4\nAntrieb := 5,35 * ln(Kohlendioxid / Bezugswert)\nAbstrahlung := Emission * Sigma * sqr(sqr(T))\nBilanz := Einstrahlung + Antrieb - Abstrahlung\nT := T + Bilanz / Waermekapazitaet * Sekunden * dt\nCelsius := T - 273,15\nZeit := Zeit + dt",
+    "source": "// Nulldimensionales Energiebilanzmodell, Zeit in Jahren\n// Temperatur T in Kelvin, Stroeme in W/m^2\nEinstrahlung := Solarkonstante * (1 - Albedo) / 4\nAntrieb := 5,35 * ln(Kohlendioxid / Bezugswert)\nAbstrahlung := Emission * Sigma * sqr(sqr(T))\nBilanz := Einstrahlung + Antrieb - Abstrahlung\nErwaermung := Bilanz / Waermekapazitaet * Sekunden\nT := T + Erwaermung * dt\nCelsius := T - 273,15\nZeit := Zeit + dt",
     "simplified": true,
     "start": {
       "ZEIT": 0,
@@ -634,6 +634,7 @@
       "ANTRIEB": 0,
       "ABSTRAHLUNG": 0,
       "BILANZ": 0,
+      "ERWAERMUNG": 0,
       "CELSIUS": 14.85
     },
     "steps": 300,

@@ -19,13 +19,7 @@
 //      dependencies (influence links plus names used in formulas); ties keep the
 //      order of `graph.nodes`
 //   2. one line per state, in the order of `graph.nodes`, flows in the order of
-//      `graph.links`:
-//        simplified:  Z := Z + r1 - r2            (also Z := Z - r1, or Z := Z without flows)
-//        with DeltaT: Z := Z + r1*DeltaT           (one flow: Z := Z ± r*DeltaT)
-//                     Z := Z + (r1 - r2)*DeltaT    (several flows, a leading outflow is written -r1)
-//                     Z := Z - (r1 + r2)*DeltaT    (several flows, all of them outflows)
-//      Summing the flows first and multiplying once by DeltaT is the textbook Euler
-//      step and the form the built-in examples use (Hasen + (Geburten - Gefressen)*dt).
+//      `graph.links`, in the forms of flows.js (shared with the sentences)
 //   3. the time line `Zeit := Zeit + 1` (simplified) or `Zeit := Zeit + DeltaT`,
 //      exactly as sentencesToProgram writes it.
 //
@@ -35,6 +29,7 @@
 //   still use states and other rates in plain arithmetic (+ - * / ^).
 //   On: aux nodes are allowed and functions may take states as arguments.
 import { FUNCTIONS, parseProgram } from './language.js'
+import { stockFlows, stockLine } from './flows.js'
 
 export const NODE_KINDS = ['state', 'rate', 'constant', 'aux']
 export const LINK_KINDS = ['flow', 'influence']
@@ -309,16 +304,6 @@ export function validateGraph(graph, options = {}) {
   return problems
 }
 
-function stateLine(state, flows, { simplified, dtName }) {
-  const z = state.name.trim()
-  if (!flows.length) return `${z} := ${z}`
-  if (simplified) return `${z} := ${z}${flows.map((f) => ` ${f.sign} ${f.name}`).join('')}`
-  if (flows.length === 1) return `${z} := ${z} ${flows[0].sign} ${flows[0].name}*${dtName}`
-  if (flows.every((f) => f.sign === '-')) return `${z} := ${z} - (${flows.map((f) => f.name).join(' + ')})*${dtName}`
-  const sum = flows.map((f, i) => (i === 0 ? (f.sign === '-' ? `-${f.name}` : f.name) : ` ${f.sign} ${f.name}`)).join('')
-  return `${z} := ${z} + (${sum})*${dtName}`
-}
-
 /**
  * Translates the graph into a program (order and forms: see the top of this file).
  * Nodes whose name is not a valid identifier are left out. Returns { source, problems }.
@@ -337,7 +322,7 @@ export function graphToProgram(graph, options = {}) {
     const flows = graph.links
       .filter((l) => l.kind === 'flow' && l.to === s.id && nodes.get(l.from)?.kind === 'rate' && valid(nodes.get(l.from)))
       .map((l) => ({ name: nodes.get(l.from).name.trim(), sign: l.sign === '-' ? '-' : '+' }))
-    lines.push(stateLine(s, flows, opts))
+    lines.push(stockLine(s.name.trim(), flows, opts))
   }
   const t = opts.timeName
   lines.push(opts.simplified ? `${t} := ${t} + 1` : `${t} := ${t} + ${opts.dtName}`)
@@ -360,37 +345,6 @@ function serialize(n) {
 }
 
 // summands of a chain a ± b ± c whose operands (except the leftmost) are variables
-function chain(n) {
-  const terms = []
-  while (n.kind === 'bin' && (n.op === '+' || n.op === '-')) {
-    if (n.right.kind !== 'var') return null
-    terms.unshift({ name: n.right.name, sign: n.op })
-    n = n.left
-  }
-  return { head: n, terms }
-}
-
-// flows of a state line in one of the generated forms, or null
-function stateFlows(e, z, simplified, dt) {
-  const isVar = (n, name) => n.kind === 'var' && (name === undefined || n.name === name)
-  if (isVar(e, z)) return []
-  if (simplified) {
-    const c = chain(e)
-    return c && isVar(c.head, z) ? c.terms : null
-  }
-  if (!(e.kind === 'bin' && (e.op === '+' || e.op === '-') && isVar(e.left, z))) return null
-  const r = e.right
-  if (!(r.kind === 'bin' && r.op === '*' && isVar(r.right, dt))) return null
-  if (isVar(r.left)) return [{ name: r.left.name, sign: e.op }]
-  const c = chain(r.left)
-  if (!c || !c.terms.length) return null
-  if (isVar(c.head)) c.terms.unshift({ name: c.head.name, sign: '+' })
-  else if (c.head.kind === 'neg' && isVar(c.head.arg)) c.terms.unshift({ name: c.head.arg.name, sign: '-' })
-  else return null
-  if (e.op === '+') return c.terms
-  return c.terms.every((t) => t.sign === '+') ? c.terms.map((t) => ({ ...t, sign: '-' })) : null
-}
-
 const ASSIGN_HEAD = /^\s*[A-Za-zÄÖÜäöüß_][A-Za-z0-9ÄÖÜäöüß_]*\s*(:=|=)/
 
 /**
@@ -431,7 +385,7 @@ export function programToGraph(source) {
     let selfRef = false
     walk(s.expr, (n) => { if (n.kind === 'var' && n.name === s.name) selfRef = true })
     if (selfRef) {
-      const flows = stateFlows(s.expr, s.name, simplified, dtU)
+      const flows = stockFlows(s.expr, s.name, simplified, dtU)
       if (!flows) return { ok: false, line: s.line, reason: 'pattern' }
       states.push({ name: s.name, flows, line: s.line })
     } else {

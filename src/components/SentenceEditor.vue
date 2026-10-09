@@ -27,15 +27,22 @@
           </select>
         </label>
         <label class="flex flex-col gap-1">
-          <span class="text-sm font-semibold text-muted">{{ $t(s.predicate === 'constant' ? 'sentences.value' : s.predicate === 'proportional' ? 'sentences.term' : 'sentences.rate') }}</span>
+          <span class="text-sm font-semibold text-muted">{{ $t(s.predicate === 'constant' ? 'sentences.value' : ['proportional', 'equals'].includes(s.predicate) ? 'sentences.term' : 'sentences.rate') }}</span>
           <input :id="`s-object-${i}`" class="field font-mono" :value="s.object" autocomplete="off" spellcheck="false"
                  @input="update(i, 'object', $event.target.value)" />
         </label>
         <button type="button" class="btn btn-quiet justify-self-start" :aria-label="$t('sentences.removeN', { n: i + 1 })" :title="$t('sentences.remove')" @click="remove(i)">
           <Trash2 :size="18" aria-hidden="true" /><span class="sm:sr-only">{{ $t('sentences.remove') }}</span>
         </button>
+        <label v-if="s.predicate === 'proportional'" class="flex flex-wrap items-center gap-2 text-sm sm:col-span-4">
+          <span class="font-semibold text-muted">{{ $t('sentences.factor') }}</span>
+          <input :id="`s-factor-${i}`" class="field !w-44 font-mono" :value="s.factor ?? ''" :placeholder="`F${s.subject.trim() || '…'}`"
+                 autocomplete="off" spellcheck="false" @input="update(i, 'factor', $event.target.value)" />
+          <span class="text-muted">{{ $t('sentences.factorHint') }}</span>
+        </label>
         <p class="text-sm text-muted sm:col-span-4">
           <span class="font-semibold text-ink">„{{ s.subject || '…' }} {{ $t(`predicates.${s.predicate}.text`) }} {{ s.object || '…' }}“</span>
+          <span v-if="s.predicate === 'proportional'">{{ ' ' + $t('sentences.withFactor', { factor: s.factor?.trim() || `F${s.subject.trim() || '…'}` }) }}</span>
           – {{ $t(`predicates.${s.predicate}.hint`) }}
         </p>
       </li>

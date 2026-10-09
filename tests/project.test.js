@@ -28,6 +28,11 @@ describe('project files', () => {
     expect(cleanSimulation({ origin: 'graph', graph: { nodes: 'x' } }).graph).toBeNull()
   })
 
+  it('keeps a named factor of a proportional sentence', () => {
+    const m = cleanSimulation({ origin: 'sentences', sentences: [{ subject: 'G', predicate: 'proportional', object: 'H', factor: 'Alpha' }] })
+    expect(parseProject(projectToText(toProject({ simulations: [m] }))).simulations[0].sentences[0].factor).toBe('Alpha')
+  })
+
   it('reads version 1 files with a single model', () => {
     const v1 = { format: 'modellwerk', version: 1, model: { title: 'Old', source: 'a := 1', start: { A: 2 }, steps: 5 }, view: { plotX: 'A' } }
     const back = parseProject(JSON.stringify(v1))
