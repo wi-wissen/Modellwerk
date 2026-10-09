@@ -136,6 +136,20 @@
                   </select>
                 </label>
                 <span v-if="resultTab === 'chart' && plotX !== timeVar" class="chip role-constant">{{ $t('app.phase') }}</span>
+                <button v-if="resultTab === 'chart'" type="button" class="btn btn-quiet ml-auto" :aria-expanded="axesOpen" aria-controls="axes-panel" @click="axesOpen = !axesOpen">
+                  <Ruler :size="18" aria-hidden="true" /> {{ $t('app.axesSettings') }}
+                </button>
+              </div>
+              <div v-if="resultTab === 'chart' && axesOpen" id="axes-panel" class="flex flex-wrap items-end gap-3 rounded-xl bg-sunken p-3">
+                <label class="inline-flex items-center gap-2 self-center">
+                  <input id="axes-auto" v-model="axes.auto" type="checkbox" class="size-5" />
+                  <span class="font-semibold">{{ $t('app.autoScale') }}</span>
+                </label>
+                <label v-for="k in ['xMin', 'xMax', 'yMin', 'yMax']" :key="k" class="flex w-28 flex-col gap-1 text-sm">
+                  <span class="font-semibold">{{ $t(`app.${k}`) }}</span>
+                  <input :id="`axes-${k}`" class="field tabular font-mono" inputmode="decimal" :disabled="axes.auto" autocomplete="off"
+                         :value="axes[k] ?? ''" :placeholder="$t('app.auto')" @input="setAxis(k, $event.target.value)" />
+                </label>
               </div>
               <div class="flex flex-wrap items-center gap-2">
                 <span class="font-semibold">{{ $t(resultTab === 'chart' ? 'app.curves' : 'app.columns') }}:</span>
@@ -154,13 +168,18 @@
             </fieldset>
 
             <div :id="`panel-${resultTab}`" role="tabpanel" :aria-labelledby="`tab-${resultTab}`">
-              <ResultChart v-if="resultTab === 'chart'" :result="run.result" :x="plotX" :ys="plotY" />
+              <ResultChart v-if="resultTab === 'chart'" ref="chart" :result="run.result" :x="plotX" :ys="plotY" :range="axes" />
               <ResultTable v-else :result="run.result" :columns="[plotX, ...plotY.filter((y) => y !== plotX)]" />
             </div>
 
             <div class="flex flex-wrap items-center justify-between gap-3">
               <p class="text-sm text-muted tabular">{{ $t('app.stats', { steps: model.steps, vars: variableList.length, ms: run.ms }) }}</p>
               <div class="flex flex-wrap gap-2">
+                <button type="button" class="btn" :disabled="model.steps >= maxSteps" @click="continueRun">
+                  <FastForward :size="18" aria-hidden="true" /> {{ $t('app.continue', { n: continueBy }) }}
+                </button>
+                <button v-if="resultTab === 'chart'" type="button" class="btn" @click="downloadImage('png')"><ImageDown :size="18" aria-hidden="true" /> PNG</button>
+                <button v-if="resultTab === 'chart'" type="button" class="btn" @click="downloadImage('svg')"><ImageDown :size="18" aria-hidden="true" /> SVG</button>
                 <button type="button" class="btn" @click="copyTable"><ClipboardCopy :size="18" aria-hidden="true" /> {{ $t('app.copyTable') }}</button>
                 <button type="button" class="btn" @click="downloadCsv"><Download :size="18" aria-hidden="true" /> {{ $t('app.saveCsv') }}</button>
               </div>
@@ -243,7 +262,7 @@
 </template>
 
 <script>
-import { AArrowDown, AArrowUp, ArrowRight, BookOpen, ChartLine, ClipboardCopy, Code, Download, FilePlus, FolderOpen, History, Save, Languages, MessageSquareText, Monitor, Moon, Sun, Table, TriangleAlert, Workflow, X } from 'lucide-vue-next'
+import { AArrowDown, AArrowUp, ArrowRight, BookOpen, ChartLine, ClipboardCopy, Code, Download, FilePlus, FolderOpen, FastForward, History, ImageDown, Ruler, Save, Languages, MessageSquareText, Monitor, Moon, Sun, Table, TriangleAlert, Workflow, X } from 'lucide-vue-next'
 import SentenceEditor from './components/SentenceEditor.vue'
 import ProgramEditor from './components/ProgramEditor.vue'
 import ModelDiagram from './components/ModelDiagram.vue'
@@ -251,8 +270,8 @@ import StartValues from './components/StartValues.vue'
 import ResultChart from './components/ResultChart.vue'
 import ResultTable from './components/ResultTable.vue'
 import CompareDialog from './components/CompareDialog.vue'
-import { analyse, programToSentences, sentencesToProgram } from './engine/model.js'
-import { simulate } from './engine/simulate.js'
+import { analyse, parseNumber, programToSentences, sentencesToProgram } from './engine/model.js'
+import { MAX_STEPS, simulate } from './engine/simulate.js'
 import { readPrg } from './engine/prg.js'
 import { tableRows, toCsv, toTsv } from './engine/export.js'
 import { PROJECT_EXTENSION, parseProject, projectToText, toProject } from './engine/project.js'
@@ -304,7 +323,7 @@ function modelFromProject(m, file = '') {
 export default {
   name: 'App',
   components: {
-    AArrowDown, AArrowUp, ArrowRight, BookOpen, ChartLine, ClipboardCopy, Code, Download, FilePlus, FolderOpen, History, Save, Languages, MessageSquareText, Monitor, Moon, Sun, Table, TriangleAlert, Workflow, X,
+    AArrowDown, AArrowUp, ArrowRight, BookOpen, ChartLine, ClipboardCopy, Code, Download, FilePlus, FolderOpen, FastForward, History, ImageDown, Ruler, Save, Languages, MessageSquareText, Monitor, Moon, Sun, Table, TriangleAlert, Workflow, X,
     SentenceEditor, ProgramEditor, ModelDiagram, StartValues, ResultChart, ResultTable, CompareDialog,
   },
   data() {
@@ -317,6 +336,10 @@ export default {
     }
     return {
       restored: Boolean(saved),
+      maxSteps: MAX_STEPS,
+      repeatChunk: saved?.model.steps ?? first.steps,
+      axesOpen: false,
+      axes: { auto: true, xMin: null, xMax: null, yMin: null, yMax: null, ...(saved?.view.axes ?? {}) },
       logoUrl,
       version: pkg.version,
       // the standalone builds (desktop/mobile app, offline file) have no landing page
@@ -362,7 +385,10 @@ export default {
       return EXAMPLES.find((e) => e.id === this.model.id) ?? null
     },
     autosaveState() {
-      return [this.model, this.plotX, this.plotY, this.resultTab]
+      return [this.model, this.plotX, this.plotY, this.resultTab, this.axes]
+    },
+    continueBy() {
+      return Math.max(1, Math.min(this.repeatChunk, MAX_STEPS - this.model.steps))
     },
     otherLocale() {
       const code = i18n.locale === 'de' ? 'en' : 'de'
@@ -443,6 +469,8 @@ export default {
     },
     loadExample(ex) {
       this.restored = false
+      this.repeatChunk = ex.steps
+      this.axes = { auto: true, xMin: null, xMax: null, yMin: null, yMax: null }
       this.model = modelFromExample(ex)
       this.modelTab = ex.mode === 'sentences' ? 'sentences' : 'program'
       this.plotX = ex.plot.x
@@ -459,6 +487,7 @@ export default {
         caseSensitive,
       }
       this.modelTab = 'program'
+      this.repeatChunk = sim.steps
       const vars = [...analyse(sim.source, { caseSensitive }).roles]
       this.plotX = vars.find(([, r]) => r === 'time')?.[0] ?? vars[0]?.[0]
       this.plotY = vars.filter(([, r]) => r === 'state').map(([n]) => n).slice(0, 4)
@@ -466,7 +495,7 @@ export default {
       this.announcement = this.$t('app.modelOpened', { title: this.texts.title })
     },
     currentProject() {
-      return toProject({ ...this.model, title: this.texts.title }, { plotX: this.plotX, plotY: this.plotY, resultTab: this.resultTab })
+      return toProject({ ...this.model, title: this.texts.title }, { plotX: this.plotX, plotY: this.plotY, resultTab: this.resultTab, axes: this.axes })
     },
     newModel() {
       this.model = modelFromProject({ title: '', origin: 'sentences', sentences: [{ subject: '', predicate: 'increase', object: '' }], source: '', start: {}, steps: 50, simplified: true, timeName: 'Zeit', dtName: 'DeltaT' })
@@ -479,12 +508,7 @@ export default {
       this.announcement = this.$t('app.newModel')
     },
     saveProject() {
-      const blob = new Blob([projectToText(this.currentProject())], { type: 'application/json' })
-      const link = document.createElement('a')
-      link.href = URL.createObjectURL(blob)
-      link.download = `${this.texts.title.replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '') || 'modell'}${PROJECT_EXTENSION}`
-      link.click()
-      setTimeout(() => URL.revokeObjectURL(link.href), 1000)
+      this.download(new Blob([projectToText(this.currentProject())], { type: 'application/json' }), `${this.fileBase()}${PROJECT_EXTENSION}`)
       this.announcement = this.$t('app.saved')
     },
     async openFile(ev) {
@@ -518,6 +542,43 @@ export default {
         this.announcement = this.$t('app.openFailed', { message })
       }
     },
+    setAxis(key, raw) {
+      this.axes[key] = raw.trim() === '' ? null : parseNumber(raw)
+    },
+    // the legacy "Weiterrechnen": the run is deterministic, so continuing equals more steps
+    continueRun() {
+      this.model.steps = Math.min(MAX_STEPS, this.model.steps + this.continueBy)
+      this.announcement = this.$t('app.continued', { n: this.model.steps })
+    },
+    fileBase() {
+      return this.texts.title.replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '') || 'modellwerk'
+    },
+    download(blob, name) {
+      const link = document.createElement('a')
+      link.href = URL.createObjectURL(blob)
+      link.download = name
+      link.click()
+      setTimeout(() => URL.revokeObjectURL(link.href), 1000)
+    },
+    downloadImage(kind) {
+      const svg = this.$refs.chart?.toSvgString()
+      if (!svg) return
+      const blob = new Blob([svg], { type: 'image/svg+xml' })
+      if (kind === 'svg') { this.download(blob, `${this.fileBase()}.svg`); return }
+      const img = new Image()
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        canvas.width = img.width * 2
+        canvas.height = img.height * 2
+        const ctx = canvas.getContext('2d')
+        ctx.scale(2, 2)
+        ctx.drawImage(img, 0, 0)
+        URL.revokeObjectURL(img.src)
+        canvas.toBlob((png) => this.download(png, `${this.fileBase()}.png`), 'image/png')
+      }
+      img.src = URL.createObjectURL(blob)
+      this.announcement = this.$t('app.imageSaved')
+    },
     exportData() {
       const columns = [this.plotX, ...this.plotY.filter((y) => y !== this.plotX)]
       const display = this.run.result.display
@@ -525,12 +586,7 @@ export default {
     },
     downloadCsv() {
       const { header, rows } = this.exportData()
-      const blob = new Blob([toCsv(header, rows, i18n.locale)], { type: 'text/csv;charset=utf-8' })
-      const link = document.createElement('a')
-      link.href = URL.createObjectURL(blob)
-      link.download = `${this.texts.title.replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '') || 'modellwerk'}.csv`
-      link.click()
-      setTimeout(() => URL.revokeObjectURL(link.href), 1000)
+      this.download(new Blob([toCsv(header, rows, i18n.locale)], { type: 'text/csv;charset=utf-8' }), `${this.fileBase()}.csv`)
       this.announcement = this.$t('app.csvSaved')
     },
     async copyTable() {

@@ -1,8 +1,10 @@
 // Built-in example models.
 // OWN: written from scratch; titles and descriptions live in src/i18n under examples.<id>.
+// OWN_COLLECTION: our own collection (src/examples/own.json) with built-in texts.
 // SOURCED: researched from openly licensed or factual sources, see src/examples/SOURCES.md;
 //          they carry their own texts and source list.
 // Program text and variable names are learner-facing content and stay German.
+import OWN_COLLECTION from './examples/own.json' with { type: 'json' }
 import SOURCED from './examples/sourced.json' with { type: 'json' }
 
 const OWN = [
@@ -18,21 +20,6 @@ const OWN = [
     steps: 70,
     plot: { x: 'ZEIT', y: ['HOEHE', 'WACHSTUM'] },
   },
-  {
-    id: 'capacitor-discharge',
-    mode: 'program',
-    source: `// Entladung eines Kondensators über einen Widerstand
-U := Q/C
-I := U/R
-DeltaQ := I*DeltaT
-Q := Q - DeltaQ
-t := t + DeltaT
-// exakte Lösung zum Vergleich
-Qexakt := Q0*exp(-t/(R*C))`,
-    start: { Q: 0.00423, QEXAKT: 0.00423, Q0: 0.00423, C: 0.00047, R: 2200, DELTAT: 0.05, T: 0 },
-    steps: 100,
-    plot: { x: 'T', y: ['Q', 'QEXAKT'] },
-  },
 ]
 
-export const EXAMPLES = [...OWN, ...SOURCED]
+export const EXAMPLES = [...OWN, ...OWN_COLLECTION, ...SOURCED]

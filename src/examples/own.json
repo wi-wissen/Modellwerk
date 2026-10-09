@@ -1,0 +1,856 @@
+[
+  {
+    "id": "camera-flash",
+    "texts": {
+      "title": {
+        "de": "Kamerablitz laden",
+        "en": "Charging a camera flash"
+      },
+      "topic": {
+        "de": "Kondensator, Aufladen über einen Widerstand",
+        "en": "Capacitor charging through a resistor"
+      },
+      "description": {
+        "de": "Ein Blitzkondensator wird über einen Widerstand auf 300 V geladen. Der Ladestrom wird immer kleiner, die Spannung nähert sich der Quellspannung.",
+        "en": "A flash capacitor is charged to 300 V through a resistor. The charging current gets smaller and smaller, and the voltage approaches the source voltage."
+      }
+    },
+    "subject": {
+      "de": "Physik",
+      "en": "Physics"
+    },
+    "level": {
+      "de": "Klasse 10–13",
+      "en": "Grades 10–13"
+    },
+    "mode": "program",
+    "source": "// Blitzkondensator wird ueber einen Widerstand geladen\n// Einheiten: V, A, C, F, Ohm, J, s\nStrom := (Quellspannung - Spannung) / Widerstand\nLadung := Ladung + Strom * dt\nSpannung := Ladung / Kapazitaet\nEnergie := 0,5 * Kapazitaet * sqr(Spannung)\nZeit := Zeit + dt",
+    "simplified": true,
+    "start": {
+      "QUELLSPANNUNG": 300,
+      "KAPAZITAET": 0.00015,
+      "WIDERSTAND": 10000,
+      "LADUNG": 0,
+      "SPANNUNG": 0,
+      "STROM": 0,
+      "ENERGIE": 0,
+      "ZEIT": 0,
+      "DT": 0.01
+    },
+    "steps": 800,
+    "plot": {
+      "x": "ZEIT",
+      "y": [
+        "SPANNUNG"
+      ]
+    },
+    "checks": [
+      {
+        "step": 150,
+        "variable": "SPANNUNG",
+        "value": 190,
+        "note": {
+          "de": "nach 1,5 s = R·C: ca. 63 % von 300 V",
+          "en": "after 1.5 s = R·C: about 63 % of 300 V"
+        }
+      },
+      {
+        "step": 800,
+        "variable": "SPANNUNG",
+        "value": 298.6,
+        "note": {
+          "de": "nach 8 s fast voll geladen",
+          "en": "almost fully charged after 8 s"
+        }
+      },
+      {
+        "step": 800,
+        "variable": "ENERGIE",
+        "value": 6.686,
+        "note": {
+          "de": "gespeicherte Energie, Grenzwert 6,75 J",
+          "en": "stored energy, limit 6.75 J"
+        }
+      }
+    ],
+    "sources": [],
+    "notes": {
+      "de": "Vereinfachung: Die Ladeschaltung der Kamera wird als ideale 300-V-Quelle mit Vorwiderstand betrachtet. Zeitkonstante R·C = 1,5 s; Euler mit dt = 0,01 s weicht weniger als 0,5 % von der exakten Lösung ab.",
+      "en": "Simplification: the camera's charging circuit is treated as an ideal 300 V source with a series resistor. Time constant R·C = 1.5 s; Euler with dt = 0.01 s differs from the exact solution by less than 0.5 %."
+    }
+  },
+  {
+    "id": "caffeine",
+    "texts": {
+      "title": {
+        "de": "Koffein im Körper",
+        "en": "Caffeine in the body"
+      },
+      "topic": {
+        "de": "Aufnahme und Abbau, Halbwertszeit, zeitgesteuerte Dosis",
+        "en": "Uptake and breakdown, half-life, timed doses"
+      },
+      "description": {
+        "de": "Zwei Tassen Kaffee um 7 und 13 Uhr: Das Koffein geht aus dem Magen ins Blut und wird mit einer Halbwertszeit von etwa 5 Stunden abgebaut. Wie viel ist um 22 Uhr noch im Körper?",
+        "en": "Two cups of coffee at 7 am and 1 pm: the caffeine passes from the stomach into the blood and is broken down with a half-life of about 5 hours. How much is still in the body at 10 pm?"
+      }
+    },
+    "subject": {
+      "de": "Biologie / Mathematik",
+      "en": "Biology / Mathematics"
+    },
+    "level": {
+      "de": "Klasse 9–11",
+      "en": "Grades 9–11"
+    },
+    "mode": "program",
+    "source": "// Koffein: Magen -> Koerper, Abbau mit Halbwertszeit (Zeit in h, Mengen in mg)\n// Ganzzahliger Schrittzaehler statt Gleitkomma-Vergleich mit der Uhrzeit\nSchritt := Schritt + 1\nIF Schritt = SchrittMorgens THEN Magen := Magen + Dosis\nIF Schritt = SchrittMittags THEN Magen := Magen + Dosis\nAbbaurate := ln(2) / Halbwertszeit\nAufnahme := Aufnahmerate * Magen\nAbbau := Abbaurate * Koerper\nMagen := Magen - Aufnahme * dt\nKoerper := Koerper + (Aufnahme - Abbau) * dt\nZeit := Startzeit + Schritt * dt",
+    "simplified": true,
+    "start": {
+      "SCHRITT": 0,
+      "STARTZEIT": 6,
+      "DT": 0.1,
+      "ZEIT": 6,
+      "SCHRITTMORGENS": 10,
+      "SCHRITTMITTAGS": 70,
+      "DOSIS": 90,
+      "AUFNAHMERATE": 2,
+      "HALBWERTSZEIT": 5,
+      "ABBAURATE": 0,
+      "MAGEN": 0,
+      "KOERPER": 0,
+      "AUFNAHME": 0,
+      "ABBAU": 0
+    },
+    "steps": 180,
+    "plot": {
+      "x": "ZEIT",
+      "y": [
+        "MAGEN",
+        "KOERPER"
+      ]
+    },
+    "checks": [
+      {
+        "step": 81,
+        "variable": "KOERPER",
+        "value": 110.5,
+        "note": {
+          "de": "Höchstwert gegen 14:06 Uhr",
+          "en": "maximum at about 2:06 pm"
+        }
+      },
+      {
+        "step": 160,
+        "variable": "KOERPER",
+        "value": 38.9,
+        "note": {
+          "de": "um 22 Uhr",
+          "en": "at 10 pm"
+        }
+      },
+      {
+        "step": 180,
+        "variable": "KOERPER",
+        "value": 29.42,
+        "note": {
+          "de": "um Mitternacht",
+          "en": "at midnight"
+        }
+      }
+    ],
+    "sources": [
+      {
+        "title": "Coffein",
+        "url": "https://de.wikipedia.org/wiki/Coffein",
+        "publisher": "Wikipedia (deutschsprachig)",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "usedFor": "Halbwertszeit (ca. 3–5 h, bis ca. 5 h beim Erwachsenen) und Koffeingehalt einer Tasse (ca. 40–120 mg)",
+        "accessed": "2026-10-09"
+      }
+    ],
+    "notes": {
+      "de": "Zwei-Kompartiment-Modell (Magen, Körper) mit Aufnahmerate 2 /h und Halbwertszeit 5 h. Dosis 90 mg je Tasse (typischer Wert im Bereich 40–120 mg). Die Dosis wird über einen ganzzahligen Schrittzähler ausgelöst, weil ein Vergleich wie „Zeit = 7“ bei Gleitkommazahlen nie exakt zutreffen muss. Zeit ist die Uhrzeit in Stunden, Start 6:00 Uhr.",
+      "en": "Two-compartment model (stomach, body) with uptake rate 2 /h and half-life 5 h. Dose 90 mg per cup (typical value within 40–120 mg). The dose is triggered by an integer step counter, because a comparison such as \"Zeit = 7\" with floating-point numbers is not guaranteed to be exactly true. Zeit is the clock time in hours, starting at 6:00."
+    }
+  },
+  {
+    "id": "bungee-jump",
+    "texts": {
+      "title": {
+        "de": "Bungee-Sprung",
+        "en": "Bungee jump"
+      },
+      "topic": {
+        "de": "Freier Fall, Federkraft ab Seillänge, Luftreibung",
+        "en": "Free fall, spring force beyond the rope length, air resistance"
+      },
+      "description": {
+        "de": "Eine Person springt mit einem 30 m langen Gummiseil. Erst fällt sie fast frei, dann bremst das gespannte Seil. Wie tief geht es hinunter?",
+        "en": "A person jumps with a 30 m elastic rope. First they fall almost freely, then the stretched rope brakes them. How far down do they go?"
+      }
+    },
+    "subject": {
+      "de": "Physik",
+      "en": "Physics"
+    },
+    "level": {
+      "de": "Klasse 10–13",
+      "en": "Grades 10–13"
+    },
+    "mode": "program",
+    "source": "// Bungee-Sprung: Strecke und Geschwindigkeit nach unten positiv\n// Das Seil zieht erst, wenn es gespannt ist\nSeilkraft := 0\nIF Strecke > Seillaenge THEN Seilkraft := Federkonstante * (Strecke - Seillaenge)\nLuftkraft := 0,5 * cw * Flaeche * Luftdichte * Geschwindigkeit * abs(Geschwindigkeit)\nBeschleunigung := Ortsfaktor - (Seilkraft + Luftkraft) / Masse\nGeschwindigkeit := Geschwindigkeit + Beschleunigung * dt\nStrecke := Strecke + Geschwindigkeit * dt\nZeit := Zeit + dt",
+    "simplified": true,
+    "start": {
+      "MASSE": 70,
+      "ORTSFAKTOR": 9.81,
+      "SEILLAENGE": 30,
+      "FEDERKONSTANTE": 150,
+      "CW": 1,
+      "FLAECHE": 0.5,
+      "LUFTDICHTE": 1.2,
+      "SEILKRAFT": 0,
+      "LUFTKRAFT": 0,
+      "BESCHLEUNIGUNG": 0,
+      "GESCHWINDIGKEIT": 0,
+      "STRECKE": 0,
+      "ZEIT": 0,
+      "DT": 0.02
+    },
+    "steps": 1500,
+    "plot": {
+      "x": "ZEIT",
+      "y": [
+        "STRECKE",
+        "GESCHWINDIGKEIT"
+      ]
+    },
+    "checks": [
+      {
+        "step": 126,
+        "variable": "GESCHWINDIGKEIT",
+        "value": 22.75,
+        "note": {
+          "de": "Seil wird gerade gespannt (t = 2,52 s)",
+          "en": "rope just becomes tight (t = 2.52 s)"
+        }
+      },
+      {
+        "step": 189,
+        "variable": "STRECKE",
+        "value": 49.81,
+        "note": {
+          "de": "tiefster Punkt (t = 3,78 s)",
+          "en": "lowest point (t = 3.78 s)"
+        }
+      }
+    ],
+    "sources": [],
+    "notes": {
+      "de": "Strecke und Geschwindigkeit nach unten positiv. Das Seil wird als lineare Feder betrachtet, die nur zieht, wenn sie gespannt ist. Luftkraft quadratisch in v. Semi-implizites Euler-Verfahren (erst v, dann s) mit dt = 0,02 s.",
+      "en": "Distance and velocity are positive downwards. The rope is treated as a linear spring that only pulls when it is stretched. Air force is quadratic in v. Semi-implicit Euler (first v, then s) with dt = 0.02 s."
+    }
+  },
+  {
+    "id": "water-rocket",
+    "texts": {
+      "title": {
+        "de": "Wasserrakete",
+        "en": "Water rocket"
+      },
+      "topic": {
+        "de": "Rückstoß, veränderliche Masse, Flug mit Luftreibung",
+        "en": "Recoil, changing mass, flight with air resistance"
+      },
+      "description": {
+        "de": "Eine PET-Flaschen-Rakete stößt 0,6 kg Wasser aus und steigt danach ballistisch weiter. Das Modell zeigt Höhe und Geschwindigkeit bis zur Landung.",
+        "en": "A PET bottle rocket pushes out 0.6 kg of water and then keeps climbing ballistically. The model shows height and velocity until landing."
+      }
+    },
+    "subject": {
+      "de": "Physik",
+      "en": "Physics"
+    },
+    "level": {
+      "de": "Klasse 10–13",
+      "en": "Grades 10–13"
+    },
+    "mode": "program",
+    "source": "// Wasserrakete: Schub, solange Wasser ausstroemt, danach Flug mit Luftreibung\n// Hoehe und Geschwindigkeit nach oben positiv\nStrom := 0\nIF Wasser > 0,0001 THEN Strom := Massenstrom\nSchub := Strom * Ausstroemgeschwindigkeit\nMasse := Leermasse + Wasser\nLuftkraft := Luftfaktor * Geschwindigkeit * abs(Geschwindigkeit)\nBeschleunigung := (Schub - Luftkraft) / Masse - Ortsfaktor\nGeschwindigkeit := Geschwindigkeit + Beschleunigung * dt\nHoehe := Hoehe + Geschwindigkeit * dt\nWasser := Wasser - Strom * dt\nIF Hoehe < 0 THEN Geschwindigkeit := 0\nIF Hoehe < 0 THEN Hoehe := 0\nZeit := Zeit + dt",
+    "simplified": true,
+    "start": {
+      "LEERMASSE": 0.15,
+      "WASSER": 0.6,
+      "MASSENSTROM": 3,
+      "AUSSTROEMGESCHWINDIGKEIT": 20,
+      "LUFTFAKTOR": 0.0024,
+      "ORTSFAKTOR": 9.81,
+      "STROM": 0,
+      "SCHUB": 0,
+      "MASSE": 0.75,
+      "LUFTKRAFT": 0,
+      "BESCHLEUNIGUNG": 0,
+      "GESCHWINDIGKEIT": 0,
+      "HOEHE": 0,
+      "ZEIT": 0,
+      "DT": 0.01
+    },
+    "steps": 700,
+    "plot": {
+      "x": "ZEIT",
+      "y": [
+        "HOEHE",
+        "GESCHWINDIGKEIT"
+      ]
+    },
+    "checks": [
+      {
+        "step": 20,
+        "variable": "GESCHWINDIGKEIT",
+        "value": 28.4,
+        "note": {
+          "de": "Brennschluss nach 0,2 s",
+          "en": "burnout after 0.2 s"
+        }
+      },
+      {
+        "step": 235,
+        "variable": "HOEHE",
+        "value": 28.28,
+        "note": {
+          "de": "Gipfelhöhe nach 2,35 s",
+          "en": "peak height after 2.35 s"
+        }
+      },
+      {
+        "step": 494,
+        "variable": "HOEHE",
+        "value": 0,
+        "note": {
+          "de": "gelandet nach etwa 4,9 s",
+          "en": "landed after about 4.9 s"
+        }
+      }
+    ],
+    "sources": [],
+    "notes": {
+      "de": "Stark vereinfacht: konstanter Massenstrom (3 kg/s) und konstante Ausströmgeschwindigkeit (20 m/s), also Schub 60 N für 0,2 s. In Wirklichkeit fällt der Druck und damit der Schub während des Ausstoßes. Luftfaktor 0,0024 kg/m entspricht etwa cw = 0,5, Durchmesser 10 cm, Luftdichte 1,2 kg/m³. Die Schwelle 0,0001 kg verhindert, dass Rundungsreste einen zusätzlichen Schubschritt auslösen.",
+      "en": "Strongly simplified: constant mass flow (3 kg/s) and constant exhaust speed (20 m/s), so thrust is 60 N for 0.2 s. In reality the pressure, and with it the thrust, drops during the push. Air factor 0.0024 kg/m corresponds roughly to cw = 0.5, diameter 10 cm, air density 1.2 kg/m³. The threshold 0.0001 kg stops rounding leftovers from causing an extra thrust step."
+    }
+  },
+  {
+    "id": "bathtub",
+    "texts": {
+      "title": {
+        "de": "Badewanne leeren",
+        "en": "Emptying a bathtub"
+      },
+      "topic": {
+        "de": "Ausfluss nach Torricelli, Wurzelgesetz",
+        "en": "Torricelli outflow, square-root law"
+      },
+      "description": {
+        "de": "Eine Badewanne mit 240 L läuft durch den Abfluss leer. Je niedriger das Wasser steht, desto langsamer fließt es ab. Ein Zulauf kann zugeschaltet werden.",
+        "en": "A bathtub with 240 L drains through the plughole. The lower the water level, the more slowly it flows out. An inflow can be switched on."
+      }
+    },
+    "subject": {
+      "de": "Physik",
+      "en": "Physics"
+    },
+    "level": {
+      "de": "Klasse 9–11",
+      "en": "Grades 9–11"
+    },
+    "mode": "program",
+    "source": "// Badewanne leert sich nach Torricelli (Einheiten: m, m^2, m^3/s, s)\n// Zulauf = 0: Wasserhahn zu\nAbfluss := Ausflusszahl * Lochflaeche * sqrt(2 * Ortsfaktor * Hoehe)\nHoehe := Hoehe + (Zulauf - Abfluss) / Grundflaeche * dt\nIF Hoehe < 0 THEN Hoehe := 0\nVolumen := Grundflaeche * Hoehe * 1000\nZeit := Zeit + dt",
+    "simplified": true,
+    "start": {
+      "GRUNDFLAECHE": 0.8,
+      "LOCHFLAECHE": 0.00126,
+      "AUSFLUSSZAHL": 0.6,
+      "ORTSFAKTOR": 9.81,
+      "ZULAUF": 0,
+      "ABFLUSS": 0,
+      "HOEHE": 0.3,
+      "VOLUMEN": 240,
+      "ZEIT": 0,
+      "DT": 1
+    },
+    "steps": 400,
+    "plot": {
+      "x": "ZEIT",
+      "y": [
+        "VOLUMEN"
+      ]
+    },
+    "checks": [
+      {
+        "step": 1,
+        "variable": "ABFLUSS",
+        "value": 0.001834,
+        "note": {
+          "de": "Anfangs-Abfluss in m³/s (ca. 1,8 L/s)",
+          "en": "initial outflow in m³/s (about 1.8 L/s)"
+        }
+      },
+      {
+        "step": 100,
+        "variable": "VOLUMEN",
+        "value": 91.36,
+        "note": {
+          "de": "nach 100 s",
+          "en": "after 100 s"
+        }
+      },
+      {
+        "step": 259,
+        "variable": "VOLUMEN",
+        "value": 0,
+        "note": {
+          "de": "Wanne leer nach 259 s",
+          "en": "tub empty after 259 s"
+        }
+      }
+    ],
+    "sources": [],
+    "notes": {
+      "de": "Torricelli: v = sqrt(2·g·h); Ausflusszahl 0,6 berücksichtigt die Einschnürung des Strahls. Abflussloch 4 cm Durchmesser (1,26 cm²), Grundfläche 0,8 m² als senkrechte Wand angenommen. Analytische Leerlaufzeit 262 s, Simulation 259 s. Die Zeile IF Hoehe < 0 verhindert die Wurzel aus einer negativen Zahl.",
+      "en": "Torricelli: v = sqrt(2·g·h); discharge coefficient 0.6 accounts for the narrowing of the jet. Plughole 4 cm diameter (1.26 cm²), base area 0.8 m² with vertical walls assumed. Analytical emptying time 262 s, simulation 259 s. The line IF Hoehe < 0 prevents the square root of a negative number."
+    }
+  },
+  {
+    "id": "classroom-co2",
+    "texts": {
+      "title": {
+        "de": "CO₂ im Klassenzimmer",
+        "en": "CO₂ in the classroom"
+      },
+      "topic": {
+        "de": "Quelle und Luftwechsel, periodisches Stoßlüften",
+        "en": "Source and air exchange, regular airing"
+      },
+      "description": {
+        "de": "28 Personen atmen in einem 200-m³-Raum CO₂ aus. Bei geschlossenem Fenster steigt die Konzentration schnell. Alle 20 Minuten wird 5 Minuten stoßgelüftet. Reicht das, um unter 1000 ppm zu bleiben?",
+        "en": "28 people breathe out CO₂ in a 200 m³ room. With the windows closed the concentration rises quickly. Every 20 minutes the room is aired for 5 minutes. Is that enough to stay below 1000 ppm?"
+      }
+    },
+    "subject": {
+      "de": "Chemie / Biologie",
+      "en": "Chemistry / Biology"
+    },
+    "level": {
+      "de": "Klasse 7–10",
+      "en": "Grades 7–10"
+    },
+    "mode": "program",
+    "source": "// CO2 im Klassenzimmer in ppm; Zeit in min, Luftwechsel in 1/h, Abgabe in L/h pro Person\n// Alle 20 min wird 5 min stossgelueftet (Phase = Rest beim Teilen durch Zyklus)\nSchritt := Schritt + 1\nPhase := (Schritt - 1) - Zyklus * int((Schritt - 1) / Zyklus)\nLuftwechsel := LuftwechselZu\nIF Phase >= Zyklus - Lueftdauer THEN Luftwechsel := LuftwechselOffen\nZufuhr := Personen * Abgabe / Raumvolumen * 1000 / 60\nKonzentration := Konzentration + (Zufuhr - Luftwechsel / 60 * (Konzentration - Aussen)) * dt\nZeit := Zeit + dt",
+    "simplified": true,
+    "start": {
+      "PERSONEN": 28,
+      "ABGABE": 15,
+      "RAUMVOLUMEN": 200,
+      "AUSSEN": 420,
+      "LUFTWECHSELZU": 0.2,
+      "LUFTWECHSELOFFEN": 15,
+      "ZYKLUS": 25,
+      "LUEFTDAUER": 5,
+      "SCHRITT": 0,
+      "PHASE": 0,
+      "LUFTWECHSEL": 0.2,
+      "ZUFUHR": 0,
+      "KONZENTRATION": 420,
+      "ZEIT": 0,
+      "DT": 1
+    },
+    "steps": 90,
+    "plot": {
+      "x": "ZEIT",
+      "y": [
+        "KONZENTRATION"
+      ]
+    },
+    "checks": [
+      {
+        "step": 20,
+        "variable": "KONZENTRATION",
+        "value": 1098,
+        "note": {
+          "de": "nach 20 min geschlossenem Fenster",
+          "en": "after 20 min with windows closed"
+        }
+      },
+      {
+        "step": 25,
+        "variable": "KONZENTRATION",
+        "value": 687.7,
+        "note": {
+          "de": "nach 5 min Stoßlüften",
+          "en": "after 5 min of airing"
+        }
+      },
+      {
+        "step": 70,
+        "variable": "KONZENTRATION",
+        "value": 1404,
+        "note": {
+          "de": "höchster Wert in 90 min",
+          "en": "highest value within 90 min"
+        }
+      }
+    ],
+    "sources": [
+      {
+        "title": "Gesundheitliche Bewertung von Kohlendioxid in der Innenraumluft (Bundesgesundheitsblatt 51, 2008, S. 1358–1369)",
+        "url": "https://www.umweltbundesamt.de/system/files/medien/pdfs/kohlendioxid_2008.pdf",
+        "publisher": "Umweltbundesamt, Ad-hoc-Arbeitsgruppe Innenraumrichtwerte",
+        "license": "Alle Rechte vorbehalten – übernommen werden nur Zahlenwerte (Fakten), kein Text",
+        "licenseUrl": "https://www.umweltbundesamt.de/impressum",
+        "usedFor": "Bewertungsstufen 1000 ppm / 2000 ppm; Rechenbeispiel Klassenraum 200 m³ mit 25 Personen",
+        "accessed": "2026-10-09"
+      },
+      {
+        "title": "Kohlenstoffdioxid in der Erdatmosphäre",
+        "url": "https://de.wikipedia.org/wiki/Kohlenstoffdioxid_in_der_Erdatmosph%C3%A4re",
+        "publisher": "Wikipedia (deutschsprachig)",
+        "license": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "usedFor": "CO₂-Gehalt der Außenluft (Jahresmittel 2024 ca. 424 ppm, gerundet 420 ppm)",
+        "accessed": "2026-10-09"
+      }
+    ],
+    "notes": {
+      "de": "Annahmen: CO₂-Abgabe 15 L/h pro Person (typischer Schätzwert für sitzende Jugendliche), Luftwechsel 0,2 /h bei geschlossenen Fenstern und 15 /h beim Stoßlüften (grobe Schätzungen), Außenluft 420 ppm. Raumvolumen 200 m³ wie im Rechenbeispiel des UBA-Papiers. Bewertung nach UBA (2008): unter 1000 ppm hygienisch unbedenklich, 1000–2000 ppm auffällig, über 2000 ppm inakzeptabel. Phase = (Schritt − 1) mod Zyklus wird mit int ganzzahlig berechnet, daher exakte Vergleiche.",
+      "en": "Assumptions: CO₂ output 15 L/h per person (typical estimate for seated teenagers), air exchange 0.2 /h with windows closed and 15 /h while airing (rough estimates), outdoor air 420 ppm. Room volume 200 m³ as in the worked example of the UBA paper. Rating according to UBA (2008): below 1000 ppm hygienically harmless, 1000–2000 ppm conspicuous, above 2000 ppm unacceptable. Phase = (step − 1) mod cycle is computed with int as a whole number, so comparisons are exact."
+    }
+  },
+  {
+    "id": "bouncing-ball",
+    "texts": {
+      "title": {
+        "de": "Springender Ball",
+        "en": "Bouncing ball"
+      },
+      "topic": {
+        "de": "Freier Fall, Stoß mit Energieverlust, Stoßzahl",
+        "en": "Free fall, impact with energy loss, coefficient of restitution"
+      },
+      "description": {
+        "de": "Ein Ball fällt aus 2 m Höhe und springt immer wieder vom Boden ab. Bei jedem Aufprall verliert er Geschwindigkeit, die Sprünge werden niedriger und kürzer.",
+        "en": "A ball falls from a height of 2 m and bounces off the floor again and again. At each impact it loses speed, so the bounces get lower and shorter."
+      }
+    },
+    "subject": {
+      "de": "Physik",
+      "en": "Physics"
+    },
+    "level": {
+      "de": "Klasse 9–11",
+      "en": "Grades 9–11"
+    },
+    "mode": "program",
+    "source": "// Springender Ball: Hoehe und Geschwindigkeit nach oben positiv\n// Beim Aufprall kehrt sich die Geschwindigkeit um und wird mit der Stosszahl verkleinert\nGeschwindigkeit := Geschwindigkeit - Ortsfaktor * dt\nHoehe := Hoehe + Geschwindigkeit * dt\nIF Hoehe < 0 THEN Geschwindigkeit := -Stosszahl * Geschwindigkeit\nIF Hoehe < 0 THEN Hoehe := 0\nZeit := Zeit + dt",
+    "simplified": true,
+    "start": {
+      "HOEHE": 2,
+      "GESCHWINDIGKEIT": 0,
+      "ORTSFAKTOR": 9.81,
+      "STOSSZAHL": 0.8,
+      "ZEIT": 0,
+      "DT": 0.002
+    },
+    "steps": 3000,
+    "plot": {
+      "x": "ZEIT",
+      "y": [
+        "HOEHE"
+      ]
+    },
+    "checks": [
+      {
+        "step": 319,
+        "variable": "HOEHE",
+        "value": 0,
+        "note": {
+          "de": "erster Aufprall nach 0,638 s",
+          "en": "first impact after 0.638 s"
+        }
+      },
+      {
+        "step": 574,
+        "variable": "HOEHE",
+        "value": 1.273,
+        "note": {
+          "de": "Gipfel des ersten Rücksprungs",
+          "en": "top of the first bounce"
+        }
+      },
+      {
+        "step": 3000,
+        "variable": "HOEHE",
+        "value": 0,
+        "note": {
+          "de": "nach 6 s liegt der Ball",
+          "en": "ball lies still after 6 s"
+        }
+      }
+    ],
+    "sources": [],
+    "notes": {
+      "de": "Stoßzahl e = 0,8: Rücksprunghöhe ≈ e² · Fallhöhe = 1,28 m (Simulation 1,27 m). Semi-implizites Euler mit dt = 0,002 s. Nach theoretisch 5,75 s ruht der Ball; numerisch bleibt am Ende ein winziges Zittern am Boden (unter 2 cm ab ca. 5 s).",
+      "en": "Coefficient of restitution e = 0.8: rebound height ≈ e² · drop height = 1.28 m (simulation 1.27 m). Semi-implicit Euler with dt = 0.002 s. In theory the ball is at rest after 5.75 s; numerically a tiny jitter remains on the floor at the end (below 2 cm from about 5 s on)."
+    }
+  },
+  {
+    "id": "pendulum-large-angle",
+    "texts": {
+      "title": {
+        "de": "Pendel mit großem Ausschlag",
+        "en": "Pendulum with a large swing"
+      },
+      "topic": {
+        "de": "Nichtlineare Schwingung, Kleinwinkel-Näherung im Vergleich",
+        "en": "Non-linear oscillation compared with the small-angle approximation"
+      },
+      "description": {
+        "de": "Ein 1 m langes Fadenpendel wird um 80° ausgelenkt. Im selben Modell schwingt ein zweites Pendel nach der Kleinwinkel-Näherung sin(x) ≈ x. Die beiden laufen schnell auseinander.",
+        "en": "A 1 m simple pendulum is pulled out by 80°. In the same model, a second pendulum swings according to the small-angle approximation sin(x) ≈ x. The two soon drift apart."
+      }
+    },
+    "subject": {
+      "de": "Physik",
+      "en": "Physics"
+    },
+    "level": {
+      "de": "Klasse 11–13",
+      "en": "Grades 11–13"
+    },
+    "mode": "program",
+    "source": "// Fadenpendel mit 80 Grad Ausschlag: genau (sin) und Kleinwinkel-Naeherung (sin x = x)\n// Winkel im Bogenmass, zur Anzeige in Grad umgerechnet\nWinkelbeschleunigung := -Ortsfaktor / Laenge * sin(Winkel)\nWinkelgeschwindigkeit := Winkelgeschwindigkeit + Winkelbeschleunigung * dt\nWinkel := Winkel + Winkelgeschwindigkeit * dt\nNaeherungsbeschleunigung := -Ortsfaktor / Laenge * Naeherung\nNaeherungsgeschwindigkeit := Naeherungsgeschwindigkeit + Naeherungsbeschleunigung * dt\nNaeherung := Naeherung + Naeherungsgeschwindigkeit * dt\nWinkelGrad := Winkel * 180 / Kreiszahl\nNaeherungGrad := Naeherung * 180 / Kreiszahl\nZeit := Zeit + dt",
+    "simplified": true,
+    "start": {
+      "LAENGE": 1,
+      "ORTSFAKTOR": 9.81,
+      "KREISZAHL": 3.14159265358979,
+      "WINKEL": 1.3962634,
+      "WINKELGESCHWINDIGKEIT": 0,
+      "WINKELBESCHLEUNIGUNG": 0,
+      "NAEHERUNG": 1.3962634,
+      "NAEHERUNGSGESCHWINDIGKEIT": 0,
+      "NAEHERUNGSBESCHLEUNIGUNG": 0,
+      "WINKELGRAD": 80,
+      "NAEHERUNGGRAD": 80,
+      "ZEIT": 0,
+      "DT": 0.01
+    },
+    "steps": 1000,
+    "plot": {
+      "x": "ZEIT",
+      "y": [
+        "WINKELGRAD",
+        "NAEHERUNGGRAD"
+      ]
+    },
+    "checks": [
+      {
+        "step": 200,
+        "variable": "NAEHERUNGGRAD",
+        "value": 80.01,
+        "note": {
+          "de": "Näherung nach 2,0 s: wieder am Umkehrpunkt",
+          "en": "approximation after 2.0 s: back at turning point"
+        }
+      },
+      {
+        "step": 200,
+        "variable": "WINKELGRAD",
+        "value": 59.11,
+        "note": {
+          "de": "genaues Pendel nach 2,0 s: noch unterwegs",
+          "en": "exact pendulum after 2.0 s: still on its way"
+        }
+      },
+      {
+        "step": 500,
+        "variable": "WINKELGRAD",
+        "value": 29.02,
+        "note": {
+          "de": "nach 5 s",
+          "en": "after 5 s"
+        }
+      }
+    ],
+    "sources": [],
+    "notes": {
+      "de": "Startwinkel 80° = 1,3962634 rad. Semi-implizites Euler (symplektisch), dt = 0,01 s: Amplitude bleibt stabil (max. 80,01°). Periodendauer Näherung 2,01 s (Theorie 2π·sqrt(l/g) = 2,006 s), exakt ca. 2,28 s (Theorie für 80°: ca. 1,13 · T₀ ≈ 2,28 s).",
+      "en": "Start angle 80° = 1.3962634 rad. Semi-implicit (symplectic) Euler, dt = 0.01 s: amplitude stays stable (max. 80.01°). Period of the approximation 2.01 s (theory 2π·sqrt(l/g) = 2.006 s), exact about 2.28 s (theory for 80°: about 1.13 · T₀ ≈ 2.28 s)."
+    }
+  },
+  {
+    "id": "ice-cube",
+    "texts": {
+      "title": {
+        "de": "Eiswürfel im Getränk",
+        "en": "Ice cube in a drink"
+      },
+      "topic": {
+        "de": "Wärmestrom, Schmelzwärme, Mischtemperatur",
+        "en": "Heat flow, latent heat of fusion, mixing temperature"
+      },
+      "description": {
+        "de": "30 g Eis schmelzen in 300 g Getränk von 20 °C. Der Wärmestrom ist proportional zur Temperaturdifferenz. Das Getränk kühlt ab, bis das Eis weg ist.",
+        "en": "30 g of ice melt in 300 g of a drink at 20 °C. The heat flow is proportional to the temperature difference. The drink cools down until the ice is gone."
+      }
+    },
+    "subject": {
+      "de": "Physik",
+      "en": "Physics"
+    },
+    "level": {
+      "de": "Klasse 8–10",
+      "en": "Grades 8–10"
+    },
+    "mode": "program",
+    "source": "// Eiswuerfel (0 Grad C) schmilzt im Getraenk; kein Waermeaustausch mit der Umgebung\n// Einheiten: kg, Grad C, W, J/kg, J/(kg K), s\nWaermestrom := Uebergangszahl * (Temperatur - Schmelztemperatur)\nSchmelzmenge := Waermestrom * dt / Schmelzwaerme\nIF Schmelzmenge > Eis THEN Schmelzmenge := Eis\nEis := Eis - Schmelzmenge\nTemperatur := Temperatur - Schmelzmenge * Schmelzwaerme / (Getraenk * Waermekapazitaet)\nTemperatur := (Getraenk * Temperatur + Schmelzmenge * Schmelztemperatur) / (Getraenk + Schmelzmenge)\nGetraenk := Getraenk + Schmelzmenge\nZeit := Zeit + dt",
+    "simplified": true,
+    "start": {
+      "GETRAENK": 0.3,
+      "TEMPERATUR": 20,
+      "EIS": 0.03,
+      "SCHMELZTEMPERATUR": 0,
+      "UEBERGANGSZAHL": 2,
+      "SCHMELZWAERME": 334000,
+      "WAERMEKAPAZITAET": 4190,
+      "WAERMESTROM": 0,
+      "SCHMELZMENGE": 0,
+      "ZEIT": 0,
+      "DT": 1
+    },
+    "steps": 600,
+    "plot": {
+      "x": "ZEIT",
+      "y": [
+        "TEMPERATUR"
+      ]
+    },
+    "checks": [
+      {
+        "step": 120,
+        "variable": "TEMPERATUR",
+        "value": 15.91,
+        "note": {
+          "de": "nach 2 min",
+          "en": "after 2 min"
+        }
+      },
+      {
+        "step": 337,
+        "variable": "EIS",
+        "value": 0,
+        "note": {
+          "de": "Eis ganz geschmolzen nach 337 s",
+          "en": "ice completely melted after 337 s"
+        }
+      },
+      {
+        "step": 337,
+        "variable": "TEMPERATUR",
+        "value": 10.94,
+        "note": {
+          "de": "Endtemperatur",
+          "en": "final temperature"
+        }
+      }
+    ],
+    "sources": [],
+    "notes": {
+      "de": "Spezifische Wärmekapazität von Wasser 4190 J/(kg·K), Schmelzwärme von Eis 334 kJ/kg (Lehrbuchwerte). Eis bereits bei 0 °C. Übergangszahl 2 W/K konstant (die schrumpfende Oberfläche wird vernachlässigt). Kein Wärmeaustausch mit der Umgebung. Energiebilanz exakt erfüllt; Endtemperatur 10,9 °C stimmt mit der Mischungsrechnung überein.",
+      "en": "Specific heat capacity of water 4190 J/(kg·K), latent heat of fusion of ice 334 kJ/kg (textbook values). Ice already at 0 °C. Transfer coefficient 2 W/K constant (the shrinking surface is neglected). No heat exchange with the surroundings. Energy balance holds exactly; final temperature 10.9 °C agrees with the mixing calculation."
+    }
+  },
+  {
+    "id": "thermostat",
+    "texts": {
+      "title": {
+        "de": "Heizung mit Thermostat",
+        "en": "Heating with a thermostat"
+      },
+      "topic": {
+        "de": "Zweipunktregler mit Hysterese, Wärmeverlust",
+        "en": "On-off controller with hysteresis, heat loss"
+      },
+      "description": {
+        "de": "Ein Raum verliert Wärme nach außen. Ein Thermostat schaltet die Heizung unter 20 °C ein und über 21 °C aus. Die Temperatur pendelt zwischen den beiden Schaltwerten.",
+        "en": "A room loses heat to the outside. A thermostat switches the heating on below 20 °C and off above 21 °C. The temperature swings between the two switching points."
+      }
+    },
+    "subject": {
+      "de": "Physik / Technik",
+      "en": "Physics / Technology"
+    },
+    "level": {
+      "de": "Klasse 8–10",
+      "en": "Grades 8–10"
+    },
+    "mode": "program",
+    "source": "// Zweipunktregler mit Hysterese: an unter 20 Grad C, aus ueber 21 Grad C\n// dt in s, Zeit in min, Energie in kWh\nIF Temperatur < Einschaltwert THEN Heizung := 1\nIF Temperatur > Ausschaltwert THEN Heizung := 0\nVerlust := Verlustfaktor * (Temperatur - Aussentemperatur)\nTemperatur := Temperatur + (Heizung * Heizleistung - Verlust) * dt / Waermekapazitaet\nEnergie := Energie + Heizung * Heizleistung * dt / 3600000\nZeit := Zeit + dt / 60",
+    "simplified": true,
+    "start": {
+      "TEMPERATUR": 15,
+      "AUSSENTEMPERATUR": 0,
+      "EINSCHALTWERT": 20,
+      "AUSSCHALTWERT": 21,
+      "HEIZUNG": 0,
+      "HEIZLEISTUNG": 3000,
+      "VERLUSTFAKTOR": 100,
+      "WAERMEKAPAZITAET": 1000000,
+      "VERLUST": 0,
+      "ENERGIE": 0,
+      "ZEIT": 0,
+      "DT": 10
+    },
+    "steps": 1080,
+    "plot": {
+      "x": "ZEIT",
+      "y": [
+        "TEMPERATUR",
+        "HEIZUNG"
+      ]
+    },
+    "checks": [
+      {
+        "step": 406,
+        "variable": "TEMPERATUR",
+        "value": 20.01,
+        "note": {
+          "de": "20 °C erstmals erreicht (67,7 min)",
+          "en": "20 °C reached for the first time (67.7 min)"
+        }
+      },
+      {
+        "step": 512,
+        "variable": "HEIZUNG",
+        "value": 0,
+        "note": {
+          "de": "Heizung erstmals aus (85,3 min)",
+          "en": "heating switched off for the first time (85.3 min)"
+        }
+      },
+      {
+        "step": 1080,
+        "variable": "ENERGIE",
+        "value": 7.342,
+        "note": {
+          "de": "Heizenergie nach 3 h in kWh",
+          "en": "heating energy after 3 h in kWh"
+        }
+      }
+    ],
+    "sources": [],
+    "notes": {
+      "de": "Heizleistung 3 kW, Verlustfaktor 100 W/K, Außentemperatur 0 °C, wirksame Wärmekapazität 1 MJ/K (Luft plus Möbel und Wände, grobe Schätzung). dt = 10 s, Zeit in Minuten. Schaltzyklus ca. 26 min (17,7 min an, 8,2 min aus). Energie in kWh.",
+      "en": "Heating power 3 kW, loss factor 100 W/K, outdoor temperature 0 °C, effective heat capacity 1 MJ/K (air plus furniture and walls, rough estimate). dt = 10 s, time in minutes. Switching cycle about 26 min (17.7 min on, 8.2 min off). Energy in kWh."
+    }
+  }
+]

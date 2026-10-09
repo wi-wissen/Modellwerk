@@ -60,6 +60,13 @@ export default {
     projectInvalid: 'Das ist keine Modellwerk-Datei.',
     projectTooNew: 'Die Datei wurde mit einer neueren Version von Modellwerk gespeichert.',
     modelTitle: 'Name des Modells',
+    axesSettings: 'Achsen',
+    autoScale: 'Automatisch skalieren',
+    auto: 'auto',
+    xMin: 'x von', xMax: 'x bis', yMin: 'y von', yMax: 'y bis',
+    continue: 'Weiterrechnen (+{n})',
+    continued: 'Jetzt {n} Schritte berechnet.',
+    imageSaved: 'Bild gespeichert.',
     close: 'Schließen',
     home: 'Zur Startseite',
     diagramDialog: 'Wirkungsdiagramm',
@@ -241,6 +248,5 @@ export default {
   },
   examples: {
     sunflower: { title: 'Eine Sonnenblume wächst', topic: 'Logistisches Wachstum', description: 'Eine junge Sonnenblume ist 8 cm hoch und wird höchstens 2,50 m groß. Im Sommer wächst sie fast 13 cm am Tag – kurz vor dem Ziel immer langsamer.' },
-    'capacitor-discharge': { title: 'Kondensator entlädt sich', topic: 'Elektrizitätslehre', description: 'Ein Kondensator (C = 470 µF) entlädt sich über einen Widerstand (R = 2,2 kΩ). Die Simulation wird mit der exakten Lösung Q(t) = Q₀·e^(−t/RC) verglichen.' },
   },
 }

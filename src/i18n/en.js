@@ -60,6 +60,13 @@ export default {
     projectInvalid: 'This is not a Modellwerk file.',
     projectTooNew: 'The file was saved with a newer version of Modellwerk.',
     modelTitle: 'Model name',
+    axesSettings: 'Axes',
+    autoScale: 'Scale automatically',
+    auto: 'auto',
+    xMin: 'x from', xMax: 'x to', yMin: 'y from', yMax: 'y to',
+    continue: 'Continue (+{n})',
+    continued: 'Now {n} steps calculated.',
+    imageSaved: 'Image saved.',
     close: 'Close',
     home: 'To the home page',
     diagramDialog: 'Influence diagram',
@@ -241,6 +248,5 @@ export default {
   },
   examples: {
     sunflower: { title: 'A sunflower grows', topic: 'Logistic growth', description: 'A young sunflower is 8 cm tall and grows to at most 2.50 m. In summer it gains almost 13 cm a day – and slows down as it nears its final height.' },
-    'capacitor-discharge': { title: 'Discharging a capacitor', topic: 'Electricity', description: 'A capacitor (C = 470 µF) discharges through a resistor (R = 2.2 kΩ). The simulation is compared with the exact solution Q(t) = Q₀·e^(−t/RC).' },
   },
 }

@@ -157,22 +157,77 @@
     ]
   },
   {
-    "id": "capacitor-discharge",
+    "id": "camera-flash",
     "teaser": {
-      "de": "Wie schnell verschwindet die Ladung aus einem Kondensator – und wie gut trifft ein einfaches Rechenverfahren die exakte Formel?",
-      "en": "How quickly does the charge drain out of a capacitor – and how close does a simple step-by-step method get to the exact formula?"
+      "de": "Warum braucht ein Blitz ein paar Sekunden, bis er wieder bereit ist?",
+      "en": "Why does a flash need a few seconds before it is ready again?"
     },
     "phenomenon": {
-      "de": "Ein Kondensator speichert elektrische Ladung, ähnlich wie ein kleiner Akku, aber nur für kurze Zeit. Verbindet man ihn mit einem Widerstand, fließt ein Strom und der Kondensator entlädt sich. Das passiert zum Beispiel beim Blitzlicht einer Kamera oder wenn eine LED nach dem Ausschalten noch kurz nachglimmt.",
-      "en": "A capacitor stores electric charge, a bit like a small battery, but only for a short time. If you connect it to a resistor, a current flows and the capacitor discharges. This happens, for example, in a camera flash or when an LED keeps glowing faintly for a moment after being switched off."
+      "de": "Nach einem Blitz zeigt die Kamera kurz „nicht bereit“. In dieser Zeit wird ein Kondensator geladen. Erst ist das schnell, dann wird es immer langsamer. Ganz voll wird er eigentlich nie.",
+      "en": "After a flash, the camera briefly shows \"not ready\". During this time a capacitor is being charged. At first this is fast, then it gets slower and slower. Strictly speaking, it never becomes completely full."
     },
     "idea": {
-      "de": "Die Spannung am Kondensator hängt davon ab, wie viel Ladung noch drauf ist (U = Q/C). Diese Spannung treibt einen Strom durch den Widerstand (I = U/R). In jedem kleinen Zeitschritt fließt die Ladung I · Δt ab. Weil mit weniger Ladung auch der Strom kleiner wird, geht die Entladung immer langsamer.",
-      "en": "The voltage across the capacitor depends on how much charge is left (U = Q/C). This voltage drives a current through the resistor (I = U/R). In every small time step the charge I · Δt flows away. Because less charge also means a smaller current, the discharge gets slower and slower."
+      "de": "Der Strom hängt davon ab, wie viel Spannung noch am Widerstand „übrig“ ist. In jedem kleinen Zeitschritt fließt etwas Ladung auf den Kondensator. Dadurch steigt seine Spannung, und der Strom im nächsten Schritt wird kleiner.",
+      "en": "The current depends on how much voltage is still \"left over\" across the resistor. In every small time step, some charge flows onto the capacitor. This raises its voltage, so the current in the next step is smaller."
     },
     "quantities": [
       {
-        "name": "U",
+        "name": "Quellspannung",
+        "meaning": {
+          "de": "Spannung der Ladeschaltung",
+          "en": "voltage of the charging circuit"
+        },
+        "unit": {
+          "de": "V",
+          "en": "V"
+        }
+      },
+      {
+        "name": "Kapazitaet",
+        "meaning": {
+          "de": "Kapazität des Kondensators",
+          "en": "capacitance of the capacitor"
+        },
+        "unit": {
+          "de": "F",
+          "en": "F"
+        }
+      },
+      {
+        "name": "Widerstand",
+        "meaning": {
+          "de": "Ladewiderstand",
+          "en": "charging resistor"
+        },
+        "unit": {
+          "de": "Ω",
+          "en": "Ω"
+        }
+      },
+      {
+        "name": "Strom",
+        "meaning": {
+          "de": "Ladestrom",
+          "en": "charging current"
+        },
+        "unit": {
+          "de": "A",
+          "en": "A"
+        }
+      },
+      {
+        "name": "Ladung",
+        "meaning": {
+          "de": "Ladung auf dem Kondensator",
+          "en": "charge on the capacitor"
+        },
+        "unit": {
+          "de": "C",
+          "en": "C"
+        }
+      },
+      {
+        "name": "Spannung",
         "meaning": {
           "de": "Spannung am Kondensator",
           "en": "voltage across the capacitor"
@@ -183,65 +238,21 @@
         }
       },
       {
-        "name": "Q",
+        "name": "Energie",
         "meaning": {
-          "de": "Ladung auf dem Kondensator (Simulation)",
-          "en": "charge on the capacitor (simulation)"
+          "de": "im Kondensator gespeicherte Energie",
+          "en": "energy stored in the capacitor"
         },
         "unit": {
-          "de": "C (Coulomb)",
-          "en": "C (coulombs)"
+          "de": "J",
+          "en": "J"
         }
       },
       {
-        "name": "C",
+        "name": "Zeit",
         "meaning": {
-          "de": "Kapazität des Kondensators (470 µF)",
-          "en": "capacitance of the capacitor (470 µF)"
-        },
-        "unit": {
-          "de": "F (Farad)",
-          "en": "F (farads)"
-        }
-      },
-      {
-        "name": "I",
-        "meaning": {
-          "de": "Entladestrom durch den Widerstand",
-          "en": "discharge current through the resistor"
-        },
-        "unit": {
-          "de": "A",
-          "en": "A"
-        }
-      },
-      {
-        "name": "R",
-        "meaning": {
-          "de": "elektrischer Widerstand (2,2 kΩ)",
-          "en": "electrical resistance (2.2 kΩ)"
-        },
-        "unit": {
-          "de": "Ω",
-          "en": "Ω"
-        }
-      },
-      {
-        "name": "DeltaQ",
-        "meaning": {
-          "de": "Ladung, die in einem Zeitschritt abfließt",
-          "en": "charge that flows away in one time step"
-        },
-        "unit": {
-          "de": "C",
-          "en": "C"
-        }
-      },
-      {
-        "name": "DeltaT",
-        "meaning": {
-          "de": "Länge eines Zeitschritts",
-          "en": "length of one time step"
+          "de": "Zeit seit Beginn des Ladens",
+          "en": "time since charging started"
         },
         "unit": {
           "de": "s",
@@ -249,122 +260,93 @@
         }
       },
       {
-        "name": "t",
+        "name": "dt",
         "meaning": {
-          "de": "vergangene Zeit",
-          "en": "elapsed time"
+          "de": "Zeitschritt",
+          "en": "time step"
         },
         "unit": {
           "de": "s",
           "en": "s"
-        }
-      },
-      {
-        "name": "Qexakt",
-        "meaning": {
-          "de": "Ladung nach der exakten Formel Q₀·e^(−t/RC), zum Vergleich",
-          "en": "charge from the exact formula Q₀·e^(−t/RC), for comparison"
-        },
-        "unit": {
-          "de": "C",
-          "en": "C"
-        }
-      },
-      {
-        "name": "Q0",
-        "meaning": {
-          "de": "Anfangsladung (4,23 mC, entspricht 9 V)",
-          "en": "initial charge (4.23 mC, equivalent to 9 V)"
-        },
-        "unit": {
-          "de": "C",
-          "en": "C"
         }
       }
     ],
     "lines": [
       {
-        "code": "U := Q/C",
+        "code": "Strom := (Quellspannung - Spannung) / Widerstand",
         "explanation": {
-          "de": "Aus der Ladung wird die Spannung berechnet: U = Q/C. Am Anfang sind das 0,00423 C / 0,00047 F = 9 V.",
-          "en": "The voltage is calculated from the charge: U = Q/C. At the start that is 0.00423 C / 0.00047 F = 9 V."
+          "de": "Der Strom ergibt sich aus der Spannung, die noch am Widerstand liegt (ohmsches Gesetz).",
+          "en": "The current follows from the voltage still across the resistor (Ohm's law)."
         }
       },
       {
-        "code": "I := U/R",
+        "code": "Ladung := Ladung + Strom * dt",
         "explanation": {
-          "de": "Ohmsches Gesetz: Die Spannung treibt den Strom I = U/R durch den Widerstand. Anfangs sind das etwa 4,1 mA.",
-          "en": "Ohm's law: the voltage drives the current I = U/R through the resistor. At the start that is about 4.1 mA."
+          "de": "In der Zeit dt fließt die Ladung Strom · dt auf den Kondensator.",
+          "en": "In the time dt, the charge current · dt flows onto the capacitor."
         }
       },
       {
-        "code": "DeltaQ := I*DeltaT",
+        "code": "Spannung := Ladung / Kapazitaet",
         "explanation": {
-          "de": "Strom bedeutet „Ladung pro Zeit“. In einem Zeitschritt fließt also die Ladung I · Δt ab.",
-          "en": "Current means charge per unit time. So in one time step the charge I · Δt flows away."
+          "de": "Aus Ladung und Kapazität folgt die neue Spannung: U = Q / C.",
+          "en": "The new voltage follows from charge and capacitance: U = Q / C."
         }
       },
       {
-        "code": "Q := Q - DeltaQ",
+        "code": "Energie := 0,5 * Kapazitaet * sqr(Spannung)",
         "explanation": {
-          "de": "Diese Ladung fehlt jetzt auf dem Kondensator.",
-          "en": "This charge is now missing from the capacitor."
+          "de": "Die gespeicherte Energie ist ½ · C · U².",
+          "en": "The stored energy is ½ · C · U²."
         }
       },
       {
-        "code": "t := t + DeltaT",
+        "code": "Zeit := Zeit + dt",
         "explanation": {
-          "de": "Die Zeit rückt um einen Zeitschritt (0,05 s) vor.",
-          "en": "Time moves on by one step (0.05 s)."
-        }
-      },
-      {
-        "code": "Qexakt := Q0*exp(-t/(R*C))",
-        "explanation": {
-          "de": "Zum Vergleich wird die exakte Lösung der Entladegleichung zur selben Zeit berechnet. R · C = 1,034 s ist die Zeitkonstante.",
-          "en": "For comparison, the exact solution of the discharge equation is calculated at the same time. R · C = 1.034 s is the time constant."
+          "de": "Die Uhr läuft um einen Zeitschritt weiter.",
+          "en": "The clock moves on by one time step."
         }
       }
     ],
     "observe": {
-      "de": "Beide Kurven fallen zuerst steil und dann immer flacher ab – eine Exponentialfunktion. Nach etwa 0,72 s ist die Hälfte der Ladung weg, nach einer Zeitkonstante (1,03 s) sind noch rund 37 % übrig. Achte auf den kleinen Abstand: Die Simulation liegt immer etwas unter der exakten Kurve, bei t = 1 s etwa 2 % und bei t = 5 s etwa 11 % (0,030 mC statt 0,034 mC).",
-      "en": "Both curves fall steeply at first and then more and more gently – an exponential function. After about 0.72 s half the charge is gone; after one time constant (1.03 s) about 37 % is left. Look at the small gap: the simulation always lies a little below the exact curve, by about 2 % at t = 1 s and about 11 % at t = 5 s (0.030 mC instead of 0.034 mC)."
+      "de": "Die Kurve steigt erst steil und wird dann flach. Nach 1,5 s (das ist R · C) liegen etwa 190 V an, also rund 63 % der 300 V. Nach etwa 4,5 s sind 95 % erreicht. Am Ende sind fast 6,7 J gespeichert.",
+      "en": "The curve rises steeply at first and then flattens out. After 1.5 s (that is R · C) the voltage is about 190 V, roughly 63 % of 300 V. After about 4.5 s, 95 % is reached. At the end almost 6.7 J are stored."
     },
     "tasks": [
       {
         "text": {
-          "de": "Verdopple den Widerstand R. Sag vorher, wie sich die Zeit bis zur halben Ladung ändert, und prüfe nach.",
-          "en": "Double the resistance R. Predict how the time until half the charge is gone changes, then check."
+          "de": "Halbiere den Widerstand. Wie lange dauert es jetzt bis 285 V?",
+          "en": "Halve the resistance. How long does it take now to reach 285 V?"
         },
         "hint": {
-          "de": "Die Zeitkonstante ist R · C. Wenn R doppelt so groß ist, fließt nur halb so viel Strom.",
-          "en": "The time constant is R · C. If R is twice as large, only half as much current flows."
+          "de": "Lies den Zeitpunkt in der Tabelle ab und vergleiche mit 4,5 s.",
+          "en": "Read the time from the table and compare it with 4.5 s."
         }
       },
       {
         "text": {
-          "de": "Halbiere DeltaT auf 0,025 s und verdopple die Zahl der Schritte. Wie groß ist jetzt der Unterschied zwischen Q und Qexakt bei t = 5 s?",
-          "en": "Halve DeltaT to 0.025 s and double the number of steps. How big is the difference between Q and Qexakt at t = 5 s now?"
+          "de": "Lass dir den Strom anzeigen. Wie groß ist er am Anfang?",
+          "en": "Display the current. How large is it at the start?"
         },
         "hint": {
-          "de": "Beim Euler-Verfahren halbiert sich der Fehler ungefähr, wenn du den Zeitschritt halbierst.",
-          "en": "With Euler's method the error roughly halves when you halve the time step."
+          "de": "Am Anfang ist der Kondensator leer, also liegen 300 V am Widerstand.",
+          "en": "At the start the capacitor is empty, so all 300 V are across the resistor."
         }
       },
       {
         "text": {
-          "de": "Wähle einen sehr großen Zeitschritt, z. B. DeltaT = 1,1 s. Was passiert mit Q? Erkläre, warum das Verfahren hier versagt.",
-          "en": "Choose a very large time step, e.g. DeltaT = 1.1 s. What happens to Q? Explain why the method fails here."
+          "de": "Ändere das Modell so, dass sich der Kondensator nach 8 s über eine Blitzröhre (sehr kleiner Widerstand) entlädt.",
+          "en": "Change the model so that the capacitor discharges through a flash tube (very small resistance) after 8 s."
         },
         "hint": {
-          "de": "Berechne DeltaQ im ersten Schritt von Hand. Ist es größer als die ganze Ladung? Der Zeitschritt sollte deutlich kleiner als R · C sein.",
-          "en": "Work out DeltaQ for the first step by hand. Is it larger than the whole charge? The time step should be much smaller than R · C."
+          "de": "Nutze einen Schrittzähler und IF, um ab Schritt 800 die Quellspannung auf 0 und den Widerstand auf 1 Ω zu setzen. Verkleinere dafür auch dt.",
+          "en": "Use a step counter and IF to set the source voltage to 0 and the resistance to 1 Ω from step 800 on. Make dt smaller for this as well."
         }
       }
     ],
     "limits": {
-      "de": "Das Modell nimmt ideale Bauteile an: Der Widerstand ändert sich nicht mit der Temperatur, und der Kondensator verliert keine Ladung durch Leckströme. Das Euler-Verfahren rechnet in jedem Schritt mit dem Strom vom Anfang des Schritts und entlädt deshalb etwas zu schnell.",
-      "en": "The model assumes ideal components: the resistance does not change with temperature and the capacitor loses no charge through leakage. Euler's method uses the current from the beginning of each step and therefore discharges slightly too quickly."
+      "de": "Echte Blitzgeräte erzeugen die 300 V mit einem Spannungswandler aus einer kleinen Batterie. Dieser Wandler liefert nicht wie eine ideale Quelle. Die Form der Kurve ist trotzdem typisch.",
+      "en": "Real flash units produce the 300 V from a small battery using a voltage converter. This converter does not behave like an ideal source. The shape of the curve is still typical."
     },
     "glossary": [
       {
@@ -373,28 +355,2373 @@
           "en": "time constant"
         },
         "definition": {
-          "de": "Das Produkt R · C. Nach dieser Zeit ist die Ladung auf etwa 37 % (1/e) des Anfangswerts gesunken.",
-          "en": "The product R · C. After this time the charge has fallen to about 37 % (1/e) of its initial value."
+          "de": "Das Produkt R · C. Nach dieser Zeit ist der Kondensator zu etwa 63 % geladen.",
+          "en": "The product R · C. After this time the capacitor is about 63 % charged."
+        }
+      }
+    ]
+  },
+  {
+    "id": "caffeine",
+    "teaser": {
+      "de": "Der Kaffee vom Mittag ist abends noch nicht weg – aber wie viel ist noch da?",
+      "en": "The coffee from lunchtime is not gone by the evening – but how much is left?"
+    },
+    "phenomenon": {
+      "de": "Viele Erwachsene trinken morgens und mittags Kaffee. Koffein macht wach, kann aber abends beim Einschlafen stören. Der Körper baut es nur langsam ab. Nach etwa 5 Stunden ist noch die Hälfte da.",
+      "en": "Many adults drink coffee in the morning and at lunchtime. Caffeine keeps you awake, but it can stop you falling asleep in the evening. The body breaks it down only slowly. After about 5 hours, half of it is still there."
+    },
+    "idea": {
+      "de": "Das Koffein liegt erst im Magen und geht dann ins Blut über. In jedem kleinen Zeitschritt wandert ein fester Anteil vom Magen in den Körper. Gleichzeitig baut der Körper einen festen Anteil seines Koffeins ab. Zu bestimmten Schritten kommt eine neue Tasse dazu.",
+      "en": "The caffeine first sits in the stomach and then passes into the blood. In every small time step, a fixed share moves from the stomach into the body. At the same time, the body breaks down a fixed share of its caffeine. At certain steps, a new cup is added."
+    },
+    "quantities": [
+      {
+        "name": "Schritt",
+        "meaning": {
+          "de": "Schrittzähler (ganze Zahl)",
+          "en": "step counter (whole number)"
+        },
+        "unit": {
+          "de": "–",
+          "en": "–"
+        }
+      },
+      {
+        "name": "SchrittMorgens",
+        "meaning": {
+          "de": "Schritt, bei dem die erste Tasse getrunken wird (7 Uhr)",
+          "en": "step at which the first cup is drunk (7 am)"
+        },
+        "unit": {
+          "de": "–",
+          "en": "–"
+        }
+      },
+      {
+        "name": "SchrittMittags",
+        "meaning": {
+          "de": "Schritt, bei dem die zweite Tasse getrunken wird (13 Uhr)",
+          "en": "step at which the second cup is drunk (1 pm)"
+        },
+        "unit": {
+          "de": "–",
+          "en": "–"
+        }
+      },
+      {
+        "name": "Magen",
+        "meaning": {
+          "de": "Koffein im Magen, noch nicht aufgenommen",
+          "en": "caffeine in the stomach, not yet absorbed"
+        },
+        "unit": {
+          "de": "mg",
+          "en": "mg"
+        }
+      },
+      {
+        "name": "Dosis",
+        "meaning": {
+          "de": "Koffein in einer Tasse Kaffee",
+          "en": "caffeine in one cup of coffee"
+        },
+        "unit": {
+          "de": "mg",
+          "en": "mg"
+        }
+      },
+      {
+        "name": "Abbaurate",
+        "meaning": {
+          "de": "Anteil, der pro Stunde abgebaut wird",
+          "en": "share broken down per hour"
+        },
+        "unit": {
+          "de": "1/h",
+          "en": "1/h"
+        }
+      },
+      {
+        "name": "Halbwertszeit",
+        "meaning": {
+          "de": "Zeit, nach der die Hälfte abgebaut ist",
+          "en": "time after which half has been broken down"
+        },
+        "unit": {
+          "de": "h",
+          "en": "h"
+        }
+      },
+      {
+        "name": "Aufnahme",
+        "meaning": {
+          "de": "Koffein, das pro Stunde vom Magen ins Blut geht",
+          "en": "caffeine passing from the stomach into the blood per hour"
+        },
+        "unit": {
+          "de": "mg/h",
+          "en": "mg/h"
+        }
+      },
+      {
+        "name": "Aufnahmerate",
+        "meaning": {
+          "de": "Anteil des Mageninhalts, der pro Stunde aufgenommen wird",
+          "en": "share of the stomach content absorbed per hour"
+        },
+        "unit": {
+          "de": "1/h",
+          "en": "1/h"
+        }
+      },
+      {
+        "name": "Abbau",
+        "meaning": {
+          "de": "Koffein, das pro Stunde abgebaut wird",
+          "en": "caffeine broken down per hour"
+        },
+        "unit": {
+          "de": "mg/h",
+          "en": "mg/h"
+        }
+      },
+      {
+        "name": "Koerper",
+        "meaning": {
+          "de": "Koffein im Körper (Blut und Gewebe)",
+          "en": "caffeine in the body (blood and tissue)"
+        },
+        "unit": {
+          "de": "mg",
+          "en": "mg"
+        }
+      },
+      {
+        "name": "dt",
+        "meaning": {
+          "de": "Zeitschritt",
+          "en": "time step"
+        },
+        "unit": {
+          "de": "h",
+          "en": "h"
+        }
+      },
+      {
+        "name": "Zeit",
+        "meaning": {
+          "de": "Uhrzeit",
+          "en": "clock time"
+        },
+        "unit": {
+          "de": "h",
+          "en": "h"
+        }
+      },
+      {
+        "name": "Startzeit",
+        "meaning": {
+          "de": "Uhrzeit beim Start der Simulation",
+          "en": "clock time when the simulation starts"
+        },
+        "unit": {
+          "de": "h",
+          "en": "h"
+        }
+      }
+    ],
+    "lines": [
+      {
+        "code": "Schritt := Schritt + 1",
+        "explanation": {
+          "de": "Der Zähler wird um 1 erhöht. Er zählt nur ganze Zahlen, deshalb klappt der Vergleich mit = sicher.",
+          "en": "The counter goes up by 1. It only counts whole numbers, so the comparison with = works reliably."
+        }
+      },
+      {
+        "code": "IF Schritt = SchrittMorgens THEN Magen := Magen + Dosis",
+        "explanation": {
+          "de": "Beim Schritt für 7 Uhr kommt eine Tasse Koffein in den Magen.",
+          "en": "At the step for 7 am, one cup of caffeine enters the stomach."
+        }
+      },
+      {
+        "code": "IF Schritt = SchrittMittags THEN Magen := Magen + Dosis",
+        "explanation": {
+          "de": "Beim Schritt für 13 Uhr kommt die zweite Tasse dazu.",
+          "en": "At the step for 1 pm, the second cup is added."
+        }
+      },
+      {
+        "code": "Abbaurate := ln(2) / Halbwertszeit",
+        "explanation": {
+          "de": "Aus der Halbwertszeit wird die Abbaurate berechnet: ln(2) / Halbwertszeit.",
+          "en": "The breakdown rate is calculated from the half-life: ln(2) / half-life."
+        }
+      },
+      {
+        "code": "Aufnahme := Aufnahmerate * Magen",
+        "explanation": {
+          "de": "Je mehr im Magen ist, desto mehr geht pro Stunde ins Blut.",
+          "en": "The more there is in the stomach, the more passes into the blood per hour."
+        }
+      },
+      {
+        "code": "Abbau := Abbaurate * Koerper",
+        "explanation": {
+          "de": "Je mehr im Körper ist, desto mehr wird pro Stunde abgebaut.",
+          "en": "The more there is in the body, the more is broken down per hour."
+        }
+      },
+      {
+        "code": "Magen := Magen - Aufnahme * dt",
+        "explanation": {
+          "de": "Der Magen verliert, was ins Blut übergeht.",
+          "en": "The stomach loses what passes into the blood."
+        }
+      },
+      {
+        "code": "Koerper := Koerper + (Aufnahme - Abbau) * dt",
+        "explanation": {
+          "de": "Der Körper gewinnt die Aufnahme und verliert den Abbau.",
+          "en": "The body gains the uptake and loses the breakdown."
+        }
+      },
+      {
+        "code": "Zeit := Startzeit + Schritt * dt",
+        "explanation": {
+          "de": "Die Uhrzeit wird aus dem Zähler berechnet. So entstehen keine Rundungsfehler beim Aufsummieren.",
+          "en": "The clock time is calculated from the counter. This avoids rounding errors from adding up."
+        }
+      }
+    ],
+    "observe": {
+      "de": "Nach jeder Tasse steigt der Wert schnell an und sinkt dann langsam. Der höchste Wert liegt bei etwa 111 mg gegen 14 Uhr. Um 22 Uhr sind noch etwa 39 mg im Körper, das ist fast eine halbe Tasse.",
+      "en": "After each cup the value rises quickly and then falls slowly. The highest value is about 111 mg at around 2 pm. At 10 pm about 39 mg are still in the body, which is almost half a cup."
+    },
+    "tasks": [
+      {
+        "text": {
+          "de": "Verschiebe die zweite Tasse auf 16 Uhr. Wie viel Koffein ist jetzt um 22 Uhr im Körper?",
+          "en": "Move the second cup to 4 pm. How much caffeine is in the body at 10 pm now?"
+        },
+        "hint": {
+          "de": "16 Uhr ist 10 Stunden nach dem Start um 6 Uhr. Bei dt = 0,1 h ist das Schritt 100.",
+          "en": "4 pm is 10 hours after the start at 6 am. With dt = 0.1 h this is step 100."
+        }
+      },
+      {
+        "text": {
+          "de": "Bei Schwangeren kann die Halbwertszeit deutlich länger sein. Setze sie auf 10 h und vergleiche.",
+          "en": "During pregnancy the half-life can be much longer. Set it to 10 h and compare."
+        },
+        "hint": {
+          "de": "Beobachte vor allem den Wert um Mitternacht (Schritt 180).",
+          "en": "Look especially at the value at midnight (step 180)."
+        }
+      },
+      {
+        "text": {
+          "de": "Füge eine dritte Tasse um 10 Uhr hinzu.",
+          "en": "Add a third cup at 10 am."
+        },
+        "hint": {
+          "de": "Du brauchst eine neue Konstante und eine weitere IF-Zeile.",
+          "en": "You need a new constant and another IF line."
+        }
+      }
+    ],
+    "limits": {
+      "de": "Die Halbwertszeit ist von Mensch zu Mensch sehr verschieden (etwa 3 bis 6 Stunden und mehr). Auch der Koffeingehalt einer Tasse schwankt stark. Das Modell zeigt den typischen Verlauf, keine Werte für eine bestimmte Person.",
+      "en": "The half-life varies a lot from person to person (about 3 to 6 hours and more). The caffeine content of a cup also varies widely. The model shows the typical pattern, not values for one particular person."
+    },
+    "glossary": [
+      {
+        "term": {
+          "de": "Halbwertszeit",
+          "en": "half-life"
+        },
+        "definition": {
+          "de": "Die Zeit, nach der nur noch die Hälfte eines Stoffes vorhanden ist.",
+          "en": "The time after which only half of a substance is left."
+        }
+      }
+    ]
+  },
+  {
+    "id": "bungee-jump",
+    "teaser": {
+      "de": "30 m Seil – aber wie tief fällt man wirklich?",
+      "en": "30 m of rope – but how far do you really fall?"
+    },
+    "phenomenon": {
+      "de": "Beim Bungee-Sprung fällt man zuerst ein ganzes Stück frei. Erst wenn das Seil gespannt ist, wird man abgebremst. Danach federt man mehrmals auf und ab.",
+      "en": "In a bungee jump you first fall freely for quite a distance. Only when the rope is tight are you slowed down. After that you bounce up and down several times."
+    },
+    "idea": {
+      "de": "In jedem kleinen Zeitschritt werden alle Kräfte addiert: Gewichtskraft nach unten, Luftkraft gegen die Bewegung und – nur wenn das Seil gespannt ist – die Seilkraft nach oben. Aus der Kraft folgt die Beschleunigung, daraus die neue Geschwindigkeit und daraus die neue Strecke.",
+      "en": "In every small time step, all forces are added up: weight downwards, air force against the motion and – only when the rope is tight – the rope force upwards. The force gives the acceleration, which gives the new velocity, which gives the new distance."
+    },
+    "quantities": [
+      {
+        "name": "Seilkraft",
+        "meaning": {
+          "de": "Kraft des gespannten Seils (nach oben)",
+          "en": "force of the stretched rope (upwards)"
+        },
+        "unit": {
+          "de": "N",
+          "en": "N"
+        }
+      },
+      {
+        "name": "Strecke",
+        "meaning": {
+          "de": "Fallstrecke unter der Absprungstelle",
+          "en": "distance fallen below the jump point"
+        },
+        "unit": {
+          "de": "m",
+          "en": "m"
+        }
+      },
+      {
+        "name": "Seillaenge",
+        "meaning": {
+          "de": "Länge des ungedehnten Seils",
+          "en": "length of the unstretched rope"
+        },
+        "unit": {
+          "de": "m",
+          "en": "m"
+        }
+      },
+      {
+        "name": "Federkonstante",
+        "meaning": {
+          "de": "Härte des Seils",
+          "en": "stiffness of the rope"
+        },
+        "unit": {
+          "de": "N/m",
+          "en": "N/m"
+        }
+      },
+      {
+        "name": "Luftkraft",
+        "meaning": {
+          "de": "Luftwiderstandskraft",
+          "en": "air resistance force"
+        },
+        "unit": {
+          "de": "N",
+          "en": "N"
+        }
+      },
+      {
+        "name": "cw",
+        "meaning": {
+          "de": "Luftwiderstandsbeiwert",
+          "en": "drag coefficient"
+        },
+        "unit": {
+          "de": "–",
+          "en": "–"
+        }
+      },
+      {
+        "name": "Flaeche",
+        "meaning": {
+          "de": "Querschnittsfläche der Person",
+          "en": "cross-sectional area of the person"
+        },
+        "unit": {
+          "de": "m²",
+          "en": "m²"
+        }
+      },
+      {
+        "name": "Luftdichte",
+        "meaning": {
+          "de": "Dichte der Luft",
+          "en": "density of air"
+        },
+        "unit": {
+          "de": "kg/m³",
+          "en": "kg/m³"
+        }
+      },
+      {
+        "name": "Geschwindigkeit",
+        "meaning": {
+          "de": "Geschwindigkeit (nach unten positiv)",
+          "en": "velocity (positive downwards)"
+        },
+        "unit": {
+          "de": "m/s",
+          "en": "m/s"
+        }
+      },
+      {
+        "name": "Beschleunigung",
+        "meaning": {
+          "de": "Beschleunigung (nach unten positiv)",
+          "en": "acceleration (positive downwards)"
+        },
+        "unit": {
+          "de": "m/s²",
+          "en": "m/s²"
+        }
+      },
+      {
+        "name": "Ortsfaktor",
+        "meaning": {
+          "de": "Fallbeschleunigung g",
+          "en": "gravitational acceleration g"
+        },
+        "unit": {
+          "de": "m/s²",
+          "en": "m/s²"
+        }
+      },
+      {
+        "name": "Masse",
+        "meaning": {
+          "de": "Masse der springenden Person",
+          "en": "mass of the jumper"
+        },
+        "unit": {
+          "de": "kg",
+          "en": "kg"
+        }
+      },
+      {
+        "name": "dt",
+        "meaning": {
+          "de": "Zeitschritt",
+          "en": "time step"
+        },
+        "unit": {
+          "de": "s",
+          "en": "s"
+        }
+      },
+      {
+        "name": "Zeit",
+        "meaning": {
+          "de": "Zeit seit dem Absprung",
+          "en": "time since the jump"
+        },
+        "unit": {
+          "de": "s",
+          "en": "s"
+        }
+      }
+    ],
+    "lines": [
+      {
+        "code": "Seilkraft := 0",
+        "explanation": {
+          "de": "Zuerst wird angenommen: Das Seil ist locker und zieht nicht.",
+          "en": "First we assume: the rope is slack and does not pull."
+        }
+      },
+      {
+        "code": "IF Strecke > Seillaenge THEN Seilkraft := Federkonstante * (Strecke - Seillaenge)",
+        "explanation": {
+          "de": "Nur wenn die Strecke größer als die Seillänge ist, zieht das Seil – umso stärker, je weiter es gedehnt ist.",
+          "en": "Only when the distance is greater than the rope length does the rope pull – the more it is stretched, the harder it pulls."
+        }
+      },
+      {
+        "code": "Luftkraft := 0,5 * cw * Flaeche * Luftdichte * Geschwindigkeit * abs(Geschwindigkeit)",
+        "explanation": {
+          "de": "Die Luftkraft wächst mit dem Quadrat der Geschwindigkeit. abs sorgt dafür, dass sie immer gegen die Bewegung zeigt.",
+          "en": "The air force grows with the square of the speed. abs makes sure it always points against the motion."
+        }
+      },
+      {
+        "code": "Beschleunigung := Ortsfaktor - (Seilkraft + Luftkraft) / Masse",
+        "explanation": {
+          "de": "Gewichtskraft zieht nach unten, Seil- und Luftkraft bremsen. Geteilt durch die Masse ergibt das die Beschleunigung.",
+          "en": "Weight pulls downwards, rope force and air force brake. Divided by the mass this gives the acceleration."
+        }
+      },
+      {
+        "code": "Geschwindigkeit := Geschwindigkeit + Beschleunigung * dt",
+        "explanation": {
+          "de": "Die Geschwindigkeit ändert sich um Beschleunigung · dt.",
+          "en": "The velocity changes by acceleration · dt."
+        }
+      },
+      {
+        "code": "Strecke := Strecke + Geschwindigkeit * dt",
+        "explanation": {
+          "de": "Mit der neuen Geschwindigkeit wird die Strecke weitergerechnet.",
+          "en": "The distance is updated using the new velocity."
+        }
+      },
+      {
+        "code": "Zeit := Zeit + dt",
+        "explanation": {
+          "de": "Die Uhr läuft weiter.",
+          "en": "The clock moves on."
+        }
+      }
+    ],
+    "observe": {
+      "de": "Nach 2,5 s ist das Seil gespannt. Die Person ist dann schon etwa 23 m/s schnell. Der tiefste Punkt liegt bei etwa 50 m nach 3,8 s. Dort zieht das Seil mit fast 3000 N, das ist gut das Vierfache der Gewichtskraft.",
+      "en": "After 2.5 s the rope is tight. The person is already moving at about 23 m/s. The lowest point is about 50 m after 3.8 s. There the rope pulls with almost 3000 N, which is more than four times the weight."
+    },
+    "tasks": [
+      {
+        "text": {
+          "de": "Ein schwererer Springer hat 100 kg. Wie tief fällt er?",
+          "en": "A heavier jumper has a mass of 100 kg. How far does he fall?"
+        },
+        "hint": {
+          "de": "Suche in der Tabelle den größten Wert der Strecke.",
+          "en": "Look for the largest value of the distance in the table."
+        }
+      },
+      {
+        "text": {
+          "de": "Welche Federkonstante braucht man, damit ein 70-kg-Springer höchstens 45 m tief fällt?",
+          "en": "Which spring constant is needed so that a 70 kg jumper falls no more than 45 m?"
+        },
+        "hint": {
+          "de": "Probiere verschiedene Werte aus und taste dich heran.",
+          "en": "Try different values and close in on the answer."
+        }
+      },
+      {
+        "text": {
+          "de": "Lass dir die Beschleunigung anzeigen. Wann ist sie am größten, und wie viele g sind das?",
+          "en": "Display the acceleration. When is it largest, and how many g is that?"
+        },
+        "hint": {
+          "de": "Teile den Betrag der Beschleunigung durch 9,81 m/s².",
+          "en": "Divide the magnitude of the acceleration by 9.81 m/s²."
+        }
+      }
+    ],
+    "limits": {
+      "de": "Echte Bungee-Seile sind keine idealen Federn und dämpfen die Schwingung stärker. Die Person wird als Punkt betrachtet. Die Länge des Körpers zählt also nicht mit.",
+      "en": "Real bungee ropes are not ideal springs and damp the oscillation more strongly. The person is treated as a point. So the length of the body is not taken into account."
+    },
+    "glossary": [
+      {
+        "term": {
+          "de": "Federkonstante",
+          "en": "spring constant"
+        },
+        "definition": {
+          "de": "Gibt an, wie viel Kraft man braucht, um eine Feder um 1 m zu dehnen.",
+          "en": "Tells you how much force is needed to stretch a spring by 1 m."
+        }
+      }
+    ]
+  },
+  {
+    "id": "water-rocket",
+    "teaser": {
+      "de": "Ein bisschen Wasser und Luftdruck – wie hoch kommt die Flasche?",
+      "en": "A little water and air pressure – how high does the bottle go?"
+    },
+    "phenomenon": {
+      "de": "Eine Wasserrakete ist eine Plastikflasche mit Wasser und Druckluft. Wird sie losgelassen, schießt das Wasser nach unten heraus und die Flasche nach oben. Der Antrieb dauert nur einen Bruchteil einer Sekunde. Danach fliegt sie noch ein ganzes Stück weiter.",
+      "en": "A water rocket is a plastic bottle with water and compressed air. When it is released, the water shoots out downwards and the bottle shoots upwards. The thrust lasts only a fraction of a second. After that it keeps flying for quite a way."
+    },
+    "idea": {
+      "de": "Solange noch Wasser da ist, drückt der Rückstoß die Rakete nach oben. In jedem kleinen Zeitschritt wird etwas Wasser ausgestoßen, die Rakete wird leichter. Aus Schub, Gewichtskraft und Luftkraft folgt die Beschleunigung, daraus Geschwindigkeit und Höhe.",
+      "en": "As long as there is water left, the recoil pushes the rocket upwards. In every small time step some water is pushed out and the rocket gets lighter. Thrust, weight and air force give the acceleration, which gives velocity and height."
+    },
+    "quantities": [
+      {
+        "name": "Strom",
+        "meaning": {
+          "de": "Wasser, das pro Sekunde ausströmt",
+          "en": "water flowing out per second"
+        },
+        "unit": {
+          "de": "kg/s",
+          "en": "kg/s"
+        }
+      },
+      {
+        "name": "Wasser",
+        "meaning": {
+          "de": "Wasser in der Flasche",
+          "en": "water in the bottle"
+        },
+        "unit": {
+          "de": "kg",
+          "en": "kg"
+        }
+      },
+      {
+        "name": "Massenstrom",
+        "meaning": {
+          "de": "Ausströmrate, solange Wasser da ist",
+          "en": "outflow rate while there is water"
+        },
+        "unit": {
+          "de": "kg/s",
+          "en": "kg/s"
+        }
+      },
+      {
+        "name": "Schub",
+        "meaning": {
+          "de": "Rückstoßkraft nach oben",
+          "en": "recoil force upwards"
+        },
+        "unit": {
+          "de": "N",
+          "en": "N"
+        }
+      },
+      {
+        "name": "Ausstroemgeschwindigkeit",
+        "meaning": {
+          "de": "Geschwindigkeit des austretenden Wassers",
+          "en": "speed of the water leaving the nozzle"
+        },
+        "unit": {
+          "de": "m/s",
+          "en": "m/s"
+        }
+      },
+      {
+        "name": "Masse",
+        "meaning": {
+          "de": "Gesamtmasse der Rakete",
+          "en": "total mass of the rocket"
+        },
+        "unit": {
+          "de": "kg",
+          "en": "kg"
+        }
+      },
+      {
+        "name": "Leermasse",
+        "meaning": {
+          "de": "Masse der leeren Rakete",
+          "en": "mass of the empty rocket"
+        },
+        "unit": {
+          "de": "kg",
+          "en": "kg"
+        }
+      },
+      {
+        "name": "Luftkraft",
+        "meaning": {
+          "de": "Luftwiderstandskraft",
+          "en": "air resistance force"
+        },
+        "unit": {
+          "de": "N",
+          "en": "N"
+        }
+      },
+      {
+        "name": "Luftfaktor",
+        "meaning": {
+          "de": "fasst cw-Wert, Fläche und Luftdichte zusammen (½·cw·A·ρ)",
+          "en": "combines drag coefficient, area and air density (½·cw·A·ρ)"
+        },
+        "unit": {
+          "de": "kg/m",
+          "en": "kg/m"
+        }
+      },
+      {
+        "name": "Geschwindigkeit",
+        "meaning": {
+          "de": "Geschwindigkeit (nach oben positiv)",
+          "en": "velocity (positive upwards)"
+        },
+        "unit": {
+          "de": "m/s",
+          "en": "m/s"
+        }
+      },
+      {
+        "name": "Beschleunigung",
+        "meaning": {
+          "de": "Beschleunigung (nach oben positiv)",
+          "en": "acceleration (positive upwards)"
+        },
+        "unit": {
+          "de": "m/s²",
+          "en": "m/s²"
+        }
+      },
+      {
+        "name": "Ortsfaktor",
+        "meaning": {
+          "de": "Fallbeschleunigung g",
+          "en": "gravitational acceleration g"
+        },
+        "unit": {
+          "de": "m/s²",
+          "en": "m/s²"
+        }
+      },
+      {
+        "name": "Hoehe",
+        "meaning": {
+          "de": "Höhe über dem Boden",
+          "en": "height above the ground"
+        },
+        "unit": {
+          "de": "m",
+          "en": "m"
+        }
+      },
+      {
+        "name": "dt",
+        "meaning": {
+          "de": "Zeitschritt",
+          "en": "time step"
+        },
+        "unit": {
+          "de": "s",
+          "en": "s"
+        }
+      },
+      {
+        "name": "Zeit",
+        "meaning": {
+          "de": "Zeit seit dem Start",
+          "en": "time since launch"
+        },
+        "unit": {
+          "de": "s",
+          "en": "s"
+        }
+      }
+    ],
+    "lines": [
+      {
+        "code": "Strom := 0",
+        "explanation": {
+          "de": "Zuerst wird angenommen: Es strömt kein Wasser aus.",
+          "en": "First we assume: no water flows out."
+        }
+      },
+      {
+        "code": "IF Wasser > 0,0001 THEN Strom := Massenstrom",
+        "explanation": {
+          "de": "Ist noch Wasser in der Flasche, strömt es mit dem festen Massenstrom aus. Die kleine Schwelle fängt Rundungsreste ab.",
+          "en": "If there is still water in the bottle, it flows out at the fixed mass flow. The small threshold catches rounding leftovers."
+        }
+      },
+      {
+        "code": "Schub := Strom * Ausstroemgeschwindigkeit",
+        "explanation": {
+          "de": "Der Schub ist ausgestoßene Masse pro Sekunde mal Ausströmgeschwindigkeit.",
+          "en": "The thrust is mass pushed out per second times exhaust speed."
+        }
+      },
+      {
+        "code": "Masse := Leermasse + Wasser",
+        "explanation": {
+          "de": "Die Rakete wiegt so viel wie die leere Flasche plus das restliche Wasser.",
+          "en": "The rocket weighs as much as the empty bottle plus the remaining water."
+        }
+      },
+      {
+        "code": "Luftkraft := Luftfaktor * Geschwindigkeit * abs(Geschwindigkeit)",
+        "explanation": {
+          "de": "Die Luftkraft wächst mit v² und zeigt gegen die Bewegung.",
+          "en": "The air force grows with v² and points against the motion."
+        }
+      },
+      {
+        "code": "Beschleunigung := (Schub - Luftkraft) / Masse - Ortsfaktor",
+        "explanation": {
+          "de": "Schub minus Luftkraft, geteilt durch die Masse, minus g ergibt die Beschleunigung.",
+          "en": "Thrust minus air force, divided by mass, minus g gives the acceleration."
+        }
+      },
+      {
+        "code": "Geschwindigkeit := Geschwindigkeit + Beschleunigung * dt",
+        "explanation": {
+          "de": "Neue Geschwindigkeit.",
+          "en": "New velocity."
+        }
+      },
+      {
+        "code": "Hoehe := Hoehe + Geschwindigkeit * dt",
+        "explanation": {
+          "de": "Neue Höhe.",
+          "en": "New height."
+        }
+      },
+      {
+        "code": "Wasser := Wasser - Strom * dt",
+        "explanation": {
+          "de": "Das ausgeströmte Wasser fehlt in der Flasche.",
+          "en": "The water that has flowed out is missing from the bottle."
+        }
+      },
+      {
+        "code": "IF Hoehe < 0 THEN Geschwindigkeit := 0",
+        "explanation": {
+          "de": "Ist die Rakete unter dem Boden, bleibt sie liegen: Geschwindigkeit 0 …",
+          "en": "If the rocket is below the ground it stays there: velocity 0 …"
+        }
+      },
+      {
+        "code": "IF Hoehe < 0 THEN Hoehe := 0",
+        "explanation": {
+          "de": "… und Höhe 0.",
+          "en": "… and height 0."
+        }
+      },
+      {
+        "code": "Zeit := Zeit + dt",
+        "explanation": {
+          "de": "Die Uhr läuft weiter.",
+          "en": "The clock moves on."
+        }
+      }
+    ],
+    "observe": {
+      "de": "Nach nur 0,2 s ist das Wasser weg. Die Rakete ist dann schon gut 28 m/s schnell, aber erst gut 2 m hoch. Die Gipfelhöhe von gut 28 m erreicht sie nach etwa 2,4 s. Nach knapp 5 s landet sie mit etwa 19 m/s.",
+      "en": "After only 0.2 s the water is gone. The rocket is then already moving at just over 28 m/s, but is only just over 2 m high. It reaches its peak height of just over 28 m after about 2.4 s. After almost 5 s it lands at about 19 m/s."
+    },
+    "tasks": [
+      {
+        "text": {
+          "de": "Fülle nur 0,3 kg Wasser ein (Startwert von Wasser ändern). Wie hoch fliegt die Rakete jetzt?",
+          "en": "Fill in only 0.3 kg of water (change the start value of Wasser). How high does the rocket fly now?"
+        },
+        "hint": {
+          "de": "Vergleiche mit 28 m. Ist es genau halb so hoch?",
+          "en": "Compare with 28 m. Is it exactly half as high?"
+        }
+      },
+      {
+        "text": {
+          "de": "Setze den Luftfaktor auf 0. Wie hoch käme die Rakete ohne Luft?",
+          "en": "Set the air factor to 0. How high would the rocket go without air?"
+        },
+        "hint": {
+          "de": "Ohne Luft ist der Flug nach Brennschluss ein senkrechter Wurf.",
+          "en": "Without air, the flight after burnout is a vertical throw."
+        }
+      },
+      {
+        "text": {
+          "de": "Warum ist die Landegeschwindigkeit kleiner als die Geschwindigkeit bei Brennschluss?",
+          "en": "Why is the landing speed lower than the speed at burnout?"
+        },
+        "hint": {
+          "de": "Denk an die Energie, die die Luftreibung umwandelt.",
+          "en": "Think about the energy that air resistance converts."
+        }
+      }
+    ],
+    "limits": {
+      "de": "In Wirklichkeit sinkt der Luftdruck in der Flasche, während das Wasser ausströmt. Der Schub ist also am Anfang größer und am Ende kleiner. Am Schluss gibt es noch einen kurzen Luftstoß, den das Modell nicht enthält.",
+      "en": "In reality the air pressure in the bottle falls while the water flows out. So the thrust is larger at the start and smaller at the end. At the very end there is also a short burst of air, which the model leaves out."
+    },
+    "glossary": [
+      {
+        "term": {
+          "de": "Rückstoß",
+          "en": "recoil"
+        },
+        "definition": {
+          "de": "Wird Masse nach hinten ausgestoßen, erfährt der Körper eine Kraft nach vorne.",
+          "en": "When mass is pushed out backwards, the body experiences a force forwards."
         }
       },
       {
         "term": {
-          "de": "Kapazität",
-          "en": "capacitance"
+          "de": "Brennschluss",
+          "en": "burnout"
         },
         "definition": {
-          "de": "Gibt an, wie viel Ladung ein Kondensator pro Volt Spannung speichert (Einheit Farad).",
-          "en": "Tells you how much charge a capacitor stores per volt (unit: farad)."
+          "de": "Der Moment, in dem der Antrieb endet.",
+          "en": "The moment at which the thrust ends."
+        }
+      }
+    ]
+  },
+  {
+    "id": "bathtub",
+    "teaser": {
+      "de": "Warum dauert das letzte bisschen Badewasser so lange?",
+      "en": "Why does the last bit of bath water take so long?"
+    },
+    "phenomenon": {
+      "de": "Ziehst du den Stöpsel, gurgelt das Wasser zuerst kräftig ab. Gegen Ende wird es immer langsamer. Das liegt am Wasserdruck über dem Abfluss.",
+      "en": "When you pull the plug, the water first drains away strongly. Towards the end it gets slower and slower. This is due to the water pressure above the plughole."
+    },
+    "idea": {
+      "de": "Je höher das Wasser steht, desto schneller strömt es aus dem Loch (Torricelli). In jedem kleinen Zeitschritt wird berechnet, wie viel Wasser abfließt und wie viel zuläuft. Daraus folgt, um wie viel der Wasserstand sinkt.",
+      "en": "The higher the water level, the faster it flows out of the hole (Torricelli). In every small time step we calculate how much water flows out and how much flows in. This tells us how much the water level drops."
+    },
+    "quantities": [
+      {
+        "name": "Abfluss",
+        "meaning": {
+          "de": "Wasser, das pro Sekunde abfließt",
+          "en": "water flowing out per second"
+        },
+        "unit": {
+          "de": "m³/s",
+          "en": "m³/s"
+        }
+      },
+      {
+        "name": "Ausflusszahl",
+        "meaning": {
+          "de": "Faktor für die Einschnürung des Strahls",
+          "en": "factor for the narrowing of the jet"
+        },
+        "unit": {
+          "de": "–",
+          "en": "–"
+        }
+      },
+      {
+        "name": "Lochflaeche",
+        "meaning": {
+          "de": "Fläche des Abflusslochs",
+          "en": "area of the plughole"
+        },
+        "unit": {
+          "de": "m²",
+          "en": "m²"
+        }
+      },
+      {
+        "name": "Ortsfaktor",
+        "meaning": {
+          "de": "Fallbeschleunigung g",
+          "en": "gravitational acceleration g"
+        },
+        "unit": {
+          "de": "m/s²",
+          "en": "m/s²"
+        }
+      },
+      {
+        "name": "Hoehe",
+        "meaning": {
+          "de": "Wasserstand in der Wanne",
+          "en": "water level in the tub"
+        },
+        "unit": {
+          "de": "m",
+          "en": "m"
+        }
+      },
+      {
+        "name": "Zulauf",
+        "meaning": {
+          "de": "Wasser, das pro Sekunde aus dem Hahn kommt",
+          "en": "water coming from the tap per second"
+        },
+        "unit": {
+          "de": "m³/s",
+          "en": "m³/s"
+        }
+      },
+      {
+        "name": "Grundflaeche",
+        "meaning": {
+          "de": "Grundfläche der Wanne",
+          "en": "base area of the tub"
+        },
+        "unit": {
+          "de": "m²",
+          "en": "m²"
+        }
+      },
+      {
+        "name": "Volumen",
+        "meaning": {
+          "de": "Wassermenge in der Wanne",
+          "en": "amount of water in the tub"
+        },
+        "unit": {
+          "de": "L",
+          "en": "L"
+        }
+      },
+      {
+        "name": "dt",
+        "meaning": {
+          "de": "Zeitschritt",
+          "en": "time step"
+        },
+        "unit": {
+          "de": "s",
+          "en": "s"
+        }
+      },
+      {
+        "name": "Zeit",
+        "meaning": {
+          "de": "Zeit seit dem Ziehen des Stöpsels",
+          "en": "time since the plug was pulled"
+        },
+        "unit": {
+          "de": "s",
+          "en": "s"
+        }
+      }
+    ],
+    "lines": [
+      {
+        "code": "Abfluss := Ausflusszahl * Lochflaeche * sqrt(2 * Ortsfaktor * Hoehe)",
+        "explanation": {
+          "de": "Ausflussgeschwindigkeit nach Torricelli mal Lochfläche ergibt den Abfluss. Die Ausflusszahl verkleinert ihn etwas.",
+          "en": "The outflow speed from Torricelli times the hole area gives the outflow. The discharge coefficient makes it a bit smaller."
+        }
+      },
+      {
+        "code": "Hoehe := Hoehe + (Zulauf - Abfluss) / Grundflaeche * dt",
+        "explanation": {
+          "de": "Zulauf minus Abfluss, geteilt durch die Grundfläche, ergibt, wie schnell sich der Wasserstand ändert.",
+          "en": "Inflow minus outflow, divided by the base area, gives how fast the water level changes."
+        }
+      },
+      {
+        "code": "IF Hoehe < 0 THEN Hoehe := 0",
+        "explanation": {
+          "de": "Der Wasserstand kann nicht negativ werden.",
+          "en": "The water level cannot become negative."
+        }
+      },
+      {
+        "code": "Volumen := Grundflaeche * Hoehe * 1000",
+        "explanation": {
+          "de": "Das Volumen in Litern (1 m³ = 1000 L).",
+          "en": "The volume in litres (1 m³ = 1000 L)."
+        }
+      },
+      {
+        "code": "Zeit := Zeit + dt",
+        "explanation": {
+          "de": "Die Uhr läuft weiter.",
+          "en": "The clock moves on."
+        }
+      }
+    ],
+    "observe": {
+      "de": "Am Anfang fließen etwa 1,8 Liter pro Sekunde ab. Nach 100 s sind noch rund 91 L in der Wanne, nach 259 s ist sie leer. Die erste Hälfte des Wassers ist nach etwa 77 s weg, für die zweite Hälfte braucht es mehr als doppelt so lange.",
+      "en": "At the start about 1.8 litres per second flow out. After 100 s about 91 L are left in the tub, after 259 s it is empty. The first half of the water is gone after about 77 s; the second half takes more than twice as long."
+    },
+    "tasks": [
+      {
+        "text": {
+          "de": "Drehe den Hahn auf: Zulauf = 0,0005 m³/s (0,5 L/s). Was passiert mit dem Wasserstand?",
+          "en": "Turn on the tap: inflow = 0.0005 m³/s (0.5 L/s). What happens to the water level?"
+        },
+        "hint": {
+          "de": "Der Wasserstand bleibt stehen, wenn Abfluss und Zulauf gleich groß sind.",
+          "en": "The water level stays constant when outflow and inflow are equal."
+        }
+      },
+      {
+        "text": {
+          "de": "Berechne mit der Formel des Abflusses, bei welcher Höhe er genau 0,5 L/s beträgt. Prüfe mit der Simulation.",
+          "en": "Use the outflow formula to work out at which height it is exactly 0.5 L/s. Check with the simulation."
+        },
+        "hint": {
+          "de": "Stelle die Gleichung nach der Höhe um.",
+          "en": "Rearrange the equation for the height."
+        }
+      },
+      {
+        "text": {
+          "de": "Ein Abfluss mit doppeltem Durchmesser – wie lange dauert das Leeren jetzt?",
+          "en": "A plughole with twice the diameter – how long does emptying take now?"
+        },
+        "hint": {
+          "de": "Doppelter Durchmesser bedeutet vierfache Fläche.",
+          "en": "Twice the diameter means four times the area."
+        }
+      }
+    ],
+    "limits": {
+      "de": "Echte Badewannen haben schräge Wände, die Grundfläche ist also nicht überall gleich. Zum Schluss bildet sich oft ein Wirbel. Beides ist im Modell nicht enthalten.",
+      "en": "Real bathtubs have sloping sides, so the base area is not the same everywhere. At the end a whirlpool often forms. Neither is included in the model."
+    },
+    "glossary": [
+      {
+        "term": {
+          "de": "Torricelli-Gesetz",
+          "en": "Torricelli's law"
+        },
+        "definition": {
+          "de": "Wasser strömt aus einem Loch mit v = sqrt(2·g·h), wobei h die Wasserhöhe über dem Loch ist.",
+          "en": "Water flows out of a hole at v = sqrt(2·g·h), where h is the water height above the hole."
+        }
+      }
+    ]
+  },
+  {
+    "id": "classroom-co2",
+    "teaser": {
+      "de": "Wann wird die Luft im Klassenzimmer „verbraucht“?",
+      "en": "When does the air in the classroom get \"stale\"?"
+    },
+    "phenomenon": {
+      "de": "Nach einer Weile im Unterricht wird man müde und unkonzentriert. Ein Grund ist die verbrauchte Luft. Ein gutes Maß dafür ist der CO₂-Gehalt. Das Umweltbundesamt hält unter 1000 ppm für unbedenklich und über 2000 ppm für inakzeptabel.",
+      "en": "After a while in class you get tired and lose concentration. One reason is stale air. A good measure of this is the CO₂ content. The German Environment Agency (UBA) considers less than 1000 ppm harmless and more than 2000 ppm unacceptable."
+    },
+    "idea": {
+      "de": "Alle Personen geben zusammen CO₂ ab, das erhöht die Konzentration. Gleichzeitig wird ein Teil der Raumluft gegen Außenluft getauscht. In jedem kleinen Zeitschritt wird beides verrechnet. Ein Schrittzähler entscheidet, ob das Fenster gerade offen ist.",
+      "en": "All the people together give off CO₂, which raises the concentration. At the same time, part of the room air is exchanged for outdoor air. In every small time step both effects are combined. A step counter decides whether the window is open at the moment."
+    },
+    "quantities": [
+      {
+        "name": "Schritt",
+        "meaning": {
+          "de": "Schrittzähler (ganze Zahl)",
+          "en": "step counter (whole number)"
+        },
+        "unit": {
+          "de": "–",
+          "en": "–"
+        }
+      },
+      {
+        "name": "Phase",
+        "meaning": {
+          "de": "Minute innerhalb eines Lüftungszyklus (0 bis 24)",
+          "en": "minute within one airing cycle (0 to 24)"
+        },
+        "unit": {
+          "de": "min",
+          "en": "min"
+        }
+      },
+      {
+        "name": "Zyklus",
+        "meaning": {
+          "de": "Länge eines Zyklus aus Unterricht und Lüften",
+          "en": "length of one cycle of lesson and airing"
+        },
+        "unit": {
+          "de": "min",
+          "en": "min"
+        }
+      },
+      {
+        "name": "Luftwechsel",
+        "meaning": {
+          "de": "Wie oft die Raumluft pro Stunde ausgetauscht wird (aktuell)",
+          "en": "how often the room air is exchanged per hour (current)"
+        },
+        "unit": {
+          "de": "1/h",
+          "en": "1/h"
+        }
+      },
+      {
+        "name": "LuftwechselZu",
+        "meaning": {
+          "de": "Luftwechsel bei geschlossenem Fenster",
+          "en": "air exchange with windows closed"
+        },
+        "unit": {
+          "de": "1/h",
+          "en": "1/h"
+        }
+      },
+      {
+        "name": "Lueftdauer",
+        "meaning": {
+          "de": "Dauer des Stoßlüftens",
+          "en": "duration of airing"
+        },
+        "unit": {
+          "de": "min",
+          "en": "min"
+        }
+      },
+      {
+        "name": "LuftwechselOffen",
+        "meaning": {
+          "de": "Luftwechsel bei weit geöffneten Fenstern",
+          "en": "air exchange with windows wide open"
+        },
+        "unit": {
+          "de": "1/h",
+          "en": "1/h"
+        }
+      },
+      {
+        "name": "Zufuhr",
+        "meaning": {
+          "de": "CO₂-Anstieg pro Minute durch die Personen",
+          "en": "rise in CO₂ per minute caused by the people"
+        },
+        "unit": {
+          "de": "ppm/min",
+          "en": "ppm/min"
+        }
+      },
+      {
+        "name": "Personen",
+        "meaning": {
+          "de": "Anzahl der Personen im Raum",
+          "en": "number of people in the room"
+        },
+        "unit": {
+          "de": "–",
+          "en": "–"
+        }
+      },
+      {
+        "name": "Abgabe",
+        "meaning": {
+          "de": "CO₂-Abgabe pro Person",
+          "en": "CO₂ output per person"
+        },
+        "unit": {
+          "de": "L/h",
+          "en": "L/h"
+        }
+      },
+      {
+        "name": "Raumvolumen",
+        "meaning": {
+          "de": "Volumen des Klassenzimmers",
+          "en": "volume of the classroom"
+        },
+        "unit": {
+          "de": "m³",
+          "en": "m³"
+        }
+      },
+      {
+        "name": "Konzentration",
+        "meaning": {
+          "de": "CO₂-Gehalt der Raumluft",
+          "en": "CO₂ content of the room air"
+        },
+        "unit": {
+          "de": "ppm",
+          "en": "ppm"
+        }
+      },
+      {
+        "name": "Aussen",
+        "meaning": {
+          "de": "CO₂-Gehalt der Außenluft",
+          "en": "CO₂ content of the outdoor air"
+        },
+        "unit": {
+          "de": "ppm",
+          "en": "ppm"
+        }
+      },
+      {
+        "name": "dt",
+        "meaning": {
+          "de": "Zeitschritt",
+          "en": "time step"
+        },
+        "unit": {
+          "de": "min",
+          "en": "min"
+        }
+      },
+      {
+        "name": "Zeit",
+        "meaning": {
+          "de": "Zeit seit Unterrichtsbeginn",
+          "en": "time since the start of the lesson"
+        },
+        "unit": {
+          "de": "min",
+          "en": "min"
+        }
+      }
+    ],
+    "lines": [
+      {
+        "code": "Schritt := Schritt + 1",
+        "explanation": {
+          "de": "Der Zähler wird um 1 erhöht.",
+          "en": "The counter goes up by 1."
+        }
+      },
+      {
+        "code": "Phase := (Schritt - 1) - Zyklus * int((Schritt - 1) / Zyklus)",
+        "explanation": {
+          "de": "Phase ist der Rest beim Teilen durch 25. Sie läuft immer wieder von 0 bis 24.",
+          "en": "Phase is the remainder when dividing by 25. It runs from 0 to 24 again and again."
+        }
+      },
+      {
+        "code": "Luftwechsel := LuftwechselZu",
+        "explanation": {
+          "de": "Zuerst wird angenommen: Das Fenster ist zu.",
+          "en": "First we assume: the window is closed."
+        }
+      },
+      {
+        "code": "IF Phase >= Zyklus - Lueftdauer THEN Luftwechsel := LuftwechselOffen",
+        "explanation": {
+          "de": "In den letzten 5 Minuten jedes Zyklus ist das Fenster offen.",
+          "en": "In the last 5 minutes of each cycle the window is open."
+        }
+      },
+      {
+        "code": "Zufuhr := Personen * Abgabe / Raumvolumen * 1000 / 60",
+        "explanation": {
+          "de": "Alle Personen zusammen erhöhen den CO₂-Gehalt. Umgerechnet von Litern pro Stunde in ppm pro Minute.",
+          "en": "All the people together raise the CO₂ content. Converted from litres per hour into ppm per minute."
+        }
+      },
+      {
+        "code": "Konzentration := Konzentration + (Zufuhr - Luftwechsel / 60 * (Konzentration - Aussen)) * dt",
+        "explanation": {
+          "de": "Neue Konzentration: plus Zufuhr, minus der Anteil, der durch Luftaustausch verschwindet. Der Luftwechsel pro Stunde wird durch 60 geteilt.",
+          "en": "New concentration: plus the input, minus the share that disappears through air exchange. The air exchange per hour is divided by 60."
+        }
+      },
+      {
+        "code": "Zeit := Zeit + dt",
+        "explanation": {
+          "de": "Die Uhr läuft um eine Minute weiter.",
+          "en": "The clock moves on by one minute."
+        }
+      }
+    ],
+    "observe": {
+      "de": "Schon nach 18 Minuten sind 1000 ppm überschritten, nach 20 Minuten sind es etwa 1100 ppm. Nach dem Lüften sinkt der Wert auf rund 690 ppm. Weil das Lüften nicht ganz auf Außenluft-Niveau zurückführt, werden die Spitzen größer: etwa 1350 ppm nach 45 min und 1400 ppm nach 70 min.",
+      "en": "After only 18 minutes 1000 ppm are exceeded, and after 20 minutes it is about 1100 ppm. After airing the value falls to around 690 ppm. Because airing does not bring it all the way back to the outdoor level, the peaks get higher: about 1350 ppm after 45 min and 1400 ppm after 70 min."
+    },
+    "tasks": [
+      {
+        "text": {
+          "de": "Was passiert ohne Lüften? Setze LuftwechselOffen auf 0,2.",
+          "en": "What happens without airing? Set LuftwechselOffen to 0.2."
+        },
+        "hint": {
+          "de": "Vergleiche den Wert nach 90 Minuten mit 2000 ppm.",
+          "en": "Compare the value after 90 minutes with 2000 ppm."
+        }
+      },
+      {
+        "text": {
+          "de": "Finde einen Lüftungsplan, der immer unter 1000 ppm bleibt.",
+          "en": "Find an airing plan that always stays below 1000 ppm."
+        },
+        "hint": {
+          "de": "Ändere Zyklus und Lueftdauer. Achte darauf, dass Lueftdauer kleiner als Zyklus bleibt.",
+          "en": "Change Zyklus and Lueftdauer. Make sure Lueftdauer stays smaller than Zyklus."
+        }
+      },
+      {
+        "text": {
+          "de": "Nur die Hälfte der Klasse ist da. Wie verändert sich der Verlauf?",
+          "en": "Only half the class is present. How does the curve change?"
+        },
+        "hint": {
+          "de": "Setze Personen auf 14.",
+          "en": "Set Personen to 14."
+        }
+      }
+    ],
+    "limits": {
+      "de": "Der Luftwechsel hängt stark vom Wetter, von der Temperaturdifferenz und von der Fenstergröße ab. Die Werte im Modell sind grobe Schätzungen. Außerdem wird angenommen, dass sich die Luft im Raum sofort gleichmäßig verteilt.",
+      "en": "Air exchange depends strongly on the weather, the temperature difference and the size of the windows. The values in the model are rough estimates. It also assumes that the air in the room mixes evenly at once."
+    },
+    "glossary": [
+      {
+        "term": {
+          "de": "ppm",
+          "en": "ppm"
+        },
+        "definition": {
+          "de": "„parts per million“: Teilchen pro Million Teilchen. 1000 ppm sind 0,1 %.",
+          "en": "\"parts per million\". 1000 ppm are 0.1 %."
         }
       },
       {
         "term": {
-          "de": "Euler-Verfahren",
-          "en": "Euler's method"
+          "de": "Luftwechsel",
+          "en": "air change rate"
         },
         "definition": {
-          "de": "Rechenverfahren, bei dem man die Änderung im kleinen Zeitschritt mit der momentanen Änderungsrate abschätzt und aufaddiert.",
-          "en": "A method that estimates the change over a small time step from the current rate of change and adds it up step by step."
+          "de": "Gibt an, wie oft pro Stunde die gesamte Raumluft durch Außenluft ersetzt wird.",
+          "en": "Tells you how many times per hour the whole room air is replaced by outdoor air."
+        }
+      }
+    ]
+  },
+  {
+    "id": "bouncing-ball",
+    "teaser": {
+      "de": "Wie hoch springt der Ball nach dem Aufprall zurück?",
+      "en": "How high does the ball bounce back after hitting the floor?"
+    },
+    "phenomenon": {
+      "de": "Lässt du einen Ball fallen, springt er nicht wieder bis zur Hand hoch. Jeder Sprung ist niedriger als der vorige. Die Aufpralle kommen immer schneller hintereinander, bis der Ball liegen bleibt.",
+      "en": "If you drop a ball, it does not bounce back up to your hand. Each bounce is lower than the one before. The impacts come faster and faster until the ball comes to rest."
+    },
+    "idea": {
+      "de": "In jedem kleinen Zeitschritt wird der Ball durch die Schwerkraft schneller nach unten. Taucht er rechnerisch in den Boden ein, kehrt sich die Geschwindigkeit um. Dabei wird sie mit der Stoßzahl multipliziert, also kleiner.",
+      "en": "In every small time step, gravity makes the ball faster downwards. If, in the calculation, it dips into the floor, the velocity is reversed. At the same time it is multiplied by the coefficient of restitution, so it gets smaller."
+    },
+    "quantities": [
+      {
+        "name": "Geschwindigkeit",
+        "meaning": {
+          "de": "Geschwindigkeit (nach oben positiv)",
+          "en": "velocity (positive upwards)"
+        },
+        "unit": {
+          "de": "m/s",
+          "en": "m/s"
+        }
+      },
+      {
+        "name": "Ortsfaktor",
+        "meaning": {
+          "de": "Fallbeschleunigung g",
+          "en": "gravitational acceleration g"
+        },
+        "unit": {
+          "de": "m/s²",
+          "en": "m/s²"
+        }
+      },
+      {
+        "name": "Hoehe",
+        "meaning": {
+          "de": "Höhe des Balls über dem Boden",
+          "en": "height of the ball above the floor"
+        },
+        "unit": {
+          "de": "m",
+          "en": "m"
+        }
+      },
+      {
+        "name": "Stosszahl",
+        "meaning": {
+          "de": "Verhältnis der Geschwindigkeiten nach und vor dem Aufprall",
+          "en": "ratio of the speeds after and before the impact"
+        },
+        "unit": {
+          "de": "–",
+          "en": "–"
+        }
+      },
+      {
+        "name": "dt",
+        "meaning": {
+          "de": "Zeitschritt",
+          "en": "time step"
+        },
+        "unit": {
+          "de": "s",
+          "en": "s"
+        }
+      },
+      {
+        "name": "Zeit",
+        "meaning": {
+          "de": "Zeit seit dem Loslassen",
+          "en": "time since release"
+        },
+        "unit": {
+          "de": "s",
+          "en": "s"
+        }
+      }
+    ],
+    "lines": [
+      {
+        "code": "Geschwindigkeit := Geschwindigkeit - Ortsfaktor * dt",
+        "explanation": {
+          "de": "Die Schwerkraft macht den Ball in jedem Schritt um g · dt schneller nach unten.",
+          "en": "In every step gravity makes the ball faster downwards by g · dt."
+        }
+      },
+      {
+        "code": "Hoehe := Hoehe + Geschwindigkeit * dt",
+        "explanation": {
+          "de": "Mit der neuen Geschwindigkeit wird die Höhe weitergerechnet.",
+          "en": "The height is updated using the new velocity."
+        }
+      },
+      {
+        "code": "IF Hoehe < 0 THEN Geschwindigkeit := -Stosszahl * Geschwindigkeit",
+        "explanation": {
+          "de": "Ist der Ball unter dem Boden, wird die Geschwindigkeit umgedreht und mit der Stoßzahl verkleinert.",
+          "en": "If the ball is below the floor, the velocity is reversed and reduced by the coefficient of restitution."
+        }
+      },
+      {
+        "code": "IF Hoehe < 0 THEN Hoehe := 0",
+        "explanation": {
+          "de": "Dann wird der Ball auf den Boden zurückgesetzt. Die Reihenfolge der beiden IF-Zeilen ist wichtig.",
+          "en": "Then the ball is put back on the floor. The order of the two IF lines matters."
+        }
+      },
+      {
+        "code": "Zeit := Zeit + dt",
+        "explanation": {
+          "de": "Die Uhr läuft weiter.",
+          "en": "The clock moves on."
+        }
+      }
+    ],
+    "observe": {
+      "de": "Der Ball trifft nach 0,64 s zum ersten Mal auf. Er springt danach bis etwa 1,27 m hoch. Das ist 0,8² · 2 m, also fast genau 64 % der Fallhöhe. Nach knapp 6 s bleibt er liegen.",
+      "en": "The ball hits the floor for the first time after 0.64 s. It then bounces up to about 1.27 m. That is 0.8² · 2 m, almost exactly 64 % of the drop height. After just under 6 s it stays on the floor."
+    },
+    "tasks": [
+      {
+        "text": {
+          "de": "Ein Flummi hat etwa e = 0,9, ein Tennisball etwa e = 0,75. Vergleiche die Höhe des ersten Rücksprungs.",
+          "en": "A super ball has about e = 0.9, a tennis ball about e = 0.75. Compare the height of the first bounce."
+        },
+        "hint": {
+          "de": "Rechne zum Vergleich e² · 2 m aus.",
+          "en": "Work out e² · 2 m for comparison."
+        }
+      },
+      {
+        "text": {
+          "de": "Vertausche die beiden IF-Zeilen. Was passiert, und warum?",
+          "en": "Swap the two IF lines. What happens, and why?"
+        },
+        "hint": {
+          "de": "Überlege, ob die zweite Bedingung noch erfüllt ist, wenn die Höhe schon auf 0 gesetzt wurde.",
+          "en": "Think about whether the second condition is still true once the height has already been set to 0."
+        }
+      },
+      {
+        "text": {
+          "de": "Miss am Bildschirm die Zeit zwischen den ersten Aufprallen. Welches Muster erkennst du?",
+          "en": "Measure the time between the first impacts on the screen. What pattern do you notice?"
+        },
+        "hint": {
+          "de": "Teile jede Flugzeit durch die vorige.",
+          "en": "Divide each flight time by the previous one."
+        }
+      }
+    ],
+    "limits": {
+      "de": "Luftreibung und Verformung des Balls werden nicht betrachtet. Echte Bälle haben auch keine ganz feste Stoßzahl. Bei sehr kleinen Sprüngen rechnet das Modell nur noch ungenau.",
+      "en": "Air resistance and the squashing of the ball are not considered. Real balls do not have a completely fixed coefficient of restitution either. For very small bounces the model is no longer accurate."
+    },
+    "glossary": [
+      {
+        "term": {
+          "de": "Stoßzahl",
+          "en": "coefficient of restitution"
+        },
+        "definition": {
+          "de": "Zahl zwischen 0 und 1. Sie gibt an, welcher Anteil der Geschwindigkeit nach dem Aufprall erhalten bleibt.",
+          "en": "A number between 0 and 1. It tells you what share of the speed is kept after the impact."
+        }
+      }
+    ]
+  },
+  {
+    "id": "pendulum-large-angle",
+    "teaser": {
+      "de": "Gilt die Pendelformel auch, wenn man richtig weit ausholt?",
+      "en": "Does the pendulum formula still work when you swing really far?"
+    },
+    "phenomenon": {
+      "de": "Für kleine Ausschläge ist die Schwingungsdauer eines Pendels fast unabhängig von der Weite. Holt man aber weit aus, braucht das Pendel länger. Das merkt man zum Beispiel bei einer Schaukel, die sehr hoch schwingt.",
+      "en": "For small swings, the period of a pendulum hardly depends on how far it swings. But if you pull it out far, the pendulum takes longer. You can notice this, for example, on a swing that goes very high."
+    },
+    "idea": {
+      "de": "Die rückstellende Beschleunigung ist proportional zu sin(Winkel). In jedem kleinen Zeitschritt werden daraus Winkelgeschwindigkeit und Winkel neu berechnet. Ein zweites Pendel rechnet mit dem Winkel selbst statt mit dem Sinus. So sieht man direkt, was die Näherung ausmacht.",
+      "en": "The restoring acceleration is proportional to sin(angle). In every small time step the angular velocity and the angle are recalculated from it. A second pendulum uses the angle itself instead of its sine. This shows directly what difference the approximation makes."
+    },
+    "quantities": [
+      {
+        "name": "Winkelbeschleunigung",
+        "meaning": {
+          "de": "Winkelbeschleunigung des genauen Pendels",
+          "en": "angular acceleration of the exact pendulum"
+        },
+        "unit": {
+          "de": "rad/s²",
+          "en": "rad/s²"
+        }
+      },
+      {
+        "name": "Ortsfaktor",
+        "meaning": {
+          "de": "Fallbeschleunigung g",
+          "en": "gravitational acceleration g"
+        },
+        "unit": {
+          "de": "m/s²",
+          "en": "m/s²"
+        }
+      },
+      {
+        "name": "Laenge",
+        "meaning": {
+          "de": "Fadenlänge",
+          "en": "length of the string"
+        },
+        "unit": {
+          "de": "m",
+          "en": "m"
+        }
+      },
+      {
+        "name": "Winkel",
+        "meaning": {
+          "de": "Auslenkung des genauen Pendels",
+          "en": "displacement of the exact pendulum"
+        },
+        "unit": {
+          "de": "rad",
+          "en": "rad"
+        }
+      },
+      {
+        "name": "Winkelgeschwindigkeit",
+        "meaning": {
+          "de": "Winkelgeschwindigkeit des genauen Pendels",
+          "en": "angular velocity of the exact pendulum"
+        },
+        "unit": {
+          "de": "rad/s",
+          "en": "rad/s"
+        }
+      },
+      {
+        "name": "Naeherungsbeschleunigung",
+        "meaning": {
+          "de": "Winkelbeschleunigung des Näherungspendels",
+          "en": "angular acceleration of the approximate pendulum"
+        },
+        "unit": {
+          "de": "rad/s²",
+          "en": "rad/s²"
+        }
+      },
+      {
+        "name": "Naeherung",
+        "meaning": {
+          "de": "Auslenkung des Näherungspendels",
+          "en": "displacement of the approximate pendulum"
+        },
+        "unit": {
+          "de": "rad",
+          "en": "rad"
+        }
+      },
+      {
+        "name": "Naeherungsgeschwindigkeit",
+        "meaning": {
+          "de": "Winkelgeschwindigkeit des Näherungspendels",
+          "en": "angular velocity of the approximate pendulum"
+        },
+        "unit": {
+          "de": "rad/s",
+          "en": "rad/s"
+        }
+      },
+      {
+        "name": "WinkelGrad",
+        "meaning": {
+          "de": "Auslenkung des genauen Pendels in Grad",
+          "en": "displacement of the exact pendulum in degrees"
+        },
+        "unit": {
+          "de": "°",
+          "en": "°"
+        }
+      },
+      {
+        "name": "Kreiszahl",
+        "meaning": {
+          "de": "die Zahl π",
+          "en": "the number π"
+        },
+        "unit": {
+          "de": "–",
+          "en": "–"
+        }
+      },
+      {
+        "name": "NaeherungGrad",
+        "meaning": {
+          "de": "Auslenkung des Näherungspendels in Grad",
+          "en": "displacement of the approximate pendulum in degrees"
+        },
+        "unit": {
+          "de": "°",
+          "en": "°"
+        }
+      },
+      {
+        "name": "dt",
+        "meaning": {
+          "de": "Zeitschritt",
+          "en": "time step"
+        },
+        "unit": {
+          "de": "s",
+          "en": "s"
+        }
+      },
+      {
+        "name": "Zeit",
+        "meaning": {
+          "de": "Zeit seit dem Loslassen",
+          "en": "time since release"
+        },
+        "unit": {
+          "de": "s",
+          "en": "s"
+        }
+      }
+    ],
+    "lines": [
+      {
+        "code": "Winkelbeschleunigung := -Ortsfaktor / Laenge * sin(Winkel)",
+        "explanation": {
+          "de": "Genaues Pendel: Die Beschleunigung hängt vom Sinus des Winkels ab.",
+          "en": "Exact pendulum: the acceleration depends on the sine of the angle."
+        }
+      },
+      {
+        "code": "Winkelgeschwindigkeit := Winkelgeschwindigkeit + Winkelbeschleunigung * dt",
+        "explanation": {
+          "de": "Neue Winkelgeschwindigkeit.",
+          "en": "New angular velocity."
+        }
+      },
+      {
+        "code": "Winkel := Winkel + Winkelgeschwindigkeit * dt",
+        "explanation": {
+          "de": "Neuer Winkel – mit der schon neuen Geschwindigkeit. So bleibt die Schwingung stabil.",
+          "en": "New angle – using the already updated velocity. This keeps the oscillation stable."
+        }
+      },
+      {
+        "code": "Naeherungsbeschleunigung := -Ortsfaktor / Laenge * Naeherung",
+        "explanation": {
+          "de": "Näherungspendel: Statt sin(Winkel) wird einfach der Winkel verwendet.",
+          "en": "Approximate pendulum: instead of sin(angle), the angle itself is used."
+        }
+      },
+      {
+        "code": "Naeherungsgeschwindigkeit := Naeherungsgeschwindigkeit + Naeherungsbeschleunigung * dt",
+        "explanation": {
+          "de": "Neue Winkelgeschwindigkeit des Näherungspendels.",
+          "en": "New angular velocity of the approximate pendulum."
+        }
+      },
+      {
+        "code": "Naeherung := Naeherung + Naeherungsgeschwindigkeit * dt",
+        "explanation": {
+          "de": "Neuer Winkel des Näherungspendels.",
+          "en": "New angle of the approximate pendulum."
+        }
+      },
+      {
+        "code": "WinkelGrad := Winkel * 180 / Kreiszahl",
+        "explanation": {
+          "de": "Umrechnung vom Bogenmaß in Grad.",
+          "en": "Conversion from radians to degrees."
+        }
+      },
+      {
+        "code": "NaeherungGrad := Naeherung * 180 / Kreiszahl",
+        "explanation": {
+          "de": "Dasselbe für das Näherungspendel.",
+          "en": "The same for the approximate pendulum."
+        }
+      },
+      {
+        "code": "Zeit := Zeit + dt",
+        "explanation": {
+          "de": "Die Uhr läuft weiter.",
+          "en": "The clock moves on."
+        }
+      }
+    ],
+    "observe": {
+      "de": "Das Näherungspendel ist nach 2,0 s wieder bei 80°. Das genaue Pendel steht dann erst bei etwa 59° und braucht für eine Schwingung etwa 2,28 s. Nach 5 s sind die beiden fast gegenläufig: 29° und −80°.",
+      "en": "The approximate pendulum is back at 80° after 2.0 s. The exact pendulum is then only at about 59° and needs about 2.28 s for one swing. After 5 s the two are almost opposite: 29° and −80°."
+    },
+    "tasks": [
+      {
+        "text": {
+          "de": "Starte beide Pendel mit 10° (0,1745 rad). Wie groß ist der Unterschied jetzt?",
+          "en": "Start both pendulums at 10° (0.1745 rad). How big is the difference now?"
+        },
+        "hint": {
+          "de": "Ändere die Startwerte von Winkel und Naeherung.",
+          "en": "Change the start values of Winkel and Naeherung."
+        }
+      },
+      {
+        "text": {
+          "de": "Bestimme die Schwingungsdauer des genauen Pendels für 30°, 60° und 90°.",
+          "en": "Find the period of the exact pendulum for 30°, 60° and 90°."
+        },
+        "hint": {
+          "de": "Miss die Zeit zwischen zwei Nulldurchgängen in gleicher Richtung.",
+          "en": "Measure the time between two zero crossings in the same direction."
+        }
+      },
+      {
+        "text": {
+          "de": "Stelle die dritte Programmzeile vor die zweite. Was passiert mit der Amplitude?",
+          "en": "Move the third line in front of the second line. What happens to the amplitude?"
+        },
+        "hint": {
+          "de": "Das ist das einfache Euler-Verfahren. Lass die Simulation lange laufen.",
+          "en": "This is the plain Euler method. Let the simulation run for a long time."
+        }
+      }
+    ],
+    "limits": {
+      "de": "Reibung wird nicht betrachtet, das Pendel schwingt also ewig. Der Faden wird als masselos und straff angenommen. Über 90° könnte ein echter Faden durchhängen.",
+      "en": "Friction is not considered, so the pendulum swings for ever. The string is assumed to be massless and taut. Above 90° a real string could go slack."
+    },
+    "glossary": [
+      {
+        "term": {
+          "de": "Kleinwinkel-Näherung",
+          "en": "small-angle approximation"
+        },
+        "definition": {
+          "de": "Für kleine Winkel im Bogenmaß gilt sin(x) ≈ x.",
+          "en": "For small angles in radians, sin(x) ≈ x."
+        }
+      },
+      {
+        "term": {
+          "de": "Bogenmaß",
+          "en": "radian"
+        },
+        "definition": {
+          "de": "Winkelmaß, bei dem ein voller Kreis 2π ist. 180° entsprechen π.",
+          "en": "Angle measure in which a full circle is 2π. 180° corresponds to π."
+        }
+      }
+    ]
+  },
+  {
+    "id": "ice-cube",
+    "teaser": {
+      "de": "Wie kalt wird die Limo mit einem Eiswürfel?",
+      "en": "How cold does lemonade get with one ice cube?"
+    },
+    "phenomenon": {
+      "de": "Ein Eiswürfel kühlt ein Getränk stark ab, obwohl er nur wenig Masse hat. Das liegt vor allem am Schmelzen. Um Eis zu schmelzen, braucht man viel Energie. Diese Energie kommt aus dem Getränk.",
+      "en": "An ice cube cools a drink a lot even though it has little mass. This is mainly due to melting. Melting ice needs a lot of energy. This energy comes from the drink."
+    },
+    "idea": {
+      "de": "Je wärmer das Getränk ist, desto mehr Wärme fließt pro Sekunde zum Eis. In jedem kleinen Zeitschritt schmilzt damit eine kleine Menge Eis. Das Getränk verliert genau diese Energie und kühlt ab. Das Schmelzwasser mischt sich mit 0 °C unter.",
+      "en": "The warmer the drink, the more heat flows to the ice per second. In every small time step this melts a small amount of ice. The drink loses exactly this energy and cools down. The meltwater joins the drink at 0 °C."
+    },
+    "quantities": [
+      {
+        "name": "Waermestrom",
+        "meaning": {
+          "de": "Wärme, die pro Sekunde vom Getränk zum Eis fließt",
+          "en": "heat flowing from the drink to the ice per second"
+        },
+        "unit": {
+          "de": "W",
+          "en": "W"
+        }
+      },
+      {
+        "name": "Uebergangszahl",
+        "meaning": {
+          "de": "Wärmestrom pro Kelvin Temperaturunterschied",
+          "en": "heat flow per kelvin of temperature difference"
+        },
+        "unit": {
+          "de": "W/K",
+          "en": "W/K"
+        }
+      },
+      {
+        "name": "Temperatur",
+        "meaning": {
+          "de": "Temperatur des Getränks",
+          "en": "temperature of the drink"
+        },
+        "unit": {
+          "de": "°C",
+          "en": "°C"
+        }
+      },
+      {
+        "name": "Schmelztemperatur",
+        "meaning": {
+          "de": "Temperatur des schmelzenden Eises",
+          "en": "temperature of the melting ice"
+        },
+        "unit": {
+          "de": "°C",
+          "en": "°C"
+        }
+      },
+      {
+        "name": "Schmelzmenge",
+        "meaning": {
+          "de": "Eis, das in diesem Zeitschritt schmilzt",
+          "en": "ice melting in this time step"
+        },
+        "unit": {
+          "de": "kg",
+          "en": "kg"
+        }
+      },
+      {
+        "name": "Schmelzwaerme",
+        "meaning": {
+          "de": "Energie, um 1 kg Eis zu schmelzen",
+          "en": "energy needed to melt 1 kg of ice"
+        },
+        "unit": {
+          "de": "J/kg",
+          "en": "J/kg"
+        }
+      },
+      {
+        "name": "Eis",
+        "meaning": {
+          "de": "Masse des Eises",
+          "en": "mass of the ice"
+        },
+        "unit": {
+          "de": "kg",
+          "en": "kg"
+        }
+      },
+      {
+        "name": "Getraenk",
+        "meaning": {
+          "de": "Masse des flüssigen Getränks",
+          "en": "mass of the liquid drink"
+        },
+        "unit": {
+          "de": "kg",
+          "en": "kg"
+        }
+      },
+      {
+        "name": "Waermekapazitaet",
+        "meaning": {
+          "de": "spezifische Wärmekapazität des Getränks (wie Wasser)",
+          "en": "specific heat capacity of the drink (like water)"
+        },
+        "unit": {
+          "de": "J/(kg·K)",
+          "en": "J/(kg·K)"
+        }
+      },
+      {
+        "name": "dt",
+        "meaning": {
+          "de": "Zeitschritt",
+          "en": "time step"
+        },
+        "unit": {
+          "de": "s",
+          "en": "s"
+        }
+      },
+      {
+        "name": "Zeit",
+        "meaning": {
+          "de": "Zeit seit dem Hineinwerfen",
+          "en": "time since the ice was dropped in"
+        },
+        "unit": {
+          "de": "s",
+          "en": "s"
+        }
+      }
+    ],
+    "lines": [
+      {
+        "code": "Waermestrom := Uebergangszahl * (Temperatur - Schmelztemperatur)",
+        "explanation": {
+          "de": "Je größer der Temperaturunterschied, desto größer der Wärmestrom.",
+          "en": "The larger the temperature difference, the larger the heat flow."
+        }
+      },
+      {
+        "code": "Schmelzmenge := Waermestrom * dt / Schmelzwaerme",
+        "explanation": {
+          "de": "Mit dieser Wärme schmilzt im Zeitschritt die Masse Q / Schmelzwärme.",
+          "en": "With this heat, the mass Q / latent heat melts in the time step."
+        }
+      },
+      {
+        "code": "IF Schmelzmenge > Eis THEN Schmelzmenge := Eis",
+        "explanation": {
+          "de": "Es kann nicht mehr schmelzen, als Eis da ist.",
+          "en": "No more can melt than there is ice."
+        }
+      },
+      {
+        "code": "Eis := Eis - Schmelzmenge",
+        "explanation": {
+          "de": "Das geschmolzene Eis fehlt jetzt beim Eis.",
+          "en": "The melted ice is now missing from the ice."
+        }
+      },
+      {
+        "code": "Temperatur := Temperatur - Schmelzmenge * Schmelzwaerme / (Getraenk * Waermekapazitaet)",
+        "explanation": {
+          "de": "Das Getränk gibt die Schmelzenergie ab und wird kälter.",
+          "en": "The drink gives off the melting energy and gets colder."
+        }
+      },
+      {
+        "code": "Temperatur := (Getraenk * Temperatur + Schmelzmenge * Schmelztemperatur) / (Getraenk + Schmelzmenge)",
+        "explanation": {
+          "de": "Das Schmelzwasser mit 0 °C mischt sich unter: gewichteter Mittelwert der Temperaturen.",
+          "en": "The meltwater at 0 °C mixes in: weighted average of the temperatures."
+        }
+      },
+      {
+        "code": "Getraenk := Getraenk + Schmelzmenge",
+        "explanation": {
+          "de": "Das Schmelzwasser gehört jetzt zum Getränk.",
+          "en": "The meltwater now belongs to the drink."
+        }
+      },
+      {
+        "code": "Zeit := Zeit + dt",
+        "explanation": {
+          "de": "Die Uhr läuft weiter.",
+          "en": "The clock moves on."
+        }
+      }
+    ],
+    "observe": {
+      "de": "Nach 2 Minuten hat das Getränk noch etwa 15,9 °C. Nach 337 s, also gut 5½ Minuten, ist das Eis ganz geschmolzen. Das Getränk hat dann 10,9 °C und wiegt 330 g. Ab da bleibt die Temperatur gleich.",
+      "en": "After 2 minutes the drink is still at about 15.9 °C. After 337 s, just over 5½ minutes, the ice has completely melted. The drink is then at 10.9 °C and weighs 330 g. From then on the temperature stays the same."
+    },
+    "tasks": [
+      {
+        "text": {
+          "de": "Prüfe die Endtemperatur mit einer Energiebilanz auf dem Papier.",
+          "en": "Check the final temperature with an energy balance on paper."
+        },
+        "hint": {
+          "de": "Abgegebene Wärme des Getränks = Schmelzwärme + Wärme, um das Schmelzwasser von 0 °C auf die Endtemperatur zu bringen.",
+          "en": "Heat given off by the drink = latent heat + heat to warm the meltwater from 0 °C to the final temperature."
+        }
+      },
+      {
+        "text": {
+          "de": "Wie viele 30-g-Eiswürfel braucht man, um das Getränk auf 5 °C zu kühlen?",
+          "en": "How many 30 g ice cubes do you need to cool the drink to 5 °C?"
+        },
+        "hint": {
+          "de": "Erhöhe den Startwert von Eis schrittweise.",
+          "en": "Increase the start value of Eis step by step."
+        }
+      },
+      {
+        "text": {
+          "de": "Was ändert sich, wenn du die Übergangszahl verdoppelst (z. B. durch Umrühren)?",
+          "en": "What changes if you double the transfer coefficient (for example by stirring)?"
+        },
+        "hint": {
+          "de": "Achte auf die Schmelzzeit und auf die Endtemperatur.",
+          "en": "Look at the melting time and at the final temperature."
+        }
+      }
+    ],
+    "limits": {
+      "de": "Das Glas und die Raumluft werden nicht betrachtet. In Wirklichkeit würde das Getränk danach wieder langsam wärmer. Die Oberfläche des Eiswürfels wird beim Schmelzen kleiner, das Modell rechnet aber mit konstanter Übergangszahl.",
+      "en": "The glass and the room air are not considered. In reality the drink would slowly warm up again afterwards. The surface of the ice cube gets smaller as it melts, but the model uses a constant transfer coefficient."
+    },
+    "glossary": [
+      {
+        "term": {
+          "de": "Schmelzwärme",
+          "en": "latent heat of fusion"
+        },
+        "definition": {
+          "de": "Energie, die man braucht, um 1 kg eines Stoffes bei gleicher Temperatur zu schmelzen. Bei Eis sind das 334 kJ.",
+          "en": "Energy needed to melt 1 kg of a substance without changing its temperature. For ice this is 334 kJ."
+        }
+      }
+    ]
+  },
+  {
+    "id": "thermostat",
+    "teaser": {
+      "de": "Warum klickt der Thermostat nicht ständig an und aus?",
+      "en": "Why does the thermostat not click on and off all the time?"
+    },
+    "phenomenon": {
+      "de": "Eine Heizung mit Thermostat hält die Raumtemperatur ungefähr konstant. Sie läuft aber nicht dauernd ein bisschen, sondern schaltet ganz an oder ganz aus. Zwischen Ein- und Ausschalten liegt ein kleiner Temperaturabstand.",
+      "en": "A heater with a thermostat keeps the room temperature roughly constant. But it does not run a little bit all the time; it switches fully on or fully off. There is a small temperature gap between switching on and switching off."
+    },
+    "idea": {
+      "de": "In jedem kleinen Zeitschritt prüft der Thermostat die Temperatur. Unter 20 °C schaltet er ein, über 21 °C aus, dazwischen bleibt alles, wie es ist. Dann wird berechnet, wie viel Wärme hereinkommt und wie viel nach draußen verloren geht.",
+      "en": "In every small time step the thermostat checks the temperature. Below 20 °C it switches on, above 21 °C off, and in between everything stays as it is. Then we calculate how much heat comes in and how much is lost to the outside."
+    },
+    "quantities": [
+      {
+        "name": "Temperatur",
+        "meaning": {
+          "de": "Raumtemperatur",
+          "en": "room temperature"
+        },
+        "unit": {
+          "de": "°C",
+          "en": "°C"
+        }
+      },
+      {
+        "name": "Einschaltwert",
+        "meaning": {
+          "de": "Temperatur, unter der eingeschaltet wird",
+          "en": "temperature below which the heating switches on"
+        },
+        "unit": {
+          "de": "°C",
+          "en": "°C"
+        }
+      },
+      {
+        "name": "Heizung",
+        "meaning": {
+          "de": "Schaltzustand: 1 = an, 0 = aus",
+          "en": "switch state: 1 = on, 0 = off"
+        },
+        "unit": {
+          "de": "–",
+          "en": "–"
+        }
+      },
+      {
+        "name": "Ausschaltwert",
+        "meaning": {
+          "de": "Temperatur, über der ausgeschaltet wird",
+          "en": "temperature above which the heating switches off"
+        },
+        "unit": {
+          "de": "°C",
+          "en": "°C"
+        }
+      },
+      {
+        "name": "Verlust",
+        "meaning": {
+          "de": "Wärmestrom nach außen",
+          "en": "heat flow to the outside"
+        },
+        "unit": {
+          "de": "W",
+          "en": "W"
+        }
+      },
+      {
+        "name": "Verlustfaktor",
+        "meaning": {
+          "de": "Wärmeverlust pro Kelvin Temperaturunterschied",
+          "en": "heat loss per kelvin of temperature difference"
+        },
+        "unit": {
+          "de": "W/K",
+          "en": "W/K"
+        }
+      },
+      {
+        "name": "Aussentemperatur",
+        "meaning": {
+          "de": "Temperatur draußen",
+          "en": "outdoor temperature"
+        },
+        "unit": {
+          "de": "°C",
+          "en": "°C"
+        }
+      },
+      {
+        "name": "Heizleistung",
+        "meaning": {
+          "de": "Leistung der eingeschalteten Heizung",
+          "en": "power of the heater when on"
+        },
+        "unit": {
+          "de": "W",
+          "en": "W"
+        }
+      },
+      {
+        "name": "Waermekapazitaet",
+        "meaning": {
+          "de": "Energie, um den Raum samt Einrichtung um 1 K zu erwärmen",
+          "en": "energy needed to warm the room and its contents by 1 K"
+        },
+        "unit": {
+          "de": "J/K",
+          "en": "J/K"
+        }
+      },
+      {
+        "name": "Energie",
+        "meaning": {
+          "de": "bisher verbrauchte Heizenergie",
+          "en": "heating energy used so far"
+        },
+        "unit": {
+          "de": "kWh",
+          "en": "kWh"
+        }
+      },
+      {
+        "name": "dt",
+        "meaning": {
+          "de": "Zeitschritt",
+          "en": "time step"
+        },
+        "unit": {
+          "de": "s",
+          "en": "s"
+        }
+      },
+      {
+        "name": "Zeit",
+        "meaning": {
+          "de": "Zeit seit dem Start",
+          "en": "time since the start"
+        },
+        "unit": {
+          "de": "min",
+          "en": "min"
+        }
+      }
+    ],
+    "lines": [
+      {
+        "code": "IF Temperatur < Einschaltwert THEN Heizung := 1",
+        "explanation": {
+          "de": "Ist es zu kalt, wird die Heizung eingeschaltet.",
+          "en": "If it is too cold, the heating is switched on."
+        }
+      },
+      {
+        "code": "IF Temperatur > Ausschaltwert THEN Heizung := 0",
+        "explanation": {
+          "de": "Ist es zu warm, wird sie ausgeschaltet. Dazwischen bleibt der alte Zustand erhalten.",
+          "en": "If it is too warm, it is switched off. In between, the previous state is kept."
+        }
+      },
+      {
+        "code": "Verlust := Verlustfaktor * (Temperatur - Aussentemperatur)",
+        "explanation": {
+          "de": "Je größer der Unterschied zu draußen, desto mehr Wärme geht verloren.",
+          "en": "The larger the difference from outside, the more heat is lost."
+        }
+      },
+      {
+        "code": "Temperatur := Temperatur + (Heizung * Heizleistung - Verlust) * dt / Waermekapazitaet",
+        "explanation": {
+          "de": "Heizleistung minus Verlust, mal dt, geteilt durch die Wärmekapazität ergibt die Temperaturänderung.",
+          "en": "Heating power minus loss, times dt, divided by the heat capacity gives the change in temperature."
+        }
+      },
+      {
+        "code": "Energie := Energie + Heizung * Heizleistung * dt / 3600000",
+        "explanation": {
+          "de": "Die Heizenergie wird aufsummiert und von Joule in kWh umgerechnet (1 kWh = 3 600 000 J).",
+          "en": "The heating energy is added up and converted from joules to kWh (1 kWh = 3,600,000 J)."
+        }
+      },
+      {
+        "code": "Zeit := Zeit + dt / 60",
+        "explanation": {
+          "de": "Die Uhr läuft weiter. dt ist in Sekunden, die Zeit wird in Minuten angezeigt.",
+          "en": "The clock moves on. dt is in seconds; the time is shown in minutes."
+        }
+      }
+    ],
+    "observe": {
+      "de": "Vom kalten Start bei 15 °C dauert es knapp 68 Minuten bis 20 °C. Bei gut 85 Minuten schaltet die Heizung zum ersten Mal ab. Danach wiederholt sich alle etwa 26 Minuten das Gleiche: rund 18 Minuten heizen, 8 Minuten Pause. In 3 Stunden werden etwa 7,3 kWh verbraucht.",
+      "en": "From the cold start at 15 °C it takes almost 68 minutes to reach 20 °C. At just over 85 minutes the heating switches off for the first time. After that the same pattern repeats about every 26 minutes: around 18 minutes of heating, 8 minutes of pause. In 3 hours about 7.3 kWh are used."
+    },
+    "tasks": [
+      {
+        "text": {
+          "de": "Verkleinere den Abstand: Einschaltwert 20,4 und Ausschaltwert 20,6. Was passiert mit der Schaltdauer?",
+          "en": "Make the gap smaller: switch-on value 20.4 and switch-off value 20.6. What happens to the switching time?"
+        },
+        "hint": {
+          "de": "Zähle, wie oft die Heizung in 3 Stunden einschaltet.",
+          "en": "Count how often the heating switches on in 3 hours."
+        }
+      },
+      {
+        "text": {
+          "de": "Draußen sind −10 °C. Schafft die Heizung die 20 °C noch?",
+          "en": "It is −10 °C outside. Can the heating still reach 20 °C?"
+        },
+        "hint": {
+          "de": "Vergleiche die Heizleistung mit dem Verlust bei 20 °C.",
+          "en": "Compare the heating power with the loss at 20 °C."
+        }
+      },
+      {
+        "text": {
+          "de": "Bessere Dämmung halbiert den Verlustfaktor. Wie viel Energie spart das in 3 Stunden?",
+          "en": "Better insulation halves the loss factor. How much energy does this save in 3 hours?"
+        },
+        "hint": {
+          "de": "Lies Energie am Ende ab und vergleiche mit 7,3 kWh.",
+          "en": "Read Energie at the end and compare with 7.3 kWh."
+        }
+      }
+    ],
+    "limits": {
+      "de": "Der Raum wird als ein einziger Wärmespeicher mit überall gleicher Temperatur betrachtet. Echte Heizkörper werden langsam warm und kühlen langsam ab. Dadurch schwankt die Temperatur in Wirklichkeit etwas stärker.",
+      "en": "The room is treated as a single heat store with the same temperature everywhere. Real radiators warm up and cool down slowly. Because of this, the temperature actually varies a little more."
+    },
+    "glossary": [
+      {
+        "term": {
+          "de": "Hysterese",
+          "en": "hysteresis"
+        },
+        "definition": {
+          "de": "Der Abstand zwischen Einschalt- und Ausschaltwert. Er verhindert ständiges Hin- und Herschalten.",
+          "en": "The gap between the switch-on and switch-off values. It prevents constant switching back and forth."
+        }
+      },
+      {
+        "term": {
+          "de": "Zweipunktregler",
+          "en": "on-off controller"
+        },
+        "definition": {
+          "de": "Ein Regler, der nur zwei Zustände kennt: ganz an oder ganz aus.",
+          "en": "A controller that only has two states: fully on or fully off."
         }
       }
     ]
@@ -1584,293 +3911,6 @@
         "definition": {
           "de": "Energieverlust durch Reibung, der eine Schwingung allmählich abklingen lässt.",
           "en": "Loss of energy through friction that makes an oscillation gradually die away."
-        }
-      }
-    ]
-  },
-  {
-    "id": "drug-level-ibuprofen",
-    "teaser": {
-      "de": "Warum steht auf dem Beipackzettel „alle 8 Stunden“ – und nicht „wann immer es wehtut“?",
-      "en": "Why does the leaflet say 'every 8 hours' rather than 'whenever it hurts'?"
-    },
-    "phenomenon": {
-      "de": "Eine Schmerztablette wirkt nicht sofort: Der Wirkstoff muss erst aus dem Magen-Darm-Trakt ins Blut gelangen. Gleichzeitig baut der Körper ihn ab, vor allem über die Leber, und scheidet ihn über die Nieren aus. Deshalb steigt die Wirkstoffmenge nach jeder Tablette an und sinkt danach wieder. Ärztinnen und Apotheker wählen den Abstand zwischen den Einnahmen so, dass genug Wirkstoff da ist, aber nicht zu viel.",
-      "en": "A painkiller does not work straight away: the drug first has to get from the gut into the blood. At the same time the body breaks it down, mainly in the liver, and gets rid of it through the kidneys. So the amount of drug rises after each tablet and then falls again. Doctors and pharmacists choose the interval between doses so that there is enough drug, but not too much."
-    },
-    "idea": {
-      "de": "Das Modell hat zwei Speicher: Magen/Darm und den übrigen Körper. In jedem kleinen Zeitschritt wandert ein fester Anteil des Wirkstoffs vom Magen in den Körper, und ein fester Anteil im Körper wird abgebaut. Alle 8 Stunden kommt eine neue Tablette mit 400 mg in den Magen. Aus dem Zusammenspiel von Aufnahme und Abbau entsteht ein Sägezahnmuster.",
-      "en": "The model has two compartments: the gut and the rest of the body. In every small time step a fixed fraction of the drug moves from the gut into the body, and a fixed fraction of the drug in the body is broken down. Every 8 hours a new 400 mg tablet arrives in the gut. The interplay of absorption and elimination produces a sawtooth pattern."
-    },
-    "quantities": [
-      {
-        "name": "Gabe",
-        "meaning": {
-          "de": "Wirkstoffmenge, die in diesem Zeitschritt eingenommen wird (400 mg oder 0)",
-          "en": "amount of drug taken in this time step (400 mg or 0)"
-        },
-        "unit": {
-          "de": "mg",
-          "en": "mg"
-        }
-      },
-      {
-        "name": "Dosis",
-        "meaning": {
-          "de": "Wirkstoffmenge einer Tablette",
-          "en": "amount of drug in one tablet"
-        },
-        "unit": {
-          "de": "mg",
-          "en": "mg"
-        }
-      },
-      {
-        "name": "Zaehler",
-        "meaning": {
-          "de": "zählt die Zeitschritte",
-          "en": "counts the time steps"
-        },
-        "unit": {
-          "de": "Schritte",
-          "en": "steps"
-        }
-      },
-      {
-        "name": "Takt",
-        "meaning": {
-          "de": "Abstand zwischen zwei Einnahmen, gemessen in Zeitschritten (80 Schritte = 8 h)",
-          "en": "interval between two doses, measured in time steps (80 steps = 8 h)"
-        },
-        "unit": {
-          "de": "Schritte",
-          "en": "steps"
-        }
-      },
-      {
-        "name": "Magen",
-        "meaning": {
-          "de": "Wirkstoffmenge im Magen-Darm-Trakt",
-          "en": "amount of drug in the gut"
-        },
-        "unit": {
-          "de": "mg",
-          "en": "mg"
-        }
-      },
-      {
-        "name": "Ke",
-        "meaning": {
-          "de": "Abbaurate im Körper",
-          "en": "elimination rate in the body"
-        },
-        "unit": {
-          "de": "1/h",
-          "en": "1/h"
-        }
-      },
-      {
-        "name": "Halbwertszeit",
-        "meaning": {
-          "de": "Zeit, in der die Hälfte des Wirkstoffs im Körper abgebaut wird",
-          "en": "time in which half of the drug in the body is eliminated"
-        },
-        "unit": {
-          "de": "h",
-          "en": "h"
-        }
-      },
-      {
-        "name": "Aufnahme",
-        "meaning": {
-          "de": "Wirkstoff, der pro Stunde vom Magen ins Blut übergeht",
-          "en": "amount of drug passing from the gut into the blood per hour"
-        },
-        "unit": {
-          "de": "mg/h",
-          "en": "mg/h"
-        }
-      },
-      {
-        "name": "Ka",
-        "meaning": {
-          "de": "Aufnahmerate aus dem Magen-Darm-Trakt",
-          "en": "absorption rate from the gut"
-        },
-        "unit": {
-          "de": "1/h",
-          "en": "1/h"
-        }
-      },
-      {
-        "name": "Abbau",
-        "meaning": {
-          "de": "Wirkstoff, der pro Stunde im Körper abgebaut wird",
-          "en": "amount of drug eliminated from the body per hour"
-        },
-        "unit": {
-          "de": "mg/h",
-          "en": "mg/h"
-        }
-      },
-      {
-        "name": "Koerper",
-        "meaning": {
-          "de": "Wirkstoffmenge im Körper (Blut und Gewebe)",
-          "en": "amount of drug in the body (blood and tissues)"
-        },
-        "unit": {
-          "de": "mg",
-          "en": "mg"
-        }
-      },
-      {
-        "name": "dt",
-        "meaning": {
-          "de": "Länge eines Zeitschritts (6 Minuten)",
-          "en": "length of one time step (6 minutes)"
-        },
-        "unit": {
-          "de": "h",
-          "en": "h"
-        }
-      },
-      {
-        "name": "Zeit",
-        "meaning": {
-          "de": "Zeit seit der ersten Tablette",
-          "en": "time since the first tablet"
-        },
-        "unit": {
-          "de": "h",
-          "en": "h"
-        }
-      }
-    ],
-    "lines": [
-      {
-        "code": "Gabe := Dosis * int(1 - frac(Zaehler / Takt) + 0,0001)",
-        "explanation": {
-          "de": "Ein Trick, der nur dann 400 mg ergibt, wenn Zaehler ein Vielfaches von Takt ist: frac liefert den Nachkommaanteil (dann 0), int schneidet die Nachkommastellen ab. Sonst ist Gabe = 0.",
-          "en": "A trick that gives 400 mg only when Zaehler is a multiple of Takt: frac returns the fractional part (0 in that case), and int cuts off everything after the decimal point. Otherwise Gabe = 0."
-        }
-      },
-      {
-        "code": "Magen := Magen + Gabe",
-        "explanation": {
-          "de": "Die eingenommene Tablette landet im Magen.",
-          "en": "The tablet that has just been taken ends up in the gut."
-        }
-      },
-      {
-        "code": "Ke := ln(2) / Halbwertszeit",
-        "explanation": {
-          "de": "Aus der Halbwertszeit wird die Abbaurate berechnet: Ke = ln 2 / 2 h ≈ 0,35 pro Stunde.",
-          "en": "The elimination rate is calculated from the half-life: Ke = ln 2 / 2 h ≈ 0.35 per hour."
-        }
-      },
-      {
-        "code": "Aufnahme := Ka * Magen",
-        "explanation": {
-          "de": "Pro Stunde geht der Anteil Ka = 1,5 des Mageninhalts ins Blut über – je mehr im Magen ist, desto mehr.",
-          "en": "Per hour a fraction Ka = 1.5 of the gut contents passes into the blood – the more there is in the gut, the more passes over."
-        }
-      },
-      {
-        "code": "Abbau := Ke * Koerper",
-        "explanation": {
-          "de": "Der Abbau ist proportional zur Wirkstoffmenge im Körper.",
-          "en": "Elimination is proportional to the amount of drug in the body."
-        }
-      },
-      {
-        "code": "Magen := Magen - Aufnahme * dt",
-        "explanation": {
-          "de": "Der Magen verliert, was aufgenommen wird.",
-          "en": "The gut loses whatever is absorbed."
-        }
-      },
-      {
-        "code": "Koerper := Koerper + (Aufnahme - Abbau) * dt",
-        "explanation": {
-          "de": "Der Körper gewinnt die Aufnahme und verliert den Abbau.",
-          "en": "The body gains what is absorbed and loses what is eliminated."
-        }
-      },
-      {
-        "code": "Zaehler := Zaehler + 1",
-        "explanation": {
-          "de": "Der Schrittzähler wird um eins erhöht.",
-          "en": "The step counter goes up by one."
-        }
-      },
-      {
-        "code": "Zeit := Zeit + dt",
-        "explanation": {
-          "de": "Die Uhr läuft 0,1 Stunden (6 Minuten) weiter.",
-          "en": "The clock moves on by 0.1 hours (6 minutes)."
-        }
-      }
-    ],
-    "observe": {
-      "de": "Nach jeder Tablette steigt die Menge im Körper rasch an und erreicht gut eine Stunde später ihr Maximum: beim ersten Mal etwa 267 mg, ab der dritten Tablette etwa 288 mg. Vor der nächsten Einnahme sind nur noch rund 31–34 mg übrig. Achte darauf, dass die Spitzen kaum höher werden: Bei 8 Stunden Abstand und 2 Stunden Halbwertszeit reichert sich der Wirkstoff fast nicht an.",
-      "en": "After each tablet the amount in the body rises quickly and peaks a little over an hour later: about 267 mg the first time and about 288 mg from the third tablet onwards. Just before the next dose only about 31–34 mg is left. Notice that the peaks hardly grow: with 8 hours between doses and a 2-hour half-life the drug barely builds up."
-    },
-    "tasks": [
-      {
-        "text": {
-          "de": "Lies ab, wie viel Wirkstoff 2, 4 und 6 Stunden nach der ersten Tablette im Körper ist. Passt das ungefähr zur Halbwertszeit von 2 Stunden?",
-          "en": "Read off how much drug is in the body 2, 4 and 6 hours after the first tablet. Does this roughly fit a half-life of 2 hours?"
-        },
-        "hint": {
-          "de": "Sobald der Magen fast leer ist, sollte sich die Menge alle 2 Stunden etwa halbieren.",
-          "en": "Once the gut is almost empty, the amount should roughly halve every 2 hours."
-        }
-      },
-      {
-        "text": {
-          "de": "Gedankenexperiment (keine Empfehlung!): Setze Takt auf 40, also alle 4 Stunden eine Tablette. Wie verändern sich Höchst- und Tiefstwerte? Warum ist das gefährlich?",
-          "en": "Thought experiment (not advice!): set Takt to 40, i.e. a tablet every 4 hours. How do the highest and lowest values change? Why is this dangerous?"
-        },
-        "hint": {
-          "de": "Die Spitzen steigen auf etwa 380 mg, die Tiefstwerte auf etwa 167 mg. Außerdem wären das 2400 mg am Tag – doppelt so viel wie die rezeptfrei erlaubte Tageshöchstdosis.",
-          "en": "The peaks rise to about 380 mg and the lowest values to about 167 mg. That would also be 2400 mg a day – twice the maximum daily dose allowed without a prescription."
-        }
-      },
-      {
-        "text": {
-          "de": "Ändere dt auf 0,05 h. Was musst du außerdem ändern, damit die Tabletten weiterhin alle 8 Stunden genommen werden? Vergleiche die Ergebnisse.",
-          "en": "Change dt to 0.05 h. What else do you have to change so that the tablets are still taken every 8 hours? Compare the results."
-        },
-        "hint": {
-          "de": "Takt zählt Schritte, nicht Stunden: 8 h / 0,05 h = 160 Schritte. Vergiss nicht, auch die Zahl der Schritte zu verdoppeln.",
-          "en": "Takt counts steps, not hours: 8 h / 0.05 h = 160 steps. Don't forget to double the number of steps as well."
-        }
-      }
-    ],
-    "limits": {
-      "de": "Das Modell rechnet mit Mengen in mg und nicht mit der Konzentration im Blut, die für die Wirkung entscheidend ist. Aufnahme und Abbau sind bei jedem Menschen verschieden und hängen z. B. von Essen, Alter und Leberfunktion ab. Diese Simulation ist kein medizinischer Rat.",
-      "en": "The model works with amounts in mg, not with the concentration in the blood, which is what matters for the effect. Absorption and elimination differ from person to person and depend on things like food, age and liver function. This simulation is not medical advice."
-    },
-    "glossary": [
-      {
-        "term": {
-          "de": "Halbwertszeit",
-          "en": "half-life"
-        },
-        "definition": {
-          "de": "Die Zeit, nach der nur noch die Hälfte einer Menge übrig ist.",
-          "en": "The time after which only half of an amount is left."
-        }
-      },
-      {
-        "term": {
-          "de": "Kompartiment",
-          "en": "compartment"
-        },
-        "definition": {
-          "de": "Ein gedachter „Behälter“ im Modell, in dem sich eine Menge sammelt, z. B. Magen oder Blut.",
-          "en": "An imagined container in the model where an amount collects, such as the gut or the blood."
         }
       }
     ]

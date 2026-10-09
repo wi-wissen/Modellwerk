@@ -1,10 +1,13 @@
 <template>
   <figure class="flex flex-col gap-2">
     <div ref="box" class="relative w-full min-w-0">
-      <svg :viewBox="`0 0 ${w} ${h}`" :width="w" :height="h" class="block w-full touch-none select-none"
+      <svg ref="svg" :viewBox="`0 0 ${w} ${h}`" :width="w" :height="h" class="block w-full touch-none select-none"
            role="img" :aria-label="summary" tabindex="0"
            aria-describedby="chart-help"
            @pointermove="onPointer" @pointerleave="cursor = null" @keydown="onKey" @focus="onFocus" @blur="cursor = null">
+        <defs>
+          <clipPath :id="clipId"><rect :x="m.l" :y="m.t" :width="pw" :height="ph" /></clipPath>
+        </defs>
         <rect :x="m.l" :y="m.t" :width="pw" :height="ph" fill="var(--sheet)" />
         <g stroke="var(--grid)" stroke-width="1">
           <line v-for="t in yTicks" :key="'gy' + t" :x1="m.l" :x2="m.l + pw" :y1="sy(t)" :y2="sy(t)" />
@@ -19,7 +22,7 @@
         </g>
         <text :x="m.l + pw / 2" :y="h - 6" text-anchor="middle" font-size="13" font-weight="700" fill="var(--ink)">{{ xLabel }}</text>
 
-        <g fill="none" stroke-linejoin="round" stroke-linecap="round">
+        <g fill="none" stroke-linejoin="round" stroke-linecap="round" :clip-path="`url(#${clipId})`">
           <polyline v-for="(s, i) in lines" :key="s.name" :points="s.points" :stroke="s.color" stroke-width="2.5"
                     :stroke-dasharray="dash(i)" />
         </g>
@@ -72,6 +75,8 @@ export default {
     result: { type: Object, required: true },
     x: { type: String, required: true },
     ys: { type: Array, required: true },
+    // { auto: true } or { auto: false, xMin, xMax, yMin, yMax }; missing limits stay automatic
+    range: { type: Object, default: () => ({ auto: true }) },
   },
   data() {
     return { w: 640, h: 380, cursor: null, ro: null }
@@ -86,11 +91,14 @@ export default {
     ph() { return this.h - this.m.t - this.m.b },
     xs() { return this.result.series[this.x] ?? [] },
     xLabel() { return this.result.display.get(this.x) ?? this.x },
-    xDomain() { return this.domain([this.xs]) },
+    clipId() { return `plot-clip-${this.$.uid}` },
+    xDomain() {
+      return this.manual(this.domain([this.xs]), 'xMin', 'xMax')
+    },
     yDomain() {
       const [lo, hi] = this.domain(this.ys.map((n) => this.result.series[n]).filter(Boolean))
       const step = niceStep(lo, hi, 6)
-      return [Math.floor(lo / step + 1e-9) * step, Math.ceil(hi / step - 1e-9) * step]
+      return this.manual([Math.floor(lo / step + 1e-9) * step, Math.ceil(hi / step - 1e-9) * step], 'yMin', 'yMax')
     },
     xTicks() { return niceTicks(...this.xDomain, Math.max(2, Math.floor(this.pw / 90))) },
     yTicksRaw() { return niceTicks(...this.yDomain, 6) },
@@ -129,6 +137,29 @@ export default {
   },
   beforeUnmount() { this.ro?.disconnect() },
   methods: {
+    manual([lo, hi], minKey, maxKey) {
+      if (this.range.auto) return [lo, hi]
+      const a = Number.isFinite(this.range[minKey]) ? this.range[minKey] : lo
+      const b = Number.isFinite(this.range[maxKey]) ? this.range[maxKey] : hi
+      return a < b ? [a, b] : [lo, hi]
+    },
+    /** Standalone SVG of the current chart with theme colours resolved. */
+    toSvgString() {
+      const clone = this.$refs.svg.cloneNode(true)
+      const css = getComputedStyle(document.documentElement)
+      const resolve = (v) => v.replace(/var\((--[\w-]+)\)/g, (_, name) => css.getPropertyValue(name).trim() || '#000')
+      for (const el of [clone, ...clone.querySelectorAll('*')]) {
+        for (const attr of [...el.attributes]) if (attr.value.includes('var(')) el.setAttribute(attr.name, resolve(attr.value))
+      }
+      clone.querySelectorAll('circle, line[stroke-dasharray="3 3"]').forEach((el) => el.closest('g')?.parentNode === clone && el.remove())
+      clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+      clone.setAttribute('font-family', 'Atkinson Hyperlegible Next, Arial, sans-serif')
+      clone.removeAttribute('class')
+      const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+      bg.setAttribute('width', this.w); bg.setAttribute('height', this.h); bg.setAttribute('fill', css.getPropertyValue('--sheet').trim())
+      clone.insertBefore(bg, clone.firstChild)
+      return new XMLSerializer().serializeToString(clone)
+    },
     domain(arrays) {
       let lo = Infinity
       let hi = -Infinity
