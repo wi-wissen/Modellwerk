@@ -1,111 +1,118 @@
 # Modellwerk
 
-Modellbildung und Simulation im Browser – eine moderne, barrierearme Neuentwicklung,
-die **rechengleich zu Moebius 3.0** (Detlef Hoche) ist. Arbeitstitel, Stand: Mockup.
+Modelling and simulation for the classroom – in the browser, as a desktop app and on
+tablets. Students describe a model in sentences, as an influence diagram or as a short
+program; Modellwerk runs it step by step and shows graphs and tables.
 
-## Schnellstart
+Modellwerk is an independent new development. It opens files in the PRG format of an
+older Windows program and reproduces the values stored in them **bit for bit**.
+
+## Quick start
 
 ```bash
 npm install
-npm run dev            # Entwicklungsserver
-npm test               # Unit-Tests
-npm run build          # Web-Build nach dist/
-npm run build:single   # eine einzige, offline nutzbare HTML-Datei nach dist-single/
+npm run dev          # website with landing page, examples and app (http://localhost:5173)
+npm test             # unit tests (Vitest)
+npm run build        # website → dist/
+npm run build:app    # app only (used by the desktop/mobile shell) → dist-app/
+npm run build:single # app as one offline HTML file → dist-single/
+npm run tauri build  # desktop app (needs Rust; see "Desktop and mobile")
 ```
 
-## Wie beweisen wir „exakt dieselben Ergebnisse“?
+## Site structure
 
-Moebius speichert in jeder `.prg`-Datei nicht nur Programm und Startwerte, sondern auch
-**die Werte, die es selbst berechnet hat** – für jede Variable und jeden Schritt als
-IEEE-754-Double. Damit liegt in jeder Originaldatei ein Referenzergebnis des Originals vor.
+| Path | Content |
+|---|---|
+| `/` | Landing page |
+| `/app/` | The app; `/app/#<example-id>` opens an example directly |
+| `/examples/` | Overview of all examples |
+| `/examples/<example-id>/` | Bilingual student guide with live graph and tasks |
 
-Der Prüflauf liest diese Dateien, rechnet jedes Modell mit unserem Rechenkern nach und
-vergleicht **jeden Wert Bit für Bit**:
+## Proof of identical results
+
+Every PRG file stores, besides program and initial values, the values the legacy
+program calculated for every variable and step (IEEE-754 doubles). The proof run
+recalculates each model and compares every stored value bit for bit:
 
 ```bash
-MOEBIUS_ORIGINAL_DIR="/pfad/zu/Moebius/Beispiele" npm run verify
-MOEBIUS_ORIGINAL_DIR="/pfad/zu/Moebius/Beispiele" npm test   # zusätzlich als Testfälle
+PRG_REFERENCE_DIR=/path/to/prg-files npm run verify   # report
+PRG_REFERENCE_DIR=/path/to/prg-files npm test         # also as test cases
 ```
 
-Stand mit den 27 Beispieldateien von Moebius 3.0 (Installer Sachsen und Shareware, identische EXE):
+Result for the 27 reference files shipped with the legacy program: **29,380 of 29,380
+values identical** (21 files contain stored results; 5 use a file variant that is not
+read yet). The reference files are copyrighted and are not part of this repository. In
+the app, *Compare PRG file* in the footer runs the same check locally.
 
-| | |
-|---|---|
-| Dateien mit gespeicherten Ergebnissen | 21 von 26 |
-| verglichene Werte | 29 380 |
-| bitgenau identisch | **29 380 (100 %)** |
+What we learned about the legacy program:
 
-Dieselbe Prüfung steckt in der App („Mit Original vergleichen“): Lehrkräfte können eigene
-`.prg`-Dateien hineinziehen und sehen sofort, ob alles identisch ist. Die Dateien verlassen
-dabei das Gerät nicht.
+- Every operation is rounded to an IEEE-754 double (an 80-bit extended re-run differs
+  in up to 70 % of the values).
+- `exp`, `ln` and `^` are effectively correctly rounded (x87 with 80 bits, then
+  stored as double). JavaScript's `Math.exp`, `Math.log` and `Math.pow` are off by one
+  ULP in 3–9 % of cases, so `src/engine/exactmath.js` computes them in double-double
+  arithmetic and rounds once (tested against 60-digit references).
+- Values are recorded after each pass; the initial value is stored separately.
 
-Die Originaldateien sind urheberrechtlich geschützt und liegen deshalb **nicht** im Repository.
-
-### Was wir dabei über das Original gelernt haben
-
-- Das Original rechnet jede Operation in **IEEE-754-Double** (nicht in 80-Bit-Extended).
-  Eine Extended-Nachrechnung weicht bei bis zu 70 % der Werte ab; Double trifft alle.
-- `exp()` rechnet das Original auf der x87-FPU und rundet dann auf Double – das ist praktisch
-  korrekt gerundet. `Math.exp` in JavaScript liegt in ca. 8 % der Fälle 1 ULP daneben.
-  Deshalb gibt es `src/engine/exactmath.js` (Double-Double-Arithmetik, gegen eine
-  60-stellige Referenz getestet). Erst damit stimmt auch das Kondensator-Beispiel bitgenau.
-- Gespeichert werden die Werte **nach** jedem Durchlauf; der Startwert steht separat.
-
-## Aufbau
+## Modelling language
 
 ```
-src/engine/language.js   Modellsprache: Tokenizer, Parser (Fehlermeldungen wie im Original)
-src/engine/simulate.js   Interpreter, Delphi-kompatibler Zufallsgenerator
-src/engine/exactmath.js  korrekt gerundete Elementarfunktionen
-src/engine/prg.js        Leser für Moebius-Dateien (MOEBIUS30)
-src/engine/verify.js     bitweiser Vergleich mit den Originalergebnissen
-src/engine/model.js      Rollen (Zustand/Rate/Konstante/Zeit), Sätze → Programm
-src/components/          Vue-Komponenten (Options API)
-scripts/                 Prüflauf, Artefakt-Export
-tests/                   Vitest
+// comment
+Growth := FGrowth*Height*(FinalHeight-Height)   // := or = assigns
+Height := Height + Growth; Time := Time + 1     // ; or : separates statements
+IF Height > 200 THEN Flag := 1; Count := Count + 1   // IF/WHILE apply to the rest of the line
 ```
 
-Technik: Vite, Vue 3 (Options API), Tailwind CSS 4, Lucide-Icons, Schrift Atkinson Hyperlegible
-(vom Braille Institute für gute Lesbarkeit entwickelt). Kurvenfarben nach Okabe-Ito
-(farbenblind-sicher) und zusätzlich unterschiedliche Strichmuster.
+Operators `+ - * / ^`, parentheses, comparisons `< > = <= >= <>`, decimal comma or point,
+functions `sqr sqrt exp ln sin cos arctan abs int frac random`. `random(0)` gives a
+fraction in [0, 1), `random(x)` a whole number from 0 to x−1. Letter case is ignored
+unless switched on. At most 8191 steps.
 
-## Barrierefreiheit (bisher umgesetzt)
+Semantics marked as *documented but not yet verified bit for bit* in
+`src/engine/language.js`: `^` precedence (assumed: binds tighter than unary minus,
+right-associative), `IF`/`WHILE`, trigonometric functions and `random`.
 
-- jede Schaltfläche mit Text, nicht nur Symbol; Tastaturbedienung überall, sichtbarer Fokus
-- Tabs nach WAI-ARIA (Pfeiltasten), Sprunglink, Live-Regionen für Meldungen
-- Diagramm per Tastatur ablesbar (← → Pos1 Ende Bild↑ Bild↓), Werte werden angesagt
-- Wirkungsdiagramm zusätzlich als Text
-- hell/dunkel/System, Schriftgröße in Stufen, `prefers-reduced-motion`
-- Fehlermeldungen mit Zeilennummer und Sprung zur Stelle
+## Code layout
 
-## Offene Punkte
+```
+src/engine/      language, simulation, exact maths, PRG reader, verification,
+                 model analysis (roles, sentences ↔ program), CSV, project files
+src/components/  app components (Vue 3, Options API)
+src/guides/      example overview and guide pages
+src/site/        shared header, footer, links, theme
+src/examples/    example collections (own.json, sourced.json with sources)
+src/i18n/        German and English texts
+src-tauri/       desktop/mobile shell (app only)
+tests/           Vitest
+```
 
-1. **Formatvariante:** 5 Beispieldateien (Kepler, Räuber, Elektron im B-Feld, Bewegung 1/3)
-   enthalten mehrere Simulationen in einem anderen Satzaufbau. Leser erweitern, dann
-   prüfen, ob dort Ergebnisse gespeichert sind.
-2. **Sprachumfang verifizieren:** IF/THEN, WHILE/DO, Vergleiche, SIN/COS/ARCTAN/LN/FRAC/INT,
-   RANDOM, TIME, INP und Makros sind aus der EXE bekannt, aber noch nicht gegen das
-   Original geprüft. Weg: Parser/Interpreter der EXE disassemblieren (Ghidra) und eigene
-   Testdateien im Original erzeugen lassen (Moebius unter Windows/Wine).
-   Für SIN/COS/LN/ARCTAN korrekt gerundete Versionen wie bei EXP ergänzen.
-3. **Namenskollisionen** (z. B. `A` und `a`) beim Eingeben warnen – das Original unterscheidet
-   standardmäßig nicht zwischen Groß- und Kleinschreibung.
-4. Grafisches Modell zum direkten Zeichnen, Animationen, Arbeitsblatt mit Text und Grafiken,
-   Drucken, Speichern im eigenen Format und Export (CSV/Excel).
-5. Grenzfall: Bei transzendenten Funktionen kann das Original selbst je nach Prozessor
-   (Intel/AMD-x87) in seltenen Fällen um 1 ULP abweichen. Für diese Fälle ist „korrekt gerundet“
-   die einzige reproduzierbare Referenz.
+Stack: Vite, Vue 3 (Options API), Tailwind CSS 4, Lucide icons, Atkinson Hyperlegible
+(self-hosted via Fontsource). No server, no tracking, no third-party requests.
 
-## Desktop und Mobil mit Tauri
+## Accessibility
 
-Die App ist eine reine Client-Anwendung ohne Server und eignet sich damit direkt für
-[Tauri 2](https://v2.tauri.app/): `npm create tauri-app` bzw. `npx tauri init` im Projekt,
-`frontendDist` auf `../dist` und `devUrl` auf den Vite-Server setzen. Daraus entstehen
-Windows-, macOS- und Linux-Installer sowie iOS- und Android-Apps. Voraussetzungen: Rust,
-für Mobil zusätzlich Xcode bzw. Android SDK. Alternativ läuft die Web-Version als PWA
-offline im Browser.
+Labelled buttons instead of icon-only toolbars, full keyboard control, visible focus,
+WAI-ARIA tabs, live regions for messages, graph values readable with arrow keys and
+announced to screen readers, diagram also as text, colour-blind-safe curve colours
+plus dash patterns, light/dark/system theme, adjustable text size, reduced motion.
 
-## Rechtliches
+## Examples
 
-Neuentwicklung der Funktionalität, kein übernommener Code. Beispiele, Texte und Grafiken
-sind neu erstellt. Das Lesen von `.prg`-Dateien dient der Interoperabilität.
+`src/examples/own.json` – written from scratch. `src/examples/sourced.json` – based on
+openly licensed or factual sources (mostly Wikipedia, CC BY-SA 4.0, and official data);
+every example lists its sources, shown in the app and on the guide pages.
+Each example has control values that the test suite checks.
+
+## Desktop and mobile
+
+`src-tauri/` wraps the app (without landing page and guides) with Tauri 2.
+GitHub Actions (`.github/workflows/release.yml`) build Windows (`.msi`, `.exe`),
+Linux (`.deb`, AppImage) and Android (`.apk`, `.aab`) on a version tag; Android signing
+is optional via the secrets `ANDROID_KEYSTORE`, `ANDROID_KEY_ALIAS`,
+`ANDROID_KEY_PASSWORD`. The app identifier `app.modellwerk.desktop` is a placeholder.
+
+Linux build dependencies: `libwebkit2gtk-4.1-dev librsvg2-dev patchelf`.
+
+## Roadmap
+
+See [docs/ROADMAP.md](docs/ROADMAP.md).
