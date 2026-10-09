@@ -36,10 +36,10 @@ import { parseNumber } from '../engine/model.js'
 import { MAX_STEPS } from '../engine/simulate.js'
 
 const ORDER = [
-  { role: 'state', title: 'Zustandsgrößen' },
-  { role: 'constant', title: 'Konstanten und Faktoren' },
-  { role: 'time', title: 'Zeit' },
-  { role: 'rate', title: 'Raten und Hilfsgrößen – werden in jedem Schritt neu berechnet', collapsed: true },
+  { role: 'state' },
+  { role: 'constant' },
+  { role: 'time' },
+  { role: 'rate', collapsed: true },
 ]
 
 export default {
@@ -62,7 +62,7 @@ export default {
   },
   watch: {
     resetKey() {
-      // Neues Modell geladen: Eingabetexte verwerfen
+      // new model loaded: drop the typed texts
       this.text = {}
       this.invalid = new Set()
     },

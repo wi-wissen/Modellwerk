@@ -123,6 +123,7 @@ import { analyse, formatNumber, programToSentences, sentencesToProgram } from '.
 import { MAX_STEPS, simulate } from './engine/simulate.js'
 import { readPrg } from './engine/prg.js'
 import { tableRows } from './engine/export.js'
+import { seriesColor, seriesDash } from './chartStyle.js'
 import { PROJECT_EXTENSION, cleanSimulation, parseProject, projectToText, toProject } from './engine/project.js'
 import { EXAMPLES } from './examples.js'
 import { exampleText } from './guides/data.js'
@@ -415,12 +416,17 @@ export default {
         }
       }
       const chart = document.querySelector('#panel-chart svg[role="img"], #panel-chart3d svg[role="img"]')
+      const legend = run.result && document.querySelector('#panel-chart svg[role="img"]')
+        ? this.view.plotY.filter((y) => y !== this.view.plotX)
+          .map((y, i) => ({ label: run.result.display.get(y) ?? y, color: seriesColor(i), dash: seriesDash(i) }))
+        : []
       this.report = {
         title: this.texts.title,
         topic: this.texts.topic,
         description: this.texts.description,
         sims,
         chartSvg: chart ? chart.outerHTML : '',
+        legend,
         table,
       }
       this.$nextTick(() => {

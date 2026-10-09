@@ -17,8 +17,8 @@
         <rect :x="m.l" :y="m.t" :width="pw" :height="ph" fill="none" stroke="var(--line)" />
 
         <g font-size="12" fill="var(--muted)" class="tabular">
-          <text v-for="t in yTicks" :key="'ty' + t" :x="m.l - 8" :y="sy(t) + 4" text-anchor="end">{{ fmt(t) }}</text>
-          <text v-for="t in xTicks" :key="'tx' + t" :x="sx(t)" :y="m.t + ph + 18" text-anchor="middle">{{ fmt(t) }}</text>
+          <text v-for="t in yTicks" :key="'ty' + t" :x="m.l - 8" :y="sy(t) + 4" text-anchor="end">{{ tick(t, yTicks) }}</text>
+          <text v-for="t in xTicks" :key="'tx' + t" :x="sx(t)" :y="m.t + ph + 18" text-anchor="middle">{{ tick(t, xTicks) }}</text>
         </g>
         <text :x="m.l + pw / 2" :y="h - 6" text-anchor="middle" font-size="13" font-weight="700" fill="var(--ink)">{{ xLabel }}</text>
 
@@ -59,7 +59,7 @@
 <script>
 import { formatNumber } from '../engine/model.js'
 import { numberLocale } from '../i18n/index.js'
-import { seriesColor, seriesDash } from '../chartStyle.js'
+import { seriesColor, seriesDash, tickLabel } from '../chartStyle.js'
 
 
 function niceStep(lo, hi, count) {
@@ -96,7 +96,7 @@ export default {
   computed: {
     // left margin grows with the longest y tick label so nothing is clipped
     m() {
-      const longest = Math.max(...this.yTicksRaw.map((t) => this.fmt(t).length))
+      const longest = Math.max(...this.yTicksRaw.map((t) => this.tick(t, this.yTicksRaw).length))
       return { l: Math.max(44, longest * 7.4 + 16), r: 16, t: 14, b: 44 }
     },
     pw() { return this.w - this.m.l - this.m.r },
@@ -207,6 +207,8 @@ export default {
     sy(v) { const [a, b] = this.yDomain; return this.m.t + this.ph - ((v - a) / (b - a)) * this.ph },
     dash(i) { return seriesDash(i) },
     fmt(v, d = 4) { return formatNumber(v, d, numberLocale()) },
+    // tick labels show as many decimals as the tick step needs (1902.5, not 1903)
+    tick(v, ticks) { return tickLabel(v, ticks.length > 1 ? ticks[1] - ticks[0] : 1, numberLocale()) },
     onPointer(ev) {
       const rect = ev.currentTarget.getBoundingClientRect()
       const px = ((ev.clientX - rect.left) / rect.width) * this.w

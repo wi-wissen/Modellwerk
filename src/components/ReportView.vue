@@ -30,6 +30,12 @@
     <section v-if="chartSvg">
       <h3>{{ $t('app.tabs.chart') }}</h3>
       <div class="report-chart" v-html="chartSvg"></div>
+      <ul v-if="legend.length" class="report-legend">
+        <li v-for="l in legend" :key="l.label">
+          <svg width="30" height="8" aria-hidden="true"><line x1="1" y1="4" x2="29" y2="4" :stroke="l.color" stroke-width="2.5" :stroke-dasharray="l.dash || null" /></svg>
+          <span class="mono">{{ l.label }}</span>
+        </li>
+      </ul>
     </section>
 
     <section v-if="table.rows.length">
@@ -51,6 +57,7 @@ export default {
     description: { type: String, default: '' },
     sims: { type: Array, required: true }, // [{ name, source, macros, start: [{ name, label, value, role }], steps }]
     chartSvg: { type: String, default: '' },
+    legend: { type: Array, default: () => [] }, // [{ label, color, dash }]
     table: { type: Object, default: () => ({ header: [], rows: [], every: 1 }) },
   },
   computed: {
@@ -73,6 +80,8 @@ export default {
   .report-table { border-collapse: collapse; font-size: 9.5pt; }
   .report-table th, .report-table td { border: 1px solid #bbb; padding: 2pt 6pt; text-align: left; }
   .report-chart svg { width: 100%; height: auto; }
+  .report-legend { display: flex; flex-wrap: wrap; gap: 4pt 14pt; list-style: none; padding: 0; margin: 4pt 0 0; font-size: 9.5pt; }
+  .report-legend li { display: inline-flex; align-items: center; gap: 5pt; }
   .report section { break-inside: avoid; }
 }
 </style>
