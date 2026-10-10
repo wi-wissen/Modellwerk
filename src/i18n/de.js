@@ -466,7 +466,7 @@ export default {
       windows: 'Windows',
       linux: 'Linux',
       android: 'Android',
-      file: 'HTML-Datei',
+      browser: 'Browser',
       button: 'Herunterladen',
       note: 'Version {v} · auf GitHub',
     },

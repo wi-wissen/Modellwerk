@@ -42,14 +42,14 @@
         </div>
       </section>
 
-      <section id="offline" class="flex flex-wrap items-center gap-x-8 gap-y-5 rounded-2xl border border-accent/25 bg-accent-soft px-6 py-5 sm:px-7" aria-labelledby="offline-title">
+      <section id="offline" class="flex flex-wrap items-center gap-x-10 gap-y-5 border-t border-line pt-8" aria-labelledby="offline-title">
         <div class="flex min-w-0 flex-[1_1_22rem] flex-col gap-1.5">
           <h2 id="offline-title" class="text-xl font-extrabold tracking-tight sm:text-2xl">{{ $t('landing.offline.title') }}</h2>
           <p class="max-w-[54ch] text-muted">{{ $t('landing.offline.text') }}</p>
         </div>
-        <ul class="flex gap-5 text-accent-strong" :aria-label="$t('landing.offline.platforms')">
+        <ul class="flex gap-6 text-ink" :aria-label="$t('landing.offline.platforms')">
           <li v-for="p in platforms" :key="p.key" class="flex flex-col items-center gap-1 text-sm font-semibold">
-            <component :is="p.icon" :size="26" :stroke-width="1.8" aria-hidden="true" /> {{ $t(`landing.offline.${p.key}`) }}
+            <PlatformIcon :name="p.key" /> <span class="text-muted">{{ $t(`landing.offline.${p.key}`) }}</span>
           </li>
         </ul>
         <div class="flex flex-col items-center gap-1.5">
@@ -66,7 +66,8 @@
 </template>
 
 <script>
-import { Accessibility, ArrowRight, Download, FileCheck2, FileCode2, Layers, Monitor, ShieldCheck, Smartphone, SquareTerminal } from 'lucide-vue-next'
+import { Accessibility, ArrowRight, Download, FileCheck2, Layers, ShieldCheck } from 'lucide-vue-next'
+import PlatformIcon from '../site/PlatformIcon.vue'
 import SiteHeader from '../site/SiteHeader.vue'
 import SiteFooter from '../site/SiteFooter.vue'
 import { RELEASES, siteLink } from '../site/links.js'
@@ -79,7 +80,7 @@ const DEMO = 'Wachstum := FWachstum*Hoehe*(Endhoehe-Hoehe)\nHoehe := Hoehe + Wac
 
 export default {
   name: 'LandingPage',
-  components: { Accessibility, ArrowRight, Download, FileCheck2, FileCode2, Layers, Monitor, ShieldCheck, Smartphone, SquareTerminal, SiteHeader, SiteFooter },
+  components: { Accessibility, ArrowRight, Download, FileCheck2, Layers, PlatformIcon, ShieldCheck, SiteHeader, SiteFooter },
   data() {
     return {
       featureIcons: ['Layers', 'Accessibility', 'ShieldCheck', 'FileCheck2'],
@@ -87,12 +88,7 @@ export default {
       // every build (desktop, Android, single HTML file) is on the newest GitHub release
       releases: `${RELEASES}/latest`,
       version: pkg.version,
-      platforms: [
-        { key: 'windows', icon: 'Monitor' },
-        { key: 'linux', icon: 'SquareTerminal' },
-        { key: 'android', icon: 'Smartphone' },
-        { key: 'file', icon: 'FileCode2' },
-      ],
+      platforms: [{ key: 'windows' }, { key: 'linux' }, { key: 'android' }, { key: 'browser' }],
     }
   },
   watch: {
