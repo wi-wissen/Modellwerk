@@ -9,12 +9,18 @@ text = gradle.read_text()
 if 'signingConfigs' in text:
     sys.exit(0)  # already patched
 
+# Inside android {} the name `java` resolves to the Android extension (AGP 9),
+# so fully qualified java.util/java.io names do not compile there; import them.
+for name in ('java.util.Properties', 'java.io.FileInputStream'):
+    if f'import {name}\n' not in text:
+        text = f'import {name}\n' + text
+
 signing = '''android {
     signingConfigs {
         create("release") {
-            val props = java.util.Properties()
+            val props = Properties()
             val keystoreProperties = rootProject.file("keystore.properties")
-            if (keystoreProperties.exists()) props.load(java.io.FileInputStream(keystoreProperties))
+            if (keystoreProperties.exists()) FileInputStream(keystoreProperties).use { props.load(it) }
             keyAlias = props["keyAlias"] as String
             keyPassword = props["password"] as String
             storeFile = file(props["storeFile"] as String)
