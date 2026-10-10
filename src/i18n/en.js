@@ -459,6 +459,17 @@ export default {
       { title: 'Stays on your device', text: 'Runs in the browser and offline. No sign-up, no data sent anywhere.' },
       { title: 'Opens PRG files', text: 'Existing models in PRG format open and calculate the very same values, bit for bit.' },
     ],
+    offline: {
+      title: 'Use it without internet',
+      lead: 'After the first visit Modellwerk needs no network. For computer rooms, tablets or a projector without Wi-Fi there are also separate versions.',
+      browser: { title: 'In the browser', text: 'Once opened, the app keeps working offline. “Install” or “Add to home screen” gives it a window of its own.', link: 'Open the app' },
+      file: { title: 'As a single file', text: 'One HTML file with everything inside. Put it on a USB stick or network drive and double-click to open it in the browser.', link: 'Download HTML file' },
+      windows: { title: 'Windows', text: 'As a program to install (.msi or setup) or as a portable .exe that starts without installing.', link: 'Download portable .exe' },
+      linux: { title: 'Linux', text: 'As a .deb package for Debian and Ubuntu or as an AppImage for other systems.', link: 'Go to the packages' },
+      android: { title: 'Android', text: 'As an app for tablets and phones. Open the APK file on the device and allow the installation.', link: 'Download APK' },
+      all: 'All downloads and release notes',
+      note: 'On GitHub, always the newest version.',
+    },
   },
   footer: {
     about: 'Modelling and simulation for the classroom – in the browser, on tablets and offline.',

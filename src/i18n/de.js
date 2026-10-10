@@ -459,6 +459,17 @@ export default {
       { title: 'Bleibt auf dem Gerät', text: 'Läuft im Browser und offline. Keine Anmeldung, keine Datenübertragung.' },
       { title: 'Öffnet PRG-Dateien', text: 'Vorhandene Modelle im PRG-Format lassen sich öffnen und rechnen Bit für Bit dieselben Werte.' },
     ],
+    offline: {
+      title: 'Ohne Internet nutzen',
+      lead: 'Modellwerk braucht nach dem ersten Laden kein Netz mehr. Für Rechnerräume, Tablets oder den Beamer ohne WLAN gibt es außerdem eigene Fassungen.',
+      browser: { title: 'Im Browser', text: 'Einmal geöffnet, läuft die App auch offline weiter. Über „Installieren“ oder „Zum Startbildschirm“ bekommt sie ein eigenes Fenster.', link: 'App öffnen' },
+      file: { title: 'Als einzelne Datei', text: 'Eine HTML-Datei mit allem darin. Auf USB-Stick oder Netzlaufwerk legen und per Doppelklick im Browser öffnen.', link: 'HTML-Datei laden' },
+      windows: { title: 'Windows', text: 'Als Programm zum Installieren (.msi oder Setup) oder als portable .exe, die ohne Installation startet.', link: 'Portable .exe laden' },
+      linux: { title: 'Linux', text: 'Als .deb-Paket für Debian und Ubuntu oder als AppImage für andere Systeme.', link: 'Zu den Paketen' },
+      android: { title: 'Android', text: 'Als App für Tablets und Smartphones. Die APK-Datei auf dem Gerät öffnen und die Installation erlauben.', link: 'APK laden' },
+      all: 'Alle Downloads und Versionshinweise',
+      note: 'Auf GitHub, immer die neueste Version.',
+    },
   },
   footer: {
     about: 'Modellbildung und Simulation für den Unterricht – im Browser, auf dem Tablet und offline.',

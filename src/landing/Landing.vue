@@ -41,6 +41,29 @@
           <p class="text-muted">{{ f.text }}</p>
         </div>
       </section>
+
+      <section id="offline" class="flex flex-col gap-6 border-t border-line pt-10" aria-labelledby="offline-title">
+        <div class="flex max-w-[62ch] flex-col gap-2">
+          <h2 id="offline-title" class="text-2xl font-extrabold tracking-tight sm:text-3xl">{{ $t('landing.offline.title') }}</h2>
+          <p class="text-lg text-muted">{{ $t('landing.offline.lead') }}</p>
+        </div>
+        <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          <li v-for="v in offlineVariants" :key="v.key" class="panel flex flex-col gap-2 p-5">
+            <component :is="v.icon" :size="22" aria-hidden="true" class="text-accent" />
+            <h3 class="text-lg font-bold">{{ $t(`landing.offline.${v.key}.title`) }}</h3>
+            <p class="flex-1 text-muted">{{ $t(`landing.offline.${v.key}.text`) }}</p>
+            <a :href="v.href" class="inline-flex items-center gap-1.5 font-semibold text-accent-strong underline underline-offset-2">
+              <component :is="v.external ? 'Download' : 'ArrowRight'" :size="16" aria-hidden="true" /> {{ $t(`landing.offline.${v.key}.link`) }}
+            </a>
+          </li>
+        </ul>
+        <p class="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <a :href="releases" class="inline-flex items-center gap-1.5 font-semibold text-accent-strong underline underline-offset-2">
+            <ExternalLink :size="18" aria-hidden="true" /> {{ $t('landing.offline.all') }}
+          </a>
+          <span class="text-muted">{{ $t('landing.offline.note') }}</span>
+        </p>
+      </section>
     </main>
 
     <SiteFooter />
@@ -48,10 +71,10 @@
 </template>
 
 <script>
-import { Accessibility, ArrowRight, FileCheck2, Layers, ShieldCheck } from 'lucide-vue-next'
+import { Accessibility, AppWindow, ArrowRight, Download, ExternalLink, FileCheck2, FileCode2, Globe, Layers, ShieldCheck, Smartphone, Terminal } from 'lucide-vue-next'
 import SiteHeader from '../site/SiteHeader.vue'
 import SiteFooter from '../site/SiteFooter.vue'
-import { siteLink } from '../site/links.js'
+import { RELEASES, latestDownload, siteLink } from '../site/links.js'
 import { simulate } from '../engine/simulate.js'
 import { sparkPoints } from '../chartStyle.js'
 
@@ -60,11 +83,20 @@ const DEMO = 'Wachstum := FWachstum*Hoehe*(Endhoehe-Hoehe)\nHoehe := Hoehe + Wac
 
 export default {
   name: 'LandingPage',
-  components: { Accessibility, ArrowRight, FileCheck2, Layers, ShieldCheck, SiteHeader, SiteFooter },
+  components: { Accessibility, AppWindow, ArrowRight, Download, ExternalLink, FileCheck2, FileCode2, Globe, Layers, ShieldCheck, Smartphone, Terminal, SiteHeader, SiteFooter },
   data() {
     return {
       featureIcons: ['Layers', 'Accessibility', 'ShieldCheck', 'FileCheck2'],
       demo: simulate(DEMO, { HOEHE: 8, ENDHOEHE: 250, FWACHSTUM: 0.0009 }, 70),
+      releases: RELEASES,
+      // files with a fixed name link straight to the newest release, the others to its page
+      offlineVariants: [
+        { key: 'browser', icon: 'Globe', href: siteLink('./', 'app/') },
+        { key: 'file', icon: 'FileCode2', href: latestDownload('modellwerk-offline.html'), external: true },
+        { key: 'windows', icon: 'AppWindow', href: latestDownload('Modellwerk-portable.exe'), external: true },
+        { key: 'linux', icon: 'Terminal', href: `${RELEASES}/latest` },
+        { key: 'android', icon: 'Smartphone', href: latestDownload('Modellwerk-android.apk'), external: true },
+      ],
     }
   },
   watch: {
