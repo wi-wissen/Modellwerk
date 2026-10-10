@@ -1,6 +1,6 @@
 [package]
 name = "modellwerk"
-version = "0.1.0"
+version = "0.1.1"
 description = "Modellwerk – modelling and simulation for the classroom"
 authors = ["Modellwerk contributors"]
 license = ""
