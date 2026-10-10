@@ -133,7 +133,8 @@ identifier is `net.wi7.modellwerk`, derived from the domain. To build a release:
 
 1. Set `version` in `package.json` and `src-tauri/tauri.conf.json` (e.g. `0.2.0`).
 2. Commit, then push a tag: `git tag v0.2.0 && git push origin v0.2.0`.
-3. `.github/workflows/release.yml` builds Windows (`.msi`, setup `.exe`), Linux
+3. `.github/workflows/release.yml` builds Windows (`.msi`, setup `.exe` and
+   `Modellwerk-portable.exe`, which runs without installing), Linux
    (`.deb`, AppImage), Android (`.apk`, `.aab`) and the offline HTML file and puts
    them into a **draft** release. Check it under Releases and publish it.
 
@@ -142,8 +143,10 @@ the files are then only attached to the run as artifacts.
 
 Android signing is optional via the secrets `ANDROID_KEYSTORE` (base64 of the
 keystore), `ANDROID_KEY_ALIAS` and `ANDROID_KEY_PASSWORD`; without them the APK is
-unsigned (fine for testing, not for the Play Store). Windows installers are not
-code-signed, so Windows SmartScreen asks once before the first start.
+unsigned (fine for testing, not for the Play Store). The Windows files are not
+code-signed, so Windows SmartScreen asks once before the first start. The portable
+exe needs the Microsoft Edge WebView2 runtime, which Windows 11 and up-to-date
+Windows 10 already have; the installers add it where it is missing.
 
 Linux build dependencies: `libwebkit2gtk-4.1-dev librsvg2-dev patchelf`.
 
