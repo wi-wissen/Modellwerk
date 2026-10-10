@@ -1,7 +1,6 @@
 <template>
-  <section class="panel flex min-w-0 flex-col gap-5 p-4 sm:p-5" aria-labelledby="model-heading">
+  <div v-if="part === 'model'" class="flex min-w-0 flex-col gap-5">
     <div class="flex flex-wrap items-center justify-between gap-3">
-      <h2 id="model-heading" class="flex items-center gap-2 text-xl font-bold"><span class="step">1</span> {{ $t('app.model') }}</h2>
       <div role="tablist" class="seg" :aria-label="$t('app.modelViews')" @keydown="tabKeys">
         <button v-for="t in tabs" :id="`tab-${t.id}`" :key="t.id" type="button" role="tab"
                 :aria-selected="tab === t.id" :aria-controls="`panel-${t.id}`" :tabindex="tab === t.id ? 0 : -1"
@@ -85,9 +84,9 @@
         <MacroEditor :macros="sim.macros" @update:macros="patch({ macros: $event })" @expand="expandMacro" @from-selection="macroFromSelection" />
       </template>
     </div>
+  </div>
 
-    <hr class="border-line" />
-    <h2 class="flex items-center gap-2 text-xl font-bold"><span class="step">2</span> {{ $t('app.startValues') }}</h2>
+  <div v-else class="flex min-w-0 flex-col gap-5">
     <StartValues :analysis="analysis" :values="sim.start" :steps="sim.steps" :reset-key="resetKey"
                  @update:values="patch({ start: $event })" @update:steps="patch({ steps: $event })" />
 
@@ -100,7 +99,7 @@
       <button type="button" class="btn" @click="patch({ seed: newSeed() })"><Dices :size="18" aria-hidden="true" /> {{ $t('random.reroll') }}</button>
       <p class="max-w-[48ch] text-sm text-muted">{{ $t('random.hint') }}</p>
     </div>
-  </section>
+  </div>
 </template>
 
 <script>
@@ -121,6 +120,8 @@ export default {
     conversion: { type: Object, required: true },
     graphConversion: { type: Object, default: () => ({ ok: false, line: null }) },
     tab: { type: String, required: true },
+    // which work step this panel shows: the model ('model') or its initial values ('start')
+    part: { type: String, default: 'model' },
     resetKey: { type: [String, Number], default: 0 },
     // model and result stacked instead of side by side (more room for the graph editor)
     wide: { type: Boolean, default: false },

@@ -1,12 +1,18 @@
 <template>
   <section class="panel flex min-w-0 flex-col gap-4 p-4 sm:p-5 xl:sticky xl:top-4" aria-labelledby="result-heading">
     <div class="flex flex-wrap items-center justify-between gap-3">
-      <h2 id="result-heading" class="flex items-center gap-2 text-xl font-bold"><span class="step">3</span> {{ $t('app.result') }}</h2>
-      <div role="tablist" class="seg" :aria-label="$t('app.resultViews')" @keydown="tabKeys">
-        <button v-for="t in tabs" :id="`tab-${t.id}`" :key="t.id" type="button" role="tab"
-                :aria-selected="view.resultTab === t.id" :aria-controls="`panel-${t.id}`" :tabindex="view.resultTab === t.id ? 0 : -1"
-                @click="set({ resultTab: t.id })">
-          <component :is="t.icon" :size="18" aria-hidden="true" /> {{ $t(`app.tabs.${t.id}`) }}
+      <h2 id="result-heading" class="flex items-center gap-2 text-xl font-bold"><span class="step">4</span> {{ $t('app.result') }}</h2>
+      <div class="flex flex-wrap items-center gap-2">
+        <div role="tablist" class="seg" :aria-label="$t('app.resultViews')" @keydown="tabKeys">
+          <button v-for="t in tabs" :id="`tab-${t.id}`" :key="t.id" type="button" role="tab"
+                  :aria-selected="view.resultTab === t.id" :aria-controls="`panel-${t.id}`" :tabindex="view.resultTab === t.id ? 0 : -1"
+                  @click="set({ resultTab: t.id })">
+            <component :is="t.icon" :size="18" aria-hidden="true" /> {{ $t(`app.tabs.${t.id}`) }}
+          </button>
+        </div>
+        <button type="button" class="btn btn-quiet !px-2.5" :aria-pressed="board ? 'true' : 'false'"
+                :title="$t(board ? 'board.leaveHint' : 'board.enter')" :aria-label="$t(board ? 'board.leaveHint' : 'board.enter')" @click="$emit('board')">
+          <component :is="board ? 'Minimize' : 'Maximize'" :size="20" aria-hidden="true" />
         </button>
       </div>
     </div>
@@ -111,8 +117,23 @@
             </div>
           </details>
         </div>
+      </fieldset>
 
-        <div v-if="tab !== 'chart3d'" class="flex flex-wrap items-center gap-2">
+      <div :id="`panel-${tab}`" role="tabpanel" :aria-labelledby="`tab-${tab}`">
+        <ResultChart v-if="tab === 'chart'" ref="chart" :result="run.result" :x="view.plotX" :ys="view.plotY" :range="view.axes"
+                     :overlays="overlays" :mode="view.curveMode" :styles="activeStyles"
+                     :labels="view.labels ?? []" :placing="placingId !== null" @place="placeLabel" />
+        <ResultChart3D v-else-if="tab === 'chart3d'" ref="chart3d" :result="run.result" :x="view.plotX" :y="y3" :z="z3" />
+        <ResultTable v-else-if="tab === 'table'" :result="run.result" :columns="[view.plotX, ...view.plotY.filter((y) => y !== view.plotX)]" />
+        <slot v-else name="animation" :result="run.result" />
+      </div>
+      <ChartLabels v-if="tab === 'chart'" :labels="view.labels ?? []" :center="labelCenter" :placing-id="placingId"
+                   @update:labels="set({ labels: $event })" @update:placing="placingId = $event" @announce="$emit('announce', $event)" />
+
+      <!-- below the chart like the legend of a figure: there is room for many curves -->
+      <fieldset v-if="tab === 'chart' || tab === 'table'" class="flex flex-col gap-3 border-t border-line pt-3">
+        <legend class="sr-only">{{ $t(tab === 'table' ? 'app.columns' : 'app.curves') }}</legend>
+        <div class="flex flex-wrap items-center gap-2">
           <span class="font-semibold">{{ $t(tab === 'chart' ? 'app.curves' : 'app.columns') }}:</span>
           <label v-for="v in variables" :key="v.name" class="toggle">
             <input :id="`plot-y-${v.name}`" type="checkbox" :value="v.name" :checked="view.plotY.includes(v.name)" @change="toggleY(v.name, $event.target.checked)" />
@@ -141,17 +162,6 @@
         </div>
       </fieldset>
 
-      <div :id="`panel-${tab}`" role="tabpanel" :aria-labelledby="`tab-${tab}`">
-        <ResultChart v-if="tab === 'chart'" ref="chart" :result="run.result" :x="view.plotX" :ys="view.plotY" :range="view.axes"
-                     :overlays="overlays" :mode="view.curveMode" :styles="activeStyles"
-                     :labels="view.labels ?? []" :placing="placingId !== null" @place="placeLabel" />
-        <ResultChart3D v-else-if="tab === 'chart3d'" ref="chart3d" :result="run.result" :x="view.plotX" :y="y3" :z="z3" />
-        <ResultTable v-else-if="tab === 'table'" :result="run.result" :columns="[view.plotX, ...view.plotY.filter((y) => y !== view.plotX)]" />
-        <slot v-else name="animation" :result="run.result" />
-      </div>
-      <ChartLabels v-if="tab === 'chart'" :labels="view.labels ?? []" :center="labelCenter" :placing-id="placingId"
-                   @update:labels="set({ labels: $event })" @update:placing="placingId = $event" @announce="$emit('announce', $event)" />
-
       <div class="flex flex-wrap items-center justify-between gap-3">
         <p class="text-sm text-muted tabular">{{ $t('app.stats', { steps, vars: variables.length, ms: run.ms }) }}</p>
         <div class="flex flex-wrap gap-2">
@@ -172,7 +182,7 @@
 </template>
 
 <script>
-import { Box, ChartLine, Clapperboard, ClipboardCopy, Code, Download, FastForward, ImageDown, Printer, RotateCcw, Ruler, Table, TriangleAlert } from 'lucide-vue-next'
+import { Box, ChartLine, Maximize, Minimize, Clapperboard, ClipboardCopy, Code, Download, FastForward, ImageDown, Printer, RotateCcw, Ruler, Table, TriangleAlert } from 'lucide-vue-next'
 import ResultChart from './ResultChart.vue'
 import ChartLabels from './ChartLabels.vue'
 import ResultChart3D from './ResultChart3D.vue'
@@ -188,8 +198,10 @@ import { download, downloadSvg } from '../site/download.js'
 
 export default {
   name: 'ResultPanel',
-  components: { Box, ChartLine, Clapperboard, ClipboardCopy, Code, Download, FastForward, ImageDown, Printer, RotateCcw, Ruler, Table, TriangleAlert, ResultChart, ResultChart3D, ResultTable, ChartLabels },
+  components: { Box, ChartLine, Maximize, Minimize, Clapperboard, ClipboardCopy, Code, Download, FastForward, ImageDown, Printer, RotateCcw, Ruler, Table, TriangleAlert, ResultChart, ResultChart3D, ResultTable, ChartLabels },
   props: {
+    // shown alone in the board view (large, for the projector)
+    board: { type: Boolean, default: false },
     runs: { type: Array, required: true }, // [{ result, error, ms }] per simulation
     active: { type: Number, required: true },
     simNames: { type: Array, required: true },
@@ -206,7 +218,7 @@ export default {
     // returns the SVG of the current animation frame (animation tab only)
     animationSvg: { type: Function, default: null },
   },
-  emits: ['update:view', 'continue', 'goto-program', 'report', 'announce'],
+  emits: ['update:view', 'continue', 'goto-program', 'report', 'announce', 'board'],
   data() {
     return { axesOpen: false, curveModes: CURVE_MODES, markers: MARKERS, placingId: null }
   },

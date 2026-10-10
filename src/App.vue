@@ -2,17 +2,26 @@
   <div class="app-shell flex min-h-screen flex-col">
     <a href="#main" class="btn btn-primary sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50">{{ $t('app.skip') }}</a>
 
-    <header class="border-b border-line bg-sheet">
-      <div class="mx-auto flex max-w-[96rem] flex-wrap items-center gap-x-6 gap-y-3 px-4 py-3 sm:px-6">
-        <component :is="homeHref ? 'a' : 'div'" :href="homeHref" class="flex items-center gap-3 rounded-lg no-underline" :title="homeHref ? $t('app.home') : null">
-          <img :src="logoUrl" width="36" height="36" alt="" />
-          <span class="leading-tight">
-            <span class="block text-lg font-extrabold tracking-tight text-ink">Modellwerk</span>
-            <span class="block text-xs text-muted">{{ $t('app.tagline') }}</span>
-          </span>
+    <header v-if="!board" class="border-b border-line bg-sheet">
+      <div class="flex flex-wrap items-center gap-x-5 gap-y-3 px-4 py-2.5 sm:px-6">
+        <component :is="homeHref ? 'a' : 'div'" :href="homeHref" class="flex flex-none items-center gap-2.5 rounded-lg no-underline" :title="homeHref ? $t('app.home') : $t('app.tagline')">
+          <img :src="logoUrl" width="32" height="32" alt="" />
+          <span class="text-lg font-extrabold tracking-tight text-ink">Modellwerk</span>
         </component>
 
-        <nav class="order-3 flex basis-full flex-wrap items-center gap-2 lg:order-none lg:basis-auto lg:flex-1" :aria-label="$t('app.toolsNav')">
+        <div class="flex min-w-0 flex-[1_1_16rem] flex-col sm:border-l sm:border-line sm:pl-5">
+          <label v-if="!project.example" class="block">
+            <span class="sr-only">{{ $t('app.modelTitle') }}</span>
+            <input id="model-title" v-model="project.title" :placeholder="$t('app.untitled')" autocomplete="off"
+                   class="w-full rounded-md border border-transparent bg-transparent px-1 -mx-1 text-lg font-bold leading-tight hover:border-line focus:border-accent" />
+          </label>
+          <h1 v-else class="truncate text-lg font-bold leading-tight">{{ texts.title }}</h1>
+          <p class="truncate text-sm text-muted">
+            {{ texts.topic }}<template v-if="guideHref"> · <a :href="guideHref" :title="$t('app.guideLink')" class="inline-flex items-center gap-1 font-semibold text-accent-strong underline underline-offset-2"><GraduationCap :size="15" aria-hidden="true" /> {{ $t('app.guideShort') }}</a></template>
+          </p>
+        </div>
+
+        <nav class="order-3 flex basis-full flex-wrap items-center gap-2 2xl:order-none 2xl:basis-auto" :aria-label="$t('app.toolsNav')">
           <button type="button" class="btn" @click="newModel"><FilePlus :size="18" aria-hidden="true" /> {{ $t('app.new') }}</button>
           <label class="btn cursor-pointer has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-accent" :title="$t('app.openHint')">
             <FolderOpen :size="18" aria-hidden="true" /> {{ $t('app.open') }}
@@ -39,52 +48,85 @@
       </div>
     </header>
 
-    <main id="main" class="mx-auto flex w-full max-w-[96rem] flex-1 flex-col gap-5 px-4 py-5 sm:px-6">
-      <div class="min-w-0 max-w-[70ch]">
-        <p class="eyebrow">{{ texts.topic }}</p>
-        <label v-if="!project.example" class="block">
-          <span class="sr-only">{{ $t('app.modelTitle') }}</span>
-          <input id="model-title" v-model="project.title" :placeholder="$t('app.untitled')" autocomplete="off"
-                 class="w-full rounded-lg border border-transparent bg-transparent px-1 -mx-1 text-2xl font-extrabold tracking-tight hover:border-line focus:border-accent sm:text-3xl" />
-        </label>
-        <h1 v-else class="text-2xl font-extrabold tracking-tight sm:text-3xl">{{ texts.title }}</h1>
-        <p class="mt-1 text-muted">{{ texts.description }}</p>
-        <p v-if="guideHref" class="mt-2">
-          <a :href="guideHref" class="inline-flex items-center gap-1.5 font-semibold text-accent-strong underline underline-offset-2">
-            <GraduationCap :size="18" aria-hidden="true" /> {{ $t('app.guideLink') }}
-          </a>
-        </p>
-        <p v-if="openError" class="mt-2 flex items-start gap-2 rounded-lg bg-bad-soft px-3 py-2 text-[0.95rem]" role="alert">
-          <TriangleAlert :size="18" aria-hidden="true" class="mt-0.5 flex-none text-bad" /> {{ $t('app.openFailed', { message: openError }) }}
-        </p>
-        <p v-if="restored" class="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted" role="status">
-          <History :size="16" aria-hidden="true" /> {{ $t('app.restored') }}
-          <button type="button" class="btn-link font-semibold" @click="loadExample(examples[0])">{{ $t('app.startOver') }}</button>
-        </p>
-        <details v-if="currentExample?.sources?.length" class="mt-2 text-sm">
-          <summary class="cursor-pointer font-semibold text-muted">{{ $t('app.sources') }} ({{ currentExample.sources.length }})</summary>
-          <ul class="mt-2 flex flex-col gap-1.5">
-            <li v-for="(src, i) in currentExample.sources" :key="i">
-              <a :href="src.url" target="_blank" rel="noopener" class="font-semibold text-accent-strong underline underline-offset-2">{{ src.title }}</a>
-              <span class="text-muted"> – {{ src.publisher }} · {{ src.license }}</span>
-            </li>
-          </ul>
-        </details>
+    <!-- board view: one column large on the projector, everything else out of the way -->
+    <div v-else class="border-b border-line bg-sheet">
+      <div class="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2 sm:px-6" role="toolbar" :aria-label="$t('board.title')">
+        <span class="font-bold">{{ $t('board.title') }}</span>
+        <span class="min-w-0 truncate text-muted">{{ texts.title }}</span>
+        <div class="seg ml-auto" role="group" :aria-label="$t('board.show')">
+          <button v-for="b in boardViews" :key="b.id" type="button" :aria-pressed="board === b.id ? 'true' : 'false'"
+                  :class="{ 'is-selected': board === b.id }" @click="board = b.id">{{ b.label }}</button>
+        </div>
+        <span class="flex gap-1">
+          <button type="button" class="btn btn-quiet" :title="$t('app.textSmaller')" :aria-label="$t('app.textSmaller')" @click="setScale(-1)"><AArrowDown :size="20" aria-hidden="true" /></button>
+          <button type="button" class="btn btn-quiet" :title="$t('app.textLarger')" :aria-label="$t('app.textLarger')" @click="setScale(1)"><AArrowUp :size="20" aria-hidden="true" /></button>
+        </span>
+        <button type="button" class="btn" :title="$t('board.leaveHint')" @click="leaveBoard">
+          <Minimize :size="18" aria-hidden="true" /> {{ $t('board.leave') }} <kbd class="text-xs text-muted">Esc</kbd>
+        </button>
       </div>
+    </div>
 
-      <SimulationBar :names="simNames" :active="project.active" :raw-name="sim.name"
-                     @select="selectSim" @copy="copySim" @remove="removeSim" @rename="patchSim({ name: $event })" />
+    <main id="main" class="flex w-full flex-1 flex-col gap-4 px-4 py-4 sm:px-6 sm:py-5">
+      <p v-if="openError" class="flex items-start gap-2 self-center rounded-lg bg-bad-soft px-3 py-2 text-[0.95rem]" role="alert">
+        <TriangleAlert :size="18" aria-hidden="true" class="mt-0.5 flex-none text-bad" /> {{ $t('app.openFailed', { message: openError }) }}
+      </p>
+      <p v-if="restored && !board" class="flex flex-wrap items-center gap-2 self-center text-sm text-muted" role="status">
+        <History :size="16" aria-hidden="true" /> {{ $t('app.restored') }}
+        <button type="button" class="btn-link font-semibold" @click="loadExample(examples[0])">{{ $t('app.startOver') }}</button>
+      </p>
 
-      <div class="grid items-start gap-5" :class="{ 'xl:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]': !wideModel }">
-        <ModelPanel ref="modelPanel" :sim="sim" :source="source" :analysis="analysis" :conversion="conversion" :graph-conversion="graphConversion" :tab="modelTab" :wide="wideModel" @update:wide="wideModel = $event"
-                    :reset-key="`${loadCount}-${project.active}`"
-                    @patch="patchSim" @update:tab="modelTab = $event" @new-model="newModel" @announce="announce">
-          <template #diagram>
-            <ModelDiagram :analysis="analysis" @enlarge="$refs.diagram.showModal()" />
-          </template>
-        </ModelPanel>
+      <!-- full width, but no column grows wider than it can use -->
+      <div class="flex flex-col gap-5" :class="stacked ? '' : 'xl:flex-row xl:items-start xl:justify-center'">
+        <section v-show="board !== 'result'" class="panel flex min-w-0 flex-col" :class="workClass" :aria-label="$t('steps.label')">
+          <div class="flex items-stretch border-b border-line">
+            <div role="tablist" class="grid min-w-0 flex-1 grid-cols-3" :aria-label="$t('steps.label')" @keydown="stepKeys">
+              <button v-for="(s, i) in steps" :id="`step-${s.id}`" :key="s.id" type="button" role="tab" class="step-tab"
+                      :aria-selected="step === s.id" aria-controls="step-panel" :tabindex="step === s.id ? 0 : -1" @click="step = s.id">
+                <span class="step" :class="{ 'step-open': step !== s.id }">{{ i + 1 }}</span>
+                <span class="flex min-w-0 flex-col items-start">
+                  <span class="font-bold">{{ s.label }}</span>
+                  <span class="max-w-full truncate text-xs text-muted">{{ s.summary }}</span>
+                </span>
+              </button>
+            </div>
+            <button type="button" class="btn btn-quiet m-1.5 !px-2.5 self-center" :aria-pressed="board === 'work' ? 'true' : 'false'"
+                    :title="$t(board === 'work' ? 'board.leaveHint' : 'board.enter')" :aria-label="$t(board === 'work' ? 'board.leaveHint' : 'board.enter')"
+                    @click="toggleBoard('work')">
+              <component :is="board === 'work' ? 'Minimize' : 'Maximize'" :size="20" aria-hidden="true" />
+            </button>
+          </div>
 
-        <ResultPanel :runs="runs" :active="project.active" :sim-names="simNames" :variables="variableList" :time-var="timeVar"
+          <div id="step-panel" role="tabpanel" :aria-labelledby="`step-${step}`" class="flex flex-col gap-5 p-4 sm:p-5">
+            <template v-if="step === 'sim'">
+              <div class="flex flex-col gap-2">
+                <p class="max-w-[62ch] text-muted">{{ texts.description }}</p>
+                <details v-if="currentExample?.sources?.length" class="text-sm">
+                  <summary class="cursor-pointer font-semibold text-muted">{{ $t('app.sources') }} ({{ currentExample.sources.length }})</summary>
+                  <ul class="mt-2 flex flex-col gap-1.5">
+                    <li v-for="(src, i) in currentExample.sources" :key="i">
+                      <a :href="src.url" target="_blank" rel="noopener" class="font-semibold text-accent-strong underline underline-offset-2">{{ src.title }}</a>
+                      <span class="text-muted"> – {{ src.publisher }} · {{ src.license }}</span>
+                    </li>
+                  </ul>
+                </details>
+              </div>
+              <SimulationBar :names="simNames" :active="project.active" :raw-name="sim.name"
+                             @select="selectSim" @copy="copySim" @remove="removeSim" @rename="patchSim({ name: $event })" />
+            </template>
+            <ModelPanel v-else ref="modelPanel" :part="step === 'start' ? 'start' : 'model'"
+                        :sim="sim" :source="source" :analysis="analysis" :conversion="conversion" :graph-conversion="graphConversion" :tab="modelTab" :wide="wideModel" @update:wide="wideModel = $event"
+                        :reset-key="`${loadCount}-${project.active}`"
+                        @patch="patchSim" @update:tab="modelTab = $event" @new-model="newModel" @announce="announce">
+              <template #diagram>
+                <ModelDiagram :analysis="analysis" @enlarge="$refs.diagram.showModal()" />
+              </template>
+            </ModelPanel>
+          </div>
+        </section>
+
+        <ResultPanel v-show="board !== 'work'" :class="resultClass" :board="board === 'result'" @board="toggleBoard('result')"
+                     :runs="runs" :active="project.active" :sim-names="simNames" :variables="variableList" :time-var="timeVar"
                      :view="view" :sim-styles="project.simulations.map((s) => s.curveStyles ?? {})" :steps="sim.steps" :max-steps="maxSteps" :continue-by="continueBy" :file-name="fileName"
                      @update:view="Object.assign(view, $event)" @continue="continueRun" @goto-program="gotoProgram"
                      :has-animation="!!runs[project.active].result" :animation-svg="() => $refs.animation?.toSvgString()"
@@ -97,7 +139,7 @@
       </div>
     </main>
 
-    <AppFooter @compare="$refs.compare.show()" />
+    <AppFooter v-if="!board" @compare="$refs.compare.show()" />
   </div>
 
   <div class="app-dialogs">
@@ -125,7 +167,7 @@
 </template>
 
 <script>
-import { AArrowDown, AArrowUp, BookOpen, FilePlus, FolderOpen, History, Languages, GraduationCap, Monitor, Moon, Redo2, Save, Sun, TriangleAlert, Undo2, X } from 'lucide-vue-next'
+import { AArrowDown, AArrowUp, BookOpen, FilePlus, FolderOpen, History, Languages, GraduationCap, Maximize, Minimize, Monitor, Moon, Redo2, Save, Sun, TriangleAlert, Undo2, X } from 'lucide-vue-next'
 import ModelPanel from './components/ModelPanel.vue'
 import ModelDiagram from './components/ModelDiagram.vue'
 import ResultPanel from './components/ResultPanel.vue'
@@ -191,7 +233,7 @@ function defaultPlot(source, options) {
 export default {
   name: 'App',
   components: {
-    AArrowDown, AArrowUp, BookOpen, FilePlus, FolderOpen, History, Languages, GraduationCap, Monitor, Moon, Redo2, Save, Sun, TriangleAlert, Undo2, X,
+    AArrowDown, AArrowUp, BookOpen, FilePlus, FolderOpen, History, Languages, GraduationCap, Maximize, Minimize, Monitor, Moon, Redo2, Save, Sun, TriangleAlert, Undo2, X,
     ModelPanel, ModelDiagram, ResultPanel, SimulationBar, CompareDialog, ExamplesDialog, AppFooter, ReportView, ResultAnimation,
   },
   data() {
@@ -224,6 +266,10 @@ export default {
       announcement: '',
       report: null,
       wideModel: false,
+      // work step shown in the left column: 'sim', 'model' or 'start'
+      step: 'model',
+      // board view for the projector: null, 'work' (left column), 'result' or 'both'
+      board: null,
       history: { past: [], future: [], lastKeys: '', lastAt: 0 },
     }
   },
@@ -287,6 +333,43 @@ export default {
       return { code, name: LOCALES[code].name }
     },
     autosaveState() { return [this.project, this.view] },
+    steps() {
+      const n = this.project.simulations.length
+      const name = this.simNames[this.project.active]
+      const tab = this.$t(`app.tabs.${this.modelTab}`)
+      const error = this.analysis.program.errors[0]
+      const lines = this.source.split('\n').filter((l) => l.trim()).length
+      const values = this.variableList.filter((v) => v.role !== 'rate').length
+      return [
+        { id: 'sim', label: this.$t('sim.label'), summary: n > 1 ? this.$t('steps.simOf', { name, i: this.project.active + 1, n }) : name },
+        {
+          id: 'model',
+          label: this.$t('app.model'),
+          summary: error
+            ? this.$t(error.line ? 'steps.error' : 'steps.errorNoLine', { tab, line: error.line })
+            : this.$t(lines === 1 ? 'steps.line' : 'steps.lines', { tab, n: lines }),
+        },
+        { id: 'start', label: this.$t('app.startValues'), summary: this.$t('steps.start', { n: values, steps: this.sim.steps }) },
+      ]
+    },
+    boardViews() {
+      const work = this.steps.find((s) => s.id === this.step).label
+      return [
+        { id: 'work', label: work },
+        { id: 'both', label: this.$t('board.both') },
+        { id: 'result', label: this.$t('app.result') },
+      ]
+    },
+    // the wide graph editor puts the result below the model
+    stacked() { return this.wideModel && this.board !== 'work' && this.board !== 'result' },
+    workClass() {
+      if (this.board === 'work') return 'w-full xl:max-w-[90rem] xl:flex-1'
+      return this.stacked ? '' : 'xl:max-w-[52rem] xl:flex-[1_1_0]'
+    },
+    resultClass() {
+      if (this.board === 'result') return 'w-full xl:max-w-[110rem] xl:flex-1'
+      return this.stacked ? '' : 'xl:max-w-[80rem] xl:flex-[1.1_1_0]'
+    },
   },
   watch: {
     // keep the current work in the browser so a reload does not lose it
@@ -304,6 +387,10 @@ export default {
       if (ys.length !== this.view.plotY.length) this.view.plotY = ys
     },
     theme: { immediate: true, handler: applyTheme },
+    // the board view enlarges everything on top of the chosen text size
+    board(b) {
+      document.documentElement.style.setProperty('--board-scale', b ? 1.2 : 1)
+    },
     textScale: {
       immediate: true,
       handler(s) {
@@ -374,6 +461,10 @@ export default {
     },
     // Ctrl+Z / Ctrl+Y outside text fields (text fields keep their own undo)
     onKey(ev) {
+      if (ev.key === 'Escape' && this.board && !document.querySelector('dialog[open]')) {
+        this.leaveBoard()
+        return
+      }
       if (!(ev.ctrlKey || ev.metaKey) || ev.altKey) return
       const t = ev.target
       if (t.closest?.('input, textarea, select, [contenteditable="true"]')) return
@@ -387,6 +478,7 @@ export default {
       this.project = project
       this.view = view
       this.modelTab = tab
+      this.step = 'model'
       this.repeatChunk = project.simulations[project.active].steps
       this.restored = false
       this.openError = ''
@@ -506,6 +598,8 @@ export default {
       this.announce(this.$t('app.continued', { n: this.sim.steps }))
     },
     gotoProgram(line) {
+      this.step = 'model'
+      if (this.board === 'result') this.board = 'both'
       this.modelTab = 'program'
       if (line) this.$nextTick(() => this.$refs.modelPanel?.$refs.program?.goto(line))
     },
@@ -556,6 +650,32 @@ export default {
         window.addEventListener('afterprint', () => { this.report = null }, { once: true })
         window.print()
       })
+    },
+    // ---- work steps and board view -------------------------------------------------
+    stepKeys(ev) {
+      const ids = this.steps.map((s) => s.id)
+      const i = ids.indexOf(this.step)
+      let j = i
+      if (ev.key === 'ArrowRight') j = (i + 1) % ids.length
+      else if (ev.key === 'ArrowLeft') j = (i - 1 + ids.length) % ids.length
+      else if (ev.key === 'Home') j = 0
+      else if (ev.key === 'End') j = ids.length - 1
+      else return
+      ev.preventDefault()
+      this.step = ids[j]
+      this.$nextTick(() => document.getElementById(`step-${ids[j]}`)?.focus())
+    },
+    toggleBoard(which) {
+      if (this.board === which) {
+        this.leaveBoard()
+        return
+      }
+      this.board = which
+      this.announce(this.$t('board.entered'))
+    },
+    leaveBoard() {
+      this.board = null
+      this.announce(this.$t('board.left'))
     },
     // ---- display settings ----------------------------------------------------------
     cycleTheme() {
