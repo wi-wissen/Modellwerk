@@ -56,3 +56,38 @@ describe.skipIf(!dir)('curve styles stored in reference PRG files', () => {
     if (kin) expect(kin[0].plot.styles).toEqual({})
   })
 })
+
+describe.skipIf(!dir)('labels set with the legacy text tool', () => {
+  const labelsOf = (name) => {
+    const file = files.find((f) => f.toLowerCase() === name.toLowerCase())
+    return file ? readPrg(new Uint8Array(readFileSync(join(dir, file))))[0].page.labels : null
+  }
+  it('reads text, size and bold, without the automatic tick labels', () => {
+    const kepler = labelsOf('Kepler.prg')
+    if (!kepler) return
+    expect(kepler.map((l) => l.text)).toEqual(['Kepler-Ellipse', 'auf Animation starten drücken'])
+    expect(kepler[0]).toMatchObject({ size: 'l', bold: true })
+  })
+  it('places labels in data units, calibrated with the tick labels', () => {
+    const fox = labelsOf('Raeuber.prg')
+    if (!fox) return
+    const foxes = fox.find((l) => l.text === 'Füchse')
+    // the x-axis title stands at the end of the x axis (foxes 14…29), just above it
+    expect(foxes.x).toBeGreaterThan(29)
+    expect(foxes.x).toBeLessThan(32)
+  })
+})
+
+describe.skipIf(!dir)('axis ranges shown in the legacy program', () => {
+  it('reads the ranges of a throw diagram', () => {
+    const file = files.find((f) => /^bewegung 3/i.test(f))
+    if (!file) return
+    const { axes } = readPrg(new Uint8Array(readFileSync(join(dir, file))))[0].page
+    expect(axes.xMin).toBeCloseTo(0, 1)
+    expect(axes.yMin).toBeCloseTo(0, 1)
+    expect(axes.xMax).toBeGreaterThan(9)
+    expect(axes.xMax).toBeLessThan(11)
+    expect(axes.yMax).toBeGreaterThan(3.5)
+    expect(axes.yMax).toBeLessThan(4.5)
+  })
+})

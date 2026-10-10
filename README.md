@@ -5,8 +5,11 @@ tablets. Students describe a model in sentences, draw it as an influence diagram
 write a short program; Modellwerk runs it step by step and shows graphs, 3D graphs,
 tables and animations, and prints a report.
 
-Modellwerk is an independent new development. It opens files in the PRG format of an
-older Windows program and reproduces the values stored in them **bit for bit**.
+Modellwerk is compatible with [Moebius 3.0](https://www.hoche-bw.de/moebius/index.php)
+by Detlef Hoche: it opens Moebius PRG files and reproduces the values stored in them
+**bit for bit**. Modellwerk is an independent new development; it is not part of, not
+endorsed by and not affiliated with Moebius or its author. Moebius is named here only
+to describe this compatibility. The app itself shows no third-party name.
 
 ## Quick start
 
@@ -129,6 +132,23 @@ is optional via the secrets `ANDROID_KEYSTORE`, `ANDROID_KEY_ALIAS`,
 
 Linux build dependencies: `libwebkit2gtk-4.1-dev librsvg2-dev patchelf`.
 
-## Roadmap
+## Features
 
-See [docs/ROADMAP.md](docs/ROADMAP.md).
+- Modelling in sentences (wording of the building blocks adjustable, like the
+  legacy predicate file), as an editable influence diagram (stocks, rates,
+  constants, flows, influence arrows; extended syntax with helper quantities) or as
+  a program; every model without conditions converts losslessly between the three
+- Modelling language incl. `^`, `=`, `:`, IF/WHILE for the rest of the line,
+  `random(x)` with a stored seed, macros (program blocks)
+- Projects with several simulations (copies, variants with other initial values),
+  overlaid in one graph; undo/redo for every change
+- 2D graph with free x axis (phase diagrams), manual axis limits, curve styles
+  (colour, line, width, points, bars), text labels in the graph, PNG/SVG export
+- 3D graph with rotation; animation with an own sprite pack (gauges, ropes,
+  springs, growing pictures); table with CSV export
+- Printable report with description, diagram, program, initial values, graph and
+  table
+- PRG files: open all file variants including x axis, shown curves, curve styles
+  per simulation, axis ranges and text labels; compare stored results bit for bit
+- 20 examples with bilingual student guides; German/English, light/dark, text size,
+  keyboard and screen reader support; works offline and as desktop/mobile app

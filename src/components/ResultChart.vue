@@ -4,7 +4,8 @@
       <svg ref="svg" :viewBox="`0 0 ${w} ${h}`" :width="w" :height="h" class="block w-full touch-none select-none"
            role="img" :aria-label="summary" tabindex="0"
            aria-describedby="chart-help"
-           @pointermove="onPointer" @pointerleave="cursor = null" @keydown="onKey" @focus="onFocus" @blur="cursor = null">
+           :class="{ 'cursor-crosshair': placing }"
+           @click="onClick" @pointermove="onPointer" @pointerleave="cursor = null" @keydown="onKey" @focus="onFocus" @blur="cursor = null">
         <defs>
           <clipPath :id="clipId"><rect :x="m.l" :y="m.t" :width="pw" :height="ph" /></clipPath>
         </defs>
@@ -24,7 +25,7 @@
 
         <g fill="none" stroke-linejoin="round" stroke-linecap="round" :clip-path="`url(#${clipId})`">
           <template v-if="mode !== 'points'">
-            <polyline v-for="o in overlayLines" :key="o.key" :points="o.points" :stroke="o.color" stroke-width="2" :stroke-dasharray="o.dash" opacity="0.85" />
+            <polyline v-for="o in overlayLines" :key="o.key" :points="o.points" :stroke="o.color" :stroke-width="o.width" :stroke-dasharray="o.dash || null" opacity="0.85" />
           </template>
           <g v-if="mode !== 'line'">
             <g v-for="o in overlayLines" :key="'p' + o.key" :fill="o.color" stroke="none" opacity="0.7">
@@ -44,6 +45,11 @@
               </g>
             </g>
           </g>
+        </g>
+
+        <g class="chart-labels" fill="var(--ink)">
+          <text v-for="l in labelMarks" :key="'l' + l.id" :x="l.px" :y="l.py" :font-size="l.fontSize" :font-weight="l.bold ? 700 : 400"
+                paint-order="stroke" stroke="var(--sheet)" stroke-width="4" stroke-linejoin="round">{{ l.text }}</text>
         </g>
 
         <g v-if="cursor !== null">
@@ -102,7 +108,12 @@ export default {
     mode: { type: String, default: 'line' },
     // per-curve styles by variable name (see chartStyle.js curveStyle); missing = automatic
     styles: { type: Object, default: () => ({}) },
+    // text labels in data units: [{ id, text, x, y, size, bold }]
+    labels: { type: Array, default: () => [] },
+    // true while the next click places a label (emits 'place' with data coordinates)
+    placing: { type: Boolean, default: false },
   },
+  emits: ['place'],
   data() {
     return { w: 640, h: 380, cursor: null, ro: null }
   },
@@ -149,7 +160,10 @@ export default {
           const py = this.sy(o.data[k])
           if (Number.isFinite(px) && Number.isFinite(py)) points += `${px.toFixed(1)},${py.toFixed(1)} `
         }
-        return { ...o, points, markers: this.mode === 'line' ? [] : this.markers(o.xs, o.data), color: seriesColor(o.colorIndex), dash: seriesDash(o.dashIndex + 1) || '6 4' }
+        // a simulation with its own stored style (PRG file) keeps its look; others are told apart by dashes
+        const look = o.style ? curveStyle(o.colorIndex, o.style) : null
+        return { ...o, points, markers: this.mode === 'line' ? [] : this.markers(o.xs, o.data),
+          color: look?.color ?? seriesColor(o.colorIndex), dash: look ? (look.dash ?? '') : seriesDash(o.dashIndex + 1) || '6 4', width: look?.width ?? 2 }
       })
     },
     summary() {
@@ -159,6 +173,16 @@ export default {
     liveText() {
       if (this.cursor === null) return ''
       return `${this.xLabel} ${this.fmt(this.xs[this.cursor], 6)}: ` + this.lines.map((s) => `${s.label} ${this.fmt(s.data[this.cursor], 6)}`).join(', ')
+    },
+    labelMarks() {
+      const sizes = { s: 12, m: 15, l: 19 }
+      return this.labels.filter((l) => l.text?.trim() && Number.isFinite(l.x) && Number.isFinite(l.y)).map((l) => ({
+        ...l,
+        // kept inside the graph area so a label never disappears
+        px: Math.min(this.m.l + this.pw - 4, Math.max(this.m.l + 4, this.sx(l.x))),
+        py: Math.min(this.m.t + this.ph - 4, Math.max(this.m.t + 16, this.sy(l.y))),
+        fontSize: sizes[l.size] ?? 15,
+      }))
     },
     // bars stand on zero, or on the lower edge when zero is outside the range
     baseY() {
@@ -249,6 +273,19 @@ export default {
         if (d < bestD) { bestD = d; best = k }
       }
       this.cursor = best
+    },
+    onClick(ev) {
+      if (!this.placing) return
+      const rect = ev.currentTarget.getBoundingClientRect()
+      const px = ((ev.clientX - rect.left) / rect.width) * this.w
+      const py = ((ev.clientY - rect.top) / rect.height) * this.h
+      const [xa, xb] = this.xDomain
+      const [ya, yb] = this.yDomain
+      // about three significant digits of the axis span are enough for a label
+      const round = (v, span) => Number(v.toFixed(Math.max(0, Math.min(10, 2 - Math.floor(Math.log10(span))))))
+      const x = xa + ((px - this.m.l) / this.pw) * (xb - xa)
+      const y = ya + ((this.m.t + this.ph - py) / this.ph) * (yb - ya)
+      this.$emit('place', { x: round(x, xb - xa), y: round(y, yb - ya) })
     },
     onFocus() { if (this.cursor === null) this.cursor = 0 },
     onKey(ev) {

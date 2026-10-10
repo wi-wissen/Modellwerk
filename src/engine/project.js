@@ -7,7 +7,7 @@ export const PROJECT_EXTENSION = '.modellwerk.json'
 
 const SIMULATION_KEYS = [
   'name', 'example', 'simplified', 'sentences', 'origin', 'source', 'start', 'steps',
-  'caseSensitive', 'timeName', 'dtName', 'macros', 'seed', 'graph', 'extended',
+  'caseSensitive', 'timeName', 'dtName', 'macros', 'seed', 'graph', 'extended', 'curveStyles',
 ]
 
 const projectError = (code, message) => Object.assign(new Error(message), { code })
@@ -55,6 +55,8 @@ export function cleanSimulation(m = {}) {
     graph: m.graph && Array.isArray(m.graph.nodes) && Array.isArray(m.graph.links) ? { nodes: m.graph.nodes, links: m.graph.links } : null,
     // extended syntax for graphical models: helper quantities and functions of stocks
     extended: m.extended === true,
+    // curve styles of this simulation (from a PRG file); the view's styles take precedence
+    curveStyles: m.curveStyles && typeof m.curveStyles === 'object' && !Array.isArray(m.curveStyles) ? m.curveStyles : {},
   }
 }
 

@@ -85,7 +85,7 @@
         </ModelPanel>
 
         <ResultPanel :runs="runs" :active="project.active" :sim-names="simNames" :variables="variableList" :time-var="timeVar"
-                     :view="view" :steps="sim.steps" :max-steps="maxSteps" :continue-by="continueBy" :file-name="fileName"
+                     :view="view" :sim-styles="project.simulations.map((s) => s.curveStyles ?? {})" :steps="sim.steps" :max-steps="maxSteps" :continue-by="continueBy" :file-name="fileName"
                      @update:view="Object.assign(view, $event)" @continue="continueRun" @goto-program="gotoProgram"
                      :has-animation="!!runs[project.active].result" :animation-svg="() => $refs.animation?.toSvgString()"
                      @report="printReport" @announce="announce">
@@ -407,13 +407,30 @@ export default {
         steps: s.steps,
         caseSensitive: s.variables.some((v) => v.name !== v.name.toUpperCase()),
         start: Object.fromEntries(s.variables.map((v) => [v.name, v.start])),
+        curveStyles: s.plot?.styles ?? {},
       }))
       const first = simulations[0]
       // use the graph settings stored in the file when it names curves; otherwise choose
       const stored = sims[0].plot
       const plot = stored?.y.length ? stored : defaultPlot(first.source, { caseSensitive: first.caseSensitive })
+      // labels set with the legacy text tool, placed in data units of the stored results
+      const range = (name) => {
+        const values = sims[0].variables.find((v) => v.name === name)?.values ?? []
+        let lo = Infinity
+        let hi = -Infinity
+        for (const v of values) if (Number.isFinite(v)) { lo = Math.min(lo, v); hi = Math.max(hi, v) }
+        return lo === Infinity ? [0, 1] : [lo, hi]
+      }
+      const [x0, x1] = range(plot.x)
+      const [y0, y1] = plot.y.map(range).reduce(([a, b], [c, d]) => [Math.min(a, c), Math.max(b, d)], [Infinity, -Infinity])
+      const page = sims[0].page ?? { labels: [], axes: null }
+      const labels = page.labels.map((l, i) => ({
+        id: i + 1, text: l.text, size: l.size, bold: l.bold,
+        x: l.x ?? x0 + l.fx * (x1 - x0),
+        y: l.y ?? (Number.isFinite(y0) ? y0 + l.fy * (y1 - y0) : 0),
+      }))
       this.startProject({ title: file.replace(/\.prg$/i, ''), file, example: null, simulations, active: 0 },
-        viewFor(plot), 'program')
+        viewFor({ ...plot, styles: {} }, { labels, ...(page.axes && stored?.y.length ? { axes: { auto: false, ...page.axes } } : {}) }), 'program')
       this.announce(this.$t('app.modelOpened', { title: this.texts.title }))
     },
     newModel(kind = 'sentences') {

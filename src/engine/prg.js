@@ -26,8 +26,16 @@
 //   u32 length + name of the x-axis variable, u32 length + name of a
 //   y-axis variable, u32 number of steps,
 //   followed by the graphical model (nodes, links) of variable length.
-// Everything else (worksheet, text, graphics) is skipped here: the simulations
-// are located by scanning for variable blocks and the program preceding them.
+// Texts on the page (labels set with the text tool, also the automatic tick
+// labels) are text objects: f64 x, y, width, height (cm) at -61…-37 before the
+// font name (the type byte 0x08 just before, a tick mark 01 2d 00 00 00 before tick
+// labels), a bold flag at -4, then u8 1, u8 1, u32 length + font name, f64 font
+// size, and 88 bytes after the name a u32 count of 78-byte character records
+// (the character in the first byte). The first page object is the graph frame
+// (type 0x40, f64 x, y, width, height); tick labels sit inside axis groups, the
+// x-axis group (type 0x3f after a tick mark) starts with its f64 x offset.
+// Everything else (worksheet, graphics) is skipped here: the simulations are
+// located by scanning for variable blocks and the program preceding them.
 
 const OPTIONS_BEFORE_PICTURE = 31
 const OPTIONS_AFTER_PICTURE = 18
@@ -140,6 +148,112 @@ function isDefaultStyle(s) {
   return s.mode === 'line' && s.dash === 0 && s.width === 1 && !s.color
 }
 
+const TICK_MARK = [0x01, 0x2d, 0x00, 0x00, 0x00]
+
+function textObjects(r, bytes) {
+  const out = []
+  for (let i = 70; i < r.len - 12; i++) {
+    if (bytes[i] !== 1 || bytes[i + 1] !== 1) continue
+    const a = i + 2
+    const L = r.u32(a)
+    if (L < 1 || L > 31 || a + 4 + L > r.len) continue
+    const font = r.str(a + 4, L)
+    if (!/^[A-Za-z][A-Za-z ]*$/.test(font)) continue
+    const nameEnd = a + 4 + L
+    const countAt = nameEnd + 88
+    if (countAt + 4 > r.len) continue
+    const n = r.u32(countAt)
+    if (n < 1 || n > 500 || countAt + 4 + 78 * n > r.len) continue
+    let text = ''
+    for (let k = 0; k < n; k++) text += decoder.decode(bytes.subarray(countAt + 4 + 78 * k, countAt + 5 + 78 * k))
+    out.push({
+      text,
+      x: r.f64(a - 61), y: r.f64(a - 53), w: r.f64(a - 45), h: r.f64(a - 37),
+      size: r.f64(nameEnd),
+      bold: bytes[a - 4] === 1,
+      tick: TICK_MARK.every((v, k) => bytes[a - 67 + k] === v),
+    })
+    i = countAt + 4 + 78 * n - 1
+  }
+  return out
+}
+
+const tickValue = (t) => (/^-?\d+(,\d+)?$/.test(t.trim()) ? Number(t.trim().replace(',', '.')) : null)
+
+// page position (cm) → data value, from two tick labels of an axis
+function axisMap(points) {
+  if (points.length < 2) return null
+  const [p1, v1] = points[0]
+  const [p2, v2] = points[points.length - 1]
+  if (p1 === p2) return null
+  return (p) => v1 + ((p - p1) * (v2 - v1)) / (p2 - p1)
+}
+
+/**
+ * The graph page: text labels placed with the text tool, in data units of the
+ * graph (null where an axis has no readable tick labels to calibrate with, e.g.
+ * 2·10⁵ style ticks), and the axis ranges shown. Returns { labels, axes }.
+ */
+export function readPrgPage(bytes) {
+  if (!isPrgFile(bytes)) return { labels: [], axes: null }
+  const r = reader(bytes)
+  const texts = textObjects(r, bytes)
+  const isFrame = bytes[58] === 0x40
+  const frame = isFrame ? { x: r.f64(59), y: r.f64(67), w: r.f64(75), h: r.f64(83) } : null
+  // x-axis group: x, y (the height of the x axis), width (the axis length)
+  let group = { x: 0, y: null, w: null }
+  for (let i = 58; i < r.len - 30; i++) {
+    if (TICK_MARK.every((v, k) => bytes[i + k] === v) && bytes[i + 5] === 0x3f) { group = { x: r.f64(i + 6), y: r.f64(i + 14), w: r.f64(i + 22) }; break }
+  }
+  const groupX = group.x
+  const ticks = texts.filter((t) => t.tick && tickValue(t.text) !== null)
+  // x-axis tick labels share one y; the others belong to the y axis
+  const byY = new Map()
+  for (const t of ticks) byY.set(t.y, [...(byY.get(t.y) ?? []), t])
+  const xTicks = [...byY.values()].sort((p, q) => q.length - p.length)[0] ?? []
+  // y-axis tick labels are right-aligned at the axis, in the font size of the x axis
+  // (other tick groups belong to further graphs on the page)
+  const byRight = new Map()
+  for (const t of ticks) {
+    if (xTicks.includes(t) || Math.abs(t.size - (xTicks[0]?.size ?? t.size)) > 0.01) continue
+    const key = Math.round((t.x + t.w) * 100)
+    byRight.set(key, [...(byRight.get(key) ?? []), t])
+  }
+  const yTicks = [...byRight.values()].sort((p, q) => q.length - p.length)[0] ?? []
+  const f = frame ?? { x: 0, y: 0, w: 0, h: 0 }
+  const toX = axisMap(xTicks.map((t) => [f.x + groupX + t.x + t.w / 2, tickValue(t.text)]))
+  const toY = axisMap(yTicks.map((t) => [f.y + t.y + t.h / 2, tickValue(t.text)]))
+  const share = (v) => Math.min(1, Math.max(0, v))
+  // rounded to 1/10 000 of the range, so that 7e-15 becomes 0
+  const nice = (a, b) => {
+    const step = 10 ** Math.floor(Math.log10(Math.abs(b - a) / 1e4))
+    return [a, b].map((v) => Number((Math.round(v / step) * step).toPrecision(12)))
+  }
+  // the axis ranges shown in the legacy program: x along the x axis, y from the
+  // x axis up to the top of the frame
+  let axes = null
+  if (toX && toY && frame && group.w > 0 && Number.isFinite(group.y)) {
+    const [xMin, xMax] = nice(toX(f.x + groupX), toX(f.x + groupX + group.w))
+    const [yMin, yMax] = nice(toY(f.y + group.y), toY(f.y))
+    axes = { xMin, xMax, yMin, yMax }
+  }
+  const labels = texts.filter((t) => !t.tick && t.text.trim() && Number.isFinite(t.x) && Number.isFinite(t.y)).map((t) => {
+    const baseline = t.y + t.h * 0.8 // the label's left end on its baseline
+    return {
+      text: t.text.trim(),
+      x: toX ? toX(t.x) : null,
+      y: toY ? toY(baseline) : null,
+      // where the label sits in the graph frame (0…1, y upwards), for axes without
+      // readable tick labels
+      fx: frame?.w ? share((t.x - f.x) / f.w) : 0.5,
+      fy: frame?.h ? share(1 - (baseline - f.y) / f.h) : 0.5,
+      size: t.size >= 16 ? 'l' : t.size <= 10 ? 's' : 'm',
+      bold: t.bold,
+    }
+  })
+  return { labels, axes: axes && axes.xMin < axes.xMax && axes.yMin < axes.yMax ? axes : null }
+}
+
 /**
  * Returns all detected simulations with program, initial values and stored
  * results. `hasResults` is false when the file stores no result values for a
@@ -179,10 +293,7 @@ export function readPrg(bytes) {
             plot: x ? {
               x,
               y: variables.filter((v) => v.plotted && v.name !== x).map((v) => v.name),
-              // only when the file sets any style: then all its curves keep their look
-              styles: variables.some((v) => v.plotted && !isDefaultStyle(v.style))
-                ? Object.fromEntries(variables.filter((v) => v.plotted).map((v) => [v.name, v.style]))
-                : {},
+              styles: Object.fromEntries(variables.filter((v) => v.plotted).map((v) => [v.name, v.style])),
             } : null,
           })
           p = q
@@ -192,5 +303,10 @@ export function readPrg(bytes) {
     }
     p++
   }
+  // curve styles only when the file sets any: then all its curves keep their look,
+  // otherwise the automatic palette is used
+  const styled = simulations.some((sim) => Object.values(sim.plot?.styles ?? {}).some((st) => !isDefaultStyle(st)))
+  for (const sim of simulations) if (sim.plot && !styled) sim.plot.styles = {}
+  if (simulations.length) simulations[0].page = readPrgPage(bytes)
   return simulations
 }

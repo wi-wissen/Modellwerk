@@ -104,7 +104,7 @@
                     <option v-for="mk in markers" :key="mk" :value="mk">{{ $t(`app.markers.${mk}`) }}</option>
                   </select>
                 </label>
-                <button v-if="view.curveStyles?.[name]" type="button" class="btn btn-quiet" @click="resetStyle(name)">
+                <button v-if="activeStyles[name]" type="button" class="btn btn-quiet" @click="resetStyle(name)">
                   <RotateCcw :size="16" aria-hidden="true" /> {{ $t('app.styleAuto') }}
                 </button>
               </div>
@@ -134,7 +134,7 @@
           </label>
           <ul v-if="overlayOn" class="flex flex-wrap gap-3 text-sm" :aria-label="$t('sim.legend')">
             <li v-for="(name, i) in simNames" :key="i" class="flex items-center gap-1.5">
-              <svg width="26" height="8" aria-hidden="true"><line x1="1" y1="4" x2="25" y2="4" stroke="var(--ink)" stroke-width="2" :stroke-dasharray="i === active ? null : dashFor(i)" /></svg>
+              <svg width="26" height="8" aria-hidden="true"><line x1="1" y1="4" x2="25" y2="4" v-bind="simLegend(i)" /></svg>
               <span :class="{ 'font-bold': i === active }">{{ name }}</span>
             </li>
           </ul>
@@ -143,11 +143,14 @@
 
       <div :id="`panel-${tab}`" role="tabpanel" :aria-labelledby="`tab-${tab}`">
         <ResultChart v-if="tab === 'chart'" ref="chart" :result="run.result" :x="view.plotX" :ys="view.plotY" :range="view.axes"
-                     :overlays="overlays" :mode="view.curveMode" :styles="view.curveStyles ?? {}" />
+                     :overlays="overlays" :mode="view.curveMode" :styles="activeStyles"
+                     :labels="view.labels ?? []" :placing="placingId !== null" @place="placeLabel" />
         <ResultChart3D v-else-if="tab === 'chart3d'" ref="chart3d" :result="run.result" :x="view.plotX" :y="y3" :z="z3" />
         <ResultTable v-else-if="tab === 'table'" :result="run.result" :columns="[view.plotX, ...view.plotY.filter((y) => y !== view.plotX)]" />
         <slot v-else name="animation" :result="run.result" />
       </div>
+      <ChartLabels v-if="tab === 'chart'" :labels="view.labels ?? []" :center="labelCenter" :placing-id="placingId"
+                   @update:labels="set({ labels: $event })" @update:placing="placingId = $event" @announce="$emit('announce', $event)" />
 
       <div class="flex flex-wrap items-center justify-between gap-3">
         <p class="text-sm text-muted tabular">{{ $t('app.stats', { steps, vars: variables.length, ms: run.ms }) }}</p>
@@ -171,6 +174,7 @@
 <script>
 import { Box, ChartLine, Clapperboard, ClipboardCopy, Code, Download, FastForward, ImageDown, Printer, RotateCcw, Ruler, Table, TriangleAlert } from 'lucide-vue-next'
 import ResultChart from './ResultChart.vue'
+import ChartLabels from './ChartLabels.vue'
 import ResultChart3D from './ResultChart3D.vue'
 import ResultTable from './ResultTable.vue'
 import { parseNumber } from '../engine/model.js'
@@ -184,7 +188,7 @@ import { download, downloadSvg } from '../site/download.js'
 
 export default {
   name: 'ResultPanel',
-  components: { Box, ChartLine, Clapperboard, ClipboardCopy, Code, Download, FastForward, ImageDown, Printer, RotateCcw, Ruler, Table, TriangleAlert, ResultChart, ResultChart3D, ResultTable },
+  components: { Box, ChartLine, Clapperboard, ClipboardCopy, Code, Download, FastForward, ImageDown, Printer, RotateCcw, Ruler, Table, TriangleAlert, ResultChart, ResultChart3D, ResultTable, ChartLabels },
   props: {
     runs: { type: Array, required: true }, // [{ result, error, ms }] per simulation
     active: { type: Number, required: true },
@@ -197,16 +201,31 @@ export default {
     continueBy: { type: Number, required: true },
     fileName: { type: String, required: true },
     hasAnimation: { type: Boolean, default: false },
+    // curve styles per simulation (index = simulation)
+    simStyles: { type: Array, default: () => [] },
     // returns the SVG of the current animation frame (animation tab only)
     animationSvg: { type: Function, default: null },
   },
   emits: ['update:view', 'continue', 'goto-program', 'report', 'announce'],
   data() {
-    return { axesOpen: false, curveModes: CURVE_MODES, markers: MARKERS }
+    return { axesOpen: false, curveModes: CURVE_MODES, markers: MARKERS, placingId: null }
   },
   computed: {
+    // styles of the active simulation (from a PRG file), overridden by the view's
+    activeStyles() { return { ...(this.simStyles[this.active] ?? {}), ...(this.view.curveStyles ?? {}) } },
     shownY() { return this.view.plotY.filter((y) => y !== this.view.plotX) },
-    hasStyles() { return Object.keys(this.view.curveStyles ?? {}).length > 0 },
+    // middle of the plotted data, where a new label starts
+    labelCenter() {
+      const r = this.run.result
+      const span = (names) => {
+        let lo = Infinity
+        let hi = -Infinity
+        for (const n of names) for (const v of r?.series[n] ?? []) if (Number.isFinite(v)) { lo = Math.min(lo, v); hi = Math.max(hi, v) }
+        return lo === Infinity ? 0 : Number(((lo + hi) / 2).toPrecision(3))
+      }
+      return { x: span([this.view.plotX]), y: span(this.shownY) }
+    },
+    hasStyles() { return Object.values(this.activeStyles).some(Boolean) },
     run() { return this.runs[this.active] },
     tabs() {
       return [
@@ -241,7 +260,7 @@ export default {
         if (!xs) return
         this.view.plotY.forEach((y, k) => {
           const data = r.result.series[y]
-          if (data) out.push({ key: `${i}-${y}`, label: `${r.result.display.get(y) ?? y} · ${this.simNames[i]}`, xs, data, colorIndex: k, dashIndex: i })
+          if (data) out.push({ key: `${i}-${y}`, label: `${r.result.display.get(y) ?? y} · ${this.simNames[i]}`, xs, data, colorIndex: k, dashIndex: i, style: this.view.curveStyles?.[y] ? null : this.simStyles[i]?.[y] ?? null })
         })
       })
       return out
@@ -252,20 +271,36 @@ export default {
     labelOf(name) { return this.variables.find((v) => v.name === name)?.label ?? name },
     // the curves in the graph, in the order that decides their automatic colour
     // same numbering as the graph, which colours the curves in the order of plotY
-    lookOf(name) { return curveStyle(this.view.plotY.indexOf(name), this.view.curveStyles?.[name], this.view.curveMode) },
+    lookOf(name) { return curveStyle(this.view.plotY.indexOf(name), this.activeStyles[name], this.view.curveMode) },
     styleOf(name) {
       const i = this.view.plotY.indexOf(name)
-      return this.view.curveStyles?.[name] ?? { mode: this.view.curveMode, dash: 0, width: 1, color: AUTO_HEX[i % AUTO_HEX.length], marker: 'disc', markerSize: 4, markerColor: null }
+      return this.activeStyles[name] ?? { mode: this.view.curveMode, dash: 0, width: 1, color: AUTO_HEX[i % AUTO_HEX.length], marker: 'disc', markerSize: 4, markerColor: null }
     },
     setStyle(name, changes) {
       this.set({ curveStyles: { ...(this.view.curveStyles ?? {}), [name]: { ...this.styleOf(name), ...changes } } })
     },
+    placeLabel({ x, y }) {
+      const labels = (this.view.labels ?? []).map((l) => (l.id === this.placingId ? { ...l, x, y } : l))
+      this.placingId = null
+      this.set({ labels })
+      this.$emit('announce', this.$t('labels.placed'))
+    },
     resetStyle(name) {
       const { [name]: _, ...rest } = this.view.curveStyles ?? {}
-      this.set({ curveStyles: rest })
+      // a style stored with the simulation is switched off by null
+      this.set({ curveStyles: this.simStyles[this.active]?.[name] ? { ...rest, [name]: null } : rest })
     },
     seriesColor,
     seriesDash,
+    // legend line of simulation i: its own stored look, else ink with the simulation's dash
+    simLegend(i) {
+      const style = this.view.curveStyles?.[this.shownY[0]] ? null : this.simStyles[i]?.[this.shownY[0]]
+      if (style) {
+        const look = curveStyle(0, style)
+        return { stroke: look.color, 'stroke-width': 2.5, 'stroke-dasharray': look.dash || null }
+      }
+      return { stroke: 'var(--ink)', 'stroke-width': 2, 'stroke-dasharray': i === this.active ? null : this.dashFor(i) }
+    },
     dashFor(i) { return seriesDash(i + 1) || '6 4' },
     set(changes) { this.$emit('update:view', changes) },
     setAxes(changes) { this.set({ axes: { ...this.view.axes, ...changes } }) },
