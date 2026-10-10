@@ -62,8 +62,9 @@ describe('graphToProgram', () => {
     expect(graphToProgram(g, { simplified: false }).source.split('\n')[2]).toBe('Z := Z - (A + B)*DeltaT')
     g.links[1].sign = '+'
     expect(graphToProgram(g, { simplified: false }).source.split('\n')[2]).toBe('Z := Z + (-A + B)*DeltaT')
+    // without flows A and B feed nothing: they are outputs after the stock
     g.links = []
-    expect(graphToProgram(g).source.split('\n')[2]).toBe('Z := Z')
+    expect(graphToProgram(g).source.split('\n').slice(0, 3)).toEqual(['Z := Z', 'A := 1', 'B := 2'])
   })
 
   it('orders calculated nodes topologically, ties in node order', () => {
@@ -216,16 +217,19 @@ describe('parseFormula', () => {
 })
 
 describe('programToGraph', () => {
-  const lossless = ['sunflower', 'lynx-and-hare', 'sir-epidemic', 'newtons-law-of-cooling', 'radioactive-decay', 'population-germany']
+  // every example without conditions is a stock-and-flow model; these need no
+  // helper quantities (the others need the extended syntax)
+  const basic = ['sunflower', 'lynx-and-hare', 'sir-epidemic', 'newtons-law-of-cooling', 'radioactive-decay', 'population-germany']
+  const special = /\bIF\b|\bWHILE\b|Startzeit|dt \/ 60|Schritt := Schritt|\) \/ Grundflaeche/i
 
   for (const ex of EXAMPLES) {
     const p = programOf(ex)
-    if (lossless.includes(ex.id)) {
+    if (!special.test(p)) {
       it(`${ex.id} converts losslessly and simulates bit for bit`, () => {
         const r = programToGraph(p)
         expect(r.ok).toBe(true)
-        expect(r.requiresExtended).toBe(false)
-        const again = graphToProgram(r.graph, r)
+        expect(r.requiresExtended).toBe(!basic.includes(ex.id))
+        const again = graphToProgram(r.graph, { ...r, extended: r.requiresExtended })
         expect(again.problems.filter((x) => x.severity === 'error')).toEqual([])
         const a = parseProgram(p).statements.length
         expect(statements(again.source)).toBe(a)
@@ -235,7 +239,7 @@ describe('programToGraph', () => {
         // a second round trip is a fixed point
         const r2 = programToGraph(again.source)
         expect(r2.ok).toBe(true)
-        expect(graphToProgram(r2.graph, r2).source).toBe(again.source)
+        expect(graphToProgram(r2.graph, { ...r2, extended: r2.requiresExtended }).source).toBe(again.source)
       })
     } else {
       it(`${ex.id} is rejected with a line and reason`, () => {
@@ -306,5 +310,21 @@ describe('freePosition', () => {
   })
   it('ignores the node itself', () => {
     expect(freePosition(graph, 'n1', 'state', 205, 200)).toEqual({ x: 205, y: 200 })
+  })
+})
+
+describe('flows between stocks', () => {
+  it('lets a stock feed another stock (velocity changes position)', () => {
+    const a = { id: 'v', kind: 'state', name: 'V' }
+    const b = { id: 'x', kind: 'state', name: 'X' }
+    expect(canLink(a, b, 'flow')).toBe(true)
+    expect(canLink(a, a, 'flow')).toBe(false)
+    const graph = { nodes: [{ ...a, x: 0, y: 0, formula: '' }, { ...b, x: 0, y: 0, formula: '' }], links: [{ id: 'l1', from: 'v', to: 'x', kind: 'flow', sign: '+' }] }
+    expect(graphToProgram(graph, { simplified: false, dtName: 'dt', timeName: 't' }).source).toBe('V := V\nX := X + V*dt\nt := t + dt')
+  })
+  it('writes outputs after the stocks', () => {
+    const r = programToGraph('R := k*N\nN := N - R*dt\nP := N/100\nt := t + dt')
+    expect(r.ok).toBe(true)
+    expect(graphToProgram(r.graph, { ...r, extended: true }).source).toBe('R := k*N\nN := N - R*dt\nP := N/100\nt := t + dt')
   })
 })

@@ -15,12 +15,14 @@
 //   influence – any node → rate/aux; the target's formula uses the source
 //
 // Generated program (graphToProgram), in this fixed order:
-//   1. every rate and aux as `Name := formula`, in topological order of their
-//      dependencies (influence links plus names used in formulas); ties keep the
-//      order of `graph.nodes`
+//   1. every rate and aux that feeds a flow as `Name := formula`, in topological
+//      order of their dependencies (influence links plus names used in formulas);
+//      ties keep the order of `graph.nodes`
 //   2. one line per state, in the order of `graph.nodes`, flows in the order of
-//      `graph.links`, in the forms of flows.js (shared with the sentences)
-//   3. the time line `Zeit := Zeit + 1` (simplified) or `Zeit := Zeit + DeltaT`,
+//      `graph.links`, in the forms of flows.js (shared with the sentences);
+//      a flow comes from a rate or from another state (velocity → position)
+//   3. calculated nodes that feed no flow (outputs), from the new state values
+//   4. the time line `Zeit := Zeit + 1` (simplified) or `Zeit := Zeit + DeltaT`,
 //      exactly as sentencesToProgram writes it.
 //
 // Extended syntax (option `extended`)
@@ -100,7 +102,8 @@ export function cloneGraph(graph) {
 /** Can `from` be connected to `to` with a link of this kind? */
 export function canLink(from, to, kind) {
   if (!from || !to || from.id === to.id) return false
-  if (kind === 'flow') return from.kind === 'rate' && to.kind === 'state'
+  // a flow comes from a rate, or from another stock (velocity changes position)
+  if (kind === 'flow') return (from.kind === 'rate' || from.kind === 'state') && to.kind === 'state'
   return to.kind === 'rate' || to.kind === 'aux'
 }
 
@@ -263,7 +266,7 @@ export function validateGraph(graph, options = {}) {
 
   for (const n of graph.nodes) {
     if (n.kind === 'state') {
-      if (!graph.links.some((l) => l.kind === 'flow' && l.to === n.id && nodes.get(l.from)?.kind === 'rate')) {
+      if (!graph.links.some((l) => l.kind === 'flow' && l.to === n.id && ['rate', 'state'].includes(nodes.get(l.from)?.kind))) {
         add('stateWithoutFlow', { nodeId: n.id, params: { name: n.name } }, 'warning')
       }
       continue
@@ -313,17 +316,24 @@ export function graphToProgram(graph, options = {}) {
   const reserved = reservedNames(opts)
   const valid = (n) => !nameProblem(n, reserved)
   const nodes = new Map(graph.nodes.map((n) => [n.id, n]))
-  const lines = []
-  for (const n of calculationOrder(graph).order) {
-    if (valid(n)) lines.push(`${n.name.trim()} := ${String(n.formula ?? '').trim() || '0'}`)
+  const { order, deps } = calculationOrder(graph)
+  // calculated nodes that feed a flow (directly or through others) come before the
+  // stocks, the others (outputs such as °C) after them – the order sentences use
+  const feeding = new Set(graph.links.filter((l) => l.kind === 'flow').map((l) => l.from))
+  for (let grown = true; grown;) {
+    grown = false
+    for (const id of [...feeding]) for (const d of deps.get(id) ?? []) if (!feeding.has(d)) { feeding.add(d); grown = true }
   }
+  const calcLine = (n) => `${n.name.trim()} := ${String(n.formula ?? '').trim() || '0'}`
+  const lines = order.filter((n) => valid(n) && feeding.has(n.id)).map(calcLine)
   for (const s of graph.nodes) {
     if (s.kind !== 'state' || !valid(s)) continue
     const flows = graph.links
-      .filter((l) => l.kind === 'flow' && l.to === s.id && nodes.get(l.from)?.kind === 'rate' && valid(nodes.get(l.from)))
+      .filter((l) => l.kind === 'flow' && l.to === s.id && ['rate', 'state'].includes(nodes.get(l.from)?.kind) && valid(nodes.get(l.from)))
       .map((l) => ({ name: nodes.get(l.from).name.trim(), sign: l.sign === '-' ? '-' : '+' }))
     lines.push(stockLine(s.name.trim(), flows, opts))
   }
+  lines.push(...order.filter((n) => valid(n) && !feeding.has(n.id)).map(calcLine))
   const t = opts.timeName
   lines.push(opts.simplified ? `${t} := ${t} + 1` : `${t} := ${t} + ${opts.dtName}`)
   return { source: lines.join('\n'), problems: validateGraph(graph, opts) }
@@ -395,11 +405,13 @@ export function programToGraph(source) {
     }
   }
   const calcNames = new Set(calc.map((c) => c.name))
+  const stateNames = new Set(states.map((st) => st.name))
   const flowNames = new Set()
   for (const st of states) {
     for (const f of st.flows) {
-      if (!calcNames.has(f.name)) return { ok: false, line: st.line, reason: 'flow' }
-      flowNames.add(f.name)
+      // a flow comes from a calculated rate or from another stock
+      if (!calcNames.has(f.name) && !stateNames.has(f.name)) return { ok: false, line: st.line, reason: 'flow' }
+      if (calcNames.has(f.name)) flowNames.add(f.name)
     }
   }
 
@@ -446,8 +458,9 @@ export const LAYOUT = {
 
 /**
  * Arranges the nodes like the automatic diagram: states in a row at the bottom
- * (in node order), rates and helper quantities above them (under the states they
- * feed or use), constants on top (above the nodes they act on). Returns a copy.
+ * (in node order), a state that flows into another state (a velocity) in a row
+ * above its target, rates and helper quantities above them (under the states
+ * they feed or use), constants on top (above the nodes they act on). Returns a copy.
  */
 export function autoLayout(graph) {
   const g = cloneGraph(graph)
@@ -456,18 +469,37 @@ export function autoLayout(graph) {
     const xs = ids.map((id) => pos.get(id)).filter((x) => x !== undefined)
     return xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null
   }
-  const place = (list, row, key) => {
+  const place = (list, row, key, y = LAYOUT.row[row]) => {
     const keyed = list.map((n, i) => ({ n, k: key(n) ?? 1e6 + i, i }))
     keyed.sort((a, b) => a.k - b.k || a.i - b.i)
     keyed.forEach(({ n }, i) => {
       n.x = LAYOUT.left[row] + i * LAYOUT.gap[row]
-      n.y = LAYOUT.row[row]
+      n.y = y
       pos.set(n.id, n.x)
     })
   }
   const linksFrom = (id) => g.links.filter((l) => l.from === id).map((l) => l.to)
   const linksTo = (id) => g.links.filter((l) => l.to === id).map((l) => l.from)
-  place(g.nodes.filter((n) => n.kind === 'state'), 'state', () => null)
+  // level of a state: 0 if it feeds no other state, else one above its highest target
+  const states = g.nodes.filter((n) => n.kind === 'state')
+  const isState = new Set(states.map((n) => n.id))
+  const stateTargets = (id) => g.links.filter((l) => l.kind === 'flow' && l.from === id && isState.has(l.to)).map((l) => l.to)
+  const level = new Map()
+  const levelOf = (id, seen = new Set()) => {
+    if (level.has(id)) return level.get(id)
+    if (seen.has(id)) return 0 // a loop of stocks: keep it in one row
+    seen.add(id)
+    const v = Math.max(-1, ...stateTargets(id).map((t) => levelOf(t, seen))) + 1
+    level.set(id, v)
+    return v
+  }
+  for (const n of states) levelOf(n.id)
+  const top = Math.max(0, ...level.values())
+  const rowGap = LAYOUT.row.state - LAYOUT.row.rate
+  for (let k = 0; k <= top; k++) {
+    const row = states.filter((n) => level.get(n.id) === k)
+    place(row, 'state', k === 0 ? () => null : (n) => meanX(stateTargets(n.id)), LAYOUT.row.state + (top - k) * rowGap)
+  }
   // rates first by the states they feed; helpers by what they act on or use
   const middle = g.nodes.filter((n) => n.kind === 'rate' || n.kind === 'aux')
   const keyMiddle = (n) => meanX(n.kind === 'rate' ? linksFrom(n.id) : [...linksFrom(n.id), ...linksTo(n.id)])

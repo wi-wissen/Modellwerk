@@ -136,8 +136,9 @@ Linux build dependencies: `libwebkit2gtk-4.1-dev librsvg2-dev patchelf`.
 
 - Modelling in sentences (wording of the building blocks adjustable, like the
   legacy predicate file), as an editable influence diagram (stocks, rates,
-  constants, flows, influence arrows; extended syntax with helper quantities) or as
-  a program; every model without conditions converts losslessly between the three
+  constants, flows between rates and stocks, influence arrows; extended syntax with
+  helper quantities) or as a program; a model without conditions whose flows are
+  named quantities converts losslessly between the three (all 12 such examples do)
 - Modelling language incl. `^`, `=`, `:`, IF/WHILE for the rest of the line,
   `random(x)` with a stored seed, macros (program blocks)
 - Projects with several simulations (copies, variants with other initial values),
