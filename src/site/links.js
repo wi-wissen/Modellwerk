@@ -11,10 +11,5 @@ export function siteLink(root, path = '') {
 }
 
 // Downloads of the desktop, Android and offline builds (see .github/workflows/release.yml).
-// "latest" always points to the newest published release, so links never go stale.
 export const RELEASES = 'https://github.com/wi-wissen/Modellwerk/releases'
 
-/** A file of the newest release; only for files whose name holds no version number. */
-export function latestDownload(file) {
-  return `${RELEASES}/latest/download/${file}`
-}

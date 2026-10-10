@@ -42,27 +42,22 @@
         </div>
       </section>
 
-      <section id="offline" class="flex flex-col gap-6 border-t border-line pt-10" aria-labelledby="offline-title">
-        <div class="flex max-w-[62ch] flex-col gap-2">
-          <h2 id="offline-title" class="text-2xl font-extrabold tracking-tight sm:text-3xl">{{ $t('landing.offline.title') }}</h2>
-          <p class="text-lg text-muted">{{ $t('landing.offline.lead') }}</p>
+      <section id="offline" class="flex flex-wrap items-center gap-x-8 gap-y-5 rounded-2xl border border-accent/25 bg-accent-soft px-6 py-5 sm:px-7" aria-labelledby="offline-title">
+        <div class="flex min-w-0 flex-[1_1_22rem] flex-col gap-1.5">
+          <h2 id="offline-title" class="text-xl font-extrabold tracking-tight sm:text-2xl">{{ $t('landing.offline.title') }}</h2>
+          <p class="max-w-[54ch] text-muted">{{ $t('landing.offline.text') }}</p>
         </div>
-        <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-          <li v-for="v in offlineVariants" :key="v.key" class="panel flex flex-col gap-2 p-5">
-            <component :is="v.icon" :size="22" aria-hidden="true" class="text-accent" />
-            <h3 class="text-lg font-bold">{{ $t(`landing.offline.${v.key}.title`) }}</h3>
-            <p class="flex-1 text-muted">{{ $t(`landing.offline.${v.key}.text`) }}</p>
-            <a :href="v.href" class="inline-flex items-center gap-1.5 font-semibold text-accent-strong underline underline-offset-2">
-              <component :is="v.external ? 'Download' : 'ArrowRight'" :size="16" aria-hidden="true" /> {{ $t(`landing.offline.${v.key}.link`) }}
-            </a>
+        <ul class="flex gap-5 text-accent-strong" :aria-label="$t('landing.offline.platforms')">
+          <li v-for="p in platforms" :key="p.key" class="flex flex-col items-center gap-1 text-sm font-semibold">
+            <component :is="p.icon" :size="26" :stroke-width="1.8" aria-hidden="true" /> {{ $t(`landing.offline.${p.key}`) }}
           </li>
         </ul>
-        <p class="flex flex-wrap items-center gap-x-3 gap-y-1">
-          <a :href="releases" class="inline-flex items-center gap-1.5 font-semibold text-accent-strong underline underline-offset-2">
-            <ExternalLink :size="18" aria-hidden="true" /> {{ $t('landing.offline.all') }}
+        <div class="flex flex-col items-center gap-1.5">
+          <a :href="releases" class="btn btn-primary !min-h-13 !px-6 text-lg no-underline">
+            <Download :size="22" aria-hidden="true" /> {{ $t('landing.offline.button') }}
           </a>
-          <span class="text-muted">{{ $t('landing.offline.note') }}</span>
-        </p>
+          <span class="text-sm text-muted">{{ $t('landing.offline.note', { v: version }) }}</span>
+        </div>
       </section>
     </main>
 
@@ -71,10 +66,11 @@
 </template>
 
 <script>
-import { Accessibility, AppWindow, ArrowRight, Download, ExternalLink, FileCheck2, FileCode2, Globe, Layers, ShieldCheck, Smartphone, Terminal } from 'lucide-vue-next'
+import { Accessibility, ArrowRight, Download, FileCheck2, FileCode2, Layers, Monitor, ShieldCheck, Smartphone, SquareTerminal } from 'lucide-vue-next'
 import SiteHeader from '../site/SiteHeader.vue'
 import SiteFooter from '../site/SiteFooter.vue'
-import { RELEASES, latestDownload, siteLink } from '../site/links.js'
+import { RELEASES, siteLink } from '../site/links.js'
+import pkg from '../../package.json' with { type: 'json' }
 import { simulate } from '../engine/simulate.js'
 import { sparkPoints } from '../chartStyle.js'
 
@@ -83,19 +79,19 @@ const DEMO = 'Wachstum := FWachstum*Hoehe*(Endhoehe-Hoehe)\nHoehe := Hoehe + Wac
 
 export default {
   name: 'LandingPage',
-  components: { Accessibility, AppWindow, ArrowRight, Download, ExternalLink, FileCheck2, FileCode2, Globe, Layers, ShieldCheck, Smartphone, Terminal, SiteHeader, SiteFooter },
+  components: { Accessibility, ArrowRight, Download, FileCheck2, FileCode2, Layers, Monitor, ShieldCheck, Smartphone, SquareTerminal, SiteHeader, SiteFooter },
   data() {
     return {
       featureIcons: ['Layers', 'Accessibility', 'ShieldCheck', 'FileCheck2'],
       demo: simulate(DEMO, { HOEHE: 8, ENDHOEHE: 250, FWACHSTUM: 0.0009 }, 70),
-      releases: RELEASES,
-      // files with a fixed name link straight to the newest release, the others to its page
-      offlineVariants: [
-        { key: 'browser', icon: 'Globe', href: siteLink('./', 'app/') },
-        { key: 'file', icon: 'FileCode2', href: latestDownload('modellwerk-offline.html'), external: true },
-        { key: 'windows', icon: 'AppWindow', href: latestDownload('Modellwerk-portable.exe'), external: true },
-        { key: 'linux', icon: 'Terminal', href: `${RELEASES}/latest` },
-        { key: 'android', icon: 'Smartphone', href: latestDownload('Modellwerk-android.apk'), external: true },
+      // every build (desktop, Android, single HTML file) is on the newest GitHub release
+      releases: `${RELEASES}/latest`,
+      version: pkg.version,
+      platforms: [
+        { key: 'windows', icon: 'Monitor' },
+        { key: 'linux', icon: 'SquareTerminal' },
+        { key: 'android', icon: 'Smartphone' },
+        { key: 'file', icon: 'FileCode2' },
       ],
     }
   },
