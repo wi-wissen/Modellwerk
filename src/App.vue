@@ -6,34 +6,24 @@
       <div class="flex flex-wrap items-center gap-x-5 gap-y-3 px-4 py-2.5 sm:px-6">
         <component :is="homeHref ? 'a' : 'div'" :href="homeHref" class="flex flex-none items-center gap-2.5 rounded-lg no-underline" :title="homeHref ? $t('app.home') : $t('app.tagline')">
           <img :src="logoUrl" width="32" height="32" alt="" />
-          <span class="text-lg font-extrabold tracking-tight text-ink">Modellwerk</span>
+          <span class="text-lg font-extrabold tracking-tight text-ink max-sm:sr-only">Modellwerk</span>
         </component>
 
-        <div class="flex min-w-0 flex-[1_1_16rem] flex-col sm:border-l sm:border-line sm:pl-5">
+        <div class="order-last flex min-w-0 basis-full flex-col sm:order-none sm:flex-1 sm:basis-0 sm:border-l sm:border-line sm:pl-5">
           <label v-if="!project.example" class="block">
             <span class="sr-only">{{ $t('app.modelTitle') }}</span>
             <input id="model-title" v-model="project.title" :placeholder="$t('app.untitled')" autocomplete="off"
                    class="w-full rounded-md border border-transparent bg-transparent px-1 -mx-1 text-lg font-bold leading-tight hover:border-line focus:border-accent" />
           </label>
           <h1 v-else class="truncate text-lg font-bold leading-tight">{{ texts.title }}</h1>
-          <p class="truncate text-sm text-muted">
-            {{ texts.topic }}<template v-if="guideHref"> · <a :href="guideHref" :title="$t('app.guideLink')" class="inline-flex items-center gap-1 font-semibold text-accent-strong underline underline-offset-2"><GraduationCap :size="15" aria-hidden="true" /> {{ $t('app.guideShort') }}</a></template>
+          <p class="flex min-w-0 items-center gap-1.5 text-sm text-muted">
+            <span class="truncate">{{ texts.topic }}</span>
+            <template v-if="guideHref">
+              <span aria-hidden="true">·</span>
+              <a :href="guideHref" :title="$t('app.guideLink')" class="inline-flex flex-none items-center gap-1 font-semibold text-accent-strong underline underline-offset-2"><GraduationCap :size="15" aria-hidden="true" /> {{ $t('app.guideShort') }}</a>
+            </template>
           </p>
         </div>
-
-        <nav class="order-3 flex basis-full flex-wrap items-center gap-2 2xl:order-none 2xl:basis-auto" :aria-label="$t('app.toolsNav')">
-          <button type="button" class="btn" @click="newModel"><FilePlus :size="18" aria-hidden="true" /> {{ $t('app.new') }}</button>
-          <label class="btn cursor-pointer has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-accent" :title="$t('app.openHint')">
-            <FolderOpen :size="18" aria-hidden="true" /> {{ $t('app.open') }}
-            <input id="open-file" type="file" accept=".json,.prg,.PRG" class="sr-only" @change="openFile($event)" />
-          </label>
-          <button type="button" class="btn" @click="saveProject"><Save :size="18" aria-hidden="true" /> {{ $t('app.save') }}</button>
-          <button type="button" class="btn" @click="$refs.examples.show()"><BookOpen :size="18" aria-hidden="true" /> {{ $t('app.examples') }}</button>
-          <span class="flex gap-1" role="group" :aria-label="$t('app.history')">
-            <button type="button" class="btn btn-quiet" :disabled="!history.past.length" :title="$t('app.undoHint')" @click="undo"><Undo2 :size="18" aria-hidden="true" /> {{ $t('app.undo') }}</button>
-            <button type="button" class="btn btn-quiet" :disabled="!history.future.length" :title="$t('app.redoHint')" @click="redo"><Redo2 :size="18" aria-hidden="true" /> {{ $t('app.redo') }}</button>
-          </span>
-        </nav>
 
         <div class="ml-auto flex items-center gap-1" role="group" :aria-label="$t('app.display')">
           <button type="button" class="btn btn-quiet" :aria-label="`${$t('app.language')}: ${otherLocale.name}`" :lang="otherLocale.code" @click="setLocale(otherLocale.code)">
@@ -67,7 +57,21 @@
       </div>
     </div>
 
-    <main id="main" class="flex w-full flex-1 flex-col gap-4 px-4 py-4 sm:px-6 sm:py-5">
+    <main id="main" class="mx-auto flex w-full max-w-[134rem] flex-1 flex-col gap-4 px-4 py-4 sm:px-6 sm:py-5">
+      <nav v-if="!board" class="panel flex flex-wrap items-center gap-2 p-2" :aria-label="$t('app.toolsNav')">
+        <button type="button" class="btn" :title="$t('app.new')" @click="newModel"><FilePlus :size="18" aria-hidden="true" /> <span class="max-sm:sr-only">{{ $t('app.new') }}</span></button>
+        <label class="btn cursor-pointer has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-accent" :title="$t('app.openHint')">
+          <FolderOpen :size="18" aria-hidden="true" /> <span class="max-sm:sr-only">{{ $t('app.open') }}</span>
+          <input id="open-file" type="file" accept=".json,.prg,.PRG" class="sr-only" @change="openFile($event)" />
+        </label>
+        <button type="button" class="btn" :title="$t('app.save')" @click="saveProject"><Save :size="18" aria-hidden="true" /> <span class="max-sm:sr-only">{{ $t('app.save') }}</span></button>
+        <button type="button" class="btn" :title="$t('app.examples')" @click="$refs.examples.show()"><BookOpen :size="18" aria-hidden="true" /> <span class="max-sm:sr-only">{{ $t('app.examples') }}</span></button>
+        <span class="ml-auto flex gap-1" role="group" :aria-label="$t('app.history')">
+          <button type="button" class="btn btn-quiet" :disabled="!history.past.length" :title="$t('app.undoHint')" @click="undo"><Undo2 :size="18" aria-hidden="true" /> <span class="max-lg:sr-only">{{ $t('app.undo') }}</span></button>
+          <button type="button" class="btn btn-quiet" :disabled="!history.future.length" :title="$t('app.redoHint')" @click="redo"><Redo2 :size="18" aria-hidden="true" /> <span class="max-lg:sr-only">{{ $t('app.redo') }}</span></button>
+        </span>
+      </nav>
+
       <p v-if="openError" class="flex items-start gap-2 self-center rounded-lg bg-bad-soft px-3 py-2 text-[0.95rem]" role="alert">
         <TriangleAlert :size="18" aria-hidden="true" class="mt-0.5 flex-none text-bad" /> {{ $t('app.openFailed', { message: openError }) }}
       </p>
@@ -90,7 +94,7 @@
                 </span>
               </button>
             </div>
-            <button type="button" class="btn btn-quiet m-1.5 !px-2.5 self-center" :aria-pressed="board === 'work' ? 'true' : 'false'"
+            <button type="button" class="btn btn-quiet m-1.5 !px-2.5 self-center max-md:hidden" :aria-pressed="board === 'work' ? 'true' : 'false'"
                     :title="$t(board === 'work' ? 'board.leaveHint' : 'board.enter')" :aria-label="$t(board === 'work' ? 'board.leaveHint' : 'board.enter')"
                     @click="toggleBoard('work')">
               <component :is="board === 'work' ? 'Minimize' : 'Maximize'" :size="20" aria-hidden="true" />

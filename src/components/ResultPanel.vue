@@ -1,8 +1,12 @@
 <template>
   <section class="panel flex min-w-0 flex-col gap-4 p-4 sm:p-5 xl:sticky xl:top-4" aria-labelledby="result-heading">
-    <div class="flex flex-wrap items-center justify-between gap-3">
+    <div class="flex flex-wrap items-center gap-3">
       <h2 id="result-heading" class="flex items-center gap-2 text-xl font-bold"><span class="step">4</span> {{ $t('app.result') }}</h2>
-      <div class="flex flex-wrap items-center gap-2">
+      <button type="button" class="btn btn-quiet !px-2.5 max-md:hidden md:order-last" :aria-pressed="board ? 'true' : 'false'"
+              :title="$t(board ? 'board.leaveHint' : 'board.enter')" :aria-label="$t(board ? 'board.leaveHint' : 'board.enter')" @click="$emit('board')">
+        <component :is="board ? 'Minimize' : 'Maximize'" :size="20" aria-hidden="true" />
+      </button>
+      <div class="flex flex-wrap items-center gap-2 md:ml-auto">
         <div role="tablist" class="seg" :aria-label="$t('app.resultViews')" @keydown="tabKeys">
           <button v-for="t in tabs" :id="`tab-${t.id}`" :key="t.id" type="button" role="tab"
                   :aria-selected="view.resultTab === t.id" :aria-controls="`panel-${t.id}`" :tabindex="view.resultTab === t.id ? 0 : -1"
@@ -10,10 +14,6 @@
             <component :is="t.icon" :size="18" aria-hidden="true" /> {{ $t(`app.tabs.${t.id}`) }}
           </button>
         </div>
-        <button type="button" class="btn btn-quiet !px-2.5" :aria-pressed="board ? 'true' : 'false'"
-                :title="$t(board ? 'board.leaveHint' : 'board.enter')" :aria-label="$t(board ? 'board.leaveHint' : 'board.enter')" @click="$emit('board')">
-          <component :is="board ? 'Minimize' : 'Maximize'" :size="20" aria-hidden="true" />
-        </button>
       </div>
     </div>
 
