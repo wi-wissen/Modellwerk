@@ -2,7 +2,7 @@
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Modellwerk",
   "version": "0.1.0",
-  "identifier": "app.modellwerk.desktop",
+  "identifier": "net.wi7.modellwerk",
   "build": {
     "frontendDist": "../dist-app",
     "devUrl": "http://localhost:5174",

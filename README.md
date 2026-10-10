@@ -122,13 +122,28 @@ openly licensed or factual sources (mostly Wikipedia, CC BY-SA 4.0, and official
 every example lists its sources, shown in the app and on the guide pages.
 Each example has control values that the test suite checks.
 
-## Desktop and mobile
+## Website, releases and apps
 
-`src-tauri/` wraps the app (without landing page and guides) with Tauri 2.
-GitHub Actions (`.github/workflows/release.yml`) build Windows (`.msi`, `.exe`),
-Linux (`.deb`, AppImage) and Android (`.apk`, `.aab`) on a version tag; Android signing
-is optional via the secrets `ANDROID_KEYSTORE`, `ANDROID_KEY_ALIAS`,
-`ANDROID_KEY_PASSWORD`. The app identifier `app.modellwerk.desktop` is a placeholder.
+The website is published at <https://modellwerk.wi7.net> by GitHub Pages
+(`.github/workflows/pages.yml`, on every push to `main`; Settings → Pages → Source:
+GitHub Actions, custom domain modellwerk.wi7.net).
+
+`src-tauri/` wraps the app (without landing page and guides) with Tauri 2; the app
+identifier is `net.wi7.modellwerk`, derived from the domain. To build a release:
+
+1. Set `version` in `package.json` and `src-tauri/tauri.conf.json` (e.g. `0.2.0`).
+2. Commit, then push a tag: `git tag v0.2.0 && git push origin v0.2.0`.
+3. `.github/workflows/release.yml` builds Windows (`.msi`, setup `.exe`), Linux
+   (`.deb`, AppImage), Android (`.apk`, `.aab`) and the offline HTML file and puts
+   them into a **draft** release. Check it under Releases and publish it.
+
+The workflow can also be started by hand (Actions → Release apps → Run workflow);
+the files are then only attached to the run as artifacts.
+
+Android signing is optional via the secrets `ANDROID_KEYSTORE` (base64 of the
+keystore), `ANDROID_KEY_ALIAS` and `ANDROID_KEY_PASSWORD`; without them the APK is
+unsigned (fine for testing, not for the Play Store). Windows installers are not
+code-signed, so Windows SmartScreen asks once before the first start.
 
 Linux build dependencies: `libwebkit2gtk-4.1-dev librsvg2-dev patchelf`.
 

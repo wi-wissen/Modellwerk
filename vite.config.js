@@ -64,10 +64,18 @@ function offlineCache() {
 }
 
 // The standalone builds are not installable web pages: drop the manifest link.
-function withoutManifest() {
+// The offline file must not load anything next to it, so its favicon is inlined.
+function standalonePage(mode) {
+  const logo = `data:image/svg+xml,${encodeURIComponent(readFileSync(resolve(here, 'src/assets/logo.svg'), 'utf8'))}`
   return {
-    name: 'modellwerk-without-manifest',
-    transformIndexHtml: (html) => html.replace(/\s*<link rel="manifest"[^>]*>/, ''),
+    name: 'modellwerk-standalone-page',
+    transformIndexHtml: {
+      order: 'pre',
+      handler: (html) => {
+        const page = html.replace(/\s*<link rel="manifest"[^>]*>/, '')
+        return mode === 'single' ? page.replace(/(<link rel="icon"[^>]*href=")[^"]*(")/, `$1${logo}$2`) : page
+      },
+    },
   }
 }
 
@@ -84,7 +92,7 @@ export default defineConfig(({ mode }) => {
       vue(),
       tailwindcss(),
       ...(mode === 'single' ? [viteSingleFile()] : []),
-      ...(standalone ? [withoutManifest()] : [guidePages(), offlineCache()]),
+      ...(standalone ? [standalonePage(mode)] : [guidePages(), offlineCache()]),
     ],
     server: { fs: { allow: [here] } },
     build: {
